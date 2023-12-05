@@ -1,0 +1,7 @@
+/build-cg
+/build-cg-push
+/*.g3a
+
+# Common IDE files
+/linuxSudo
+.vscode
