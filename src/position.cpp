@@ -34,14 +34,15 @@ void position::set(position& other){
 
 // moveTo() : Move to an absolute position
 //
-//  line, row : new absolute position
+//  @line, @row : new absolute position
 //
-void position::moveTo(uint8_t line,uint8_t  row){
-    line_ = line;
-    row_ = row;
-    index_ = row + line * ROW_COUNT;
+void position::moveTo(uint8_t line, uint8_t  row){
+    // Ensure position is in the grid
+    row_ = _setInRange(row);
+    line_ = _setInRange(line);
 
-    _whereAmI(false);   // square ID is missing
+    index_ = row_ + line_ * ROW_COUNT;
+    _whereAmI(false);
 }
 
 // Change index
@@ -127,7 +128,7 @@ uint8_t position::decValue(uint8_t value){
 }
 
 //
-//   internal methods
+//   Internal methods
 //
 
 // _whereAmI() : Updating coordinates according to (new) index
@@ -144,6 +145,16 @@ void position::_whereAmI(bool all){
 
     // Small square ID
     squareID_ = 3 * floor(line_ / 3) + floor(row_ / 3);
+}
+
+// _setInRange() : Set (force) a vlue in the col range
+//
+//  @value : value to check
+//
+//  @return : value in the range [0, ROW_COUNT]
+//
+uint8_t position::_setInRange(int8_t value){
+    return (value < 0 ?0:(value >= ROW_COUNT?(ROW_COUNT - 1):value));
 }
 
 // EOF

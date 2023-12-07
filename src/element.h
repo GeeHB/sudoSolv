@@ -25,6 +25,8 @@ extern "C" {
 // An empty element value
 #define EMPTY_VALUE     -1
 
+// element - A single sudoku grid element
+//
 class element{
 
 public:

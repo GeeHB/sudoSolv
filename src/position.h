@@ -31,11 +31,14 @@ class position{
 
 public:
     // Constructions
-    position(uint8_t index = 0, bool gameMode = true);
+    position(uint8_t index = INDEX_MIN, bool gameMode = true);
 
     position(position& other){
         set(other);
     }
+
+    // Destruction
+    ~position(){}
 
     // Get sthe status
     //
@@ -51,9 +54,9 @@ public:
 
     // moveTo() : Move to an absolute position
     //
-    //  line, row : new absolute position
+    //  @line, @row : new absolute position
     //
-    void moveTo(uint8_t line,uint8_t  row);
+    void moveTo(uint8_t line, uint8_t  row);
 
     // Access
     //
@@ -101,6 +104,14 @@ private:
     //          if false, only square index
     //
     void _whereAmI(bool all = true);
+
+    // _setInRange() : Set (force) a vlue in the col range
+    //
+    //  @value : value to check
+    //
+    //  @return : value in the range [0, ROW_COUNT]
+    //
+    uint8_t _setInRange(int8_t value);
 
     // Members
 private:

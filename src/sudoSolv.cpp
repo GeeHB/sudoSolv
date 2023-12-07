@@ -1,11 +1,11 @@
-#include <gint/display.h>
-#include <gint/keyboard.h>
+#include "sudoku.h"
 
 int main(void)
 {
 	dclear(C_WHITE);
-	dtext(1, 1, C_BLACK, "Sample fxSDK add-in.");
-	dupdate();
+	
+	sudoku myGame;
+	myGame.display();
 
 	getkey();
 	return 1;
