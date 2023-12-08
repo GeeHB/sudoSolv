@@ -23,7 +23,7 @@ extern "C" {
 #define STATUS_ORIGINAL 4       // Can't be changed (except in edition mode)
 
 // An empty element value
-#define EMPTY_VALUE     -1
+#define EMPTY_VALUE     0
 
 // element - A single sudoku grid element
 //
@@ -46,19 +46,21 @@ public:
     //  @ status : new status
     //  @editMode : true if the grid is currentlin edit mode
     //
-    void setValue(int value, uint8_t status = STATUS_EMPTY, bool editMode = false);
+    void setValue(uint8_t value, uint8_t status = STATUS_EMPTY, bool editMode = false);
 
     // Access
     //
-    int value(){
+    uint8_t value(){
         return (_isStatusBitSet(STATUS_SET)?value_:EMPTY_VALUE);
     }
 
     // empty() : Empty the element's value
     //  @return : previous value
-    int empty(){
+    uint8_t empty(){
         status_ = STATUS_EMPTY;
-        return value_;
+        uint8_t value(value_);
+        value_ = EMPTY_VALUE;
+        return value;
     }
 
     // Element's status
@@ -93,7 +95,7 @@ private:
     // Members
 private:
         uint8_t     status_;
-        int         value_;
+        uint8_t     value_;
 }; // class element
 
 #ifdef __cplusplus

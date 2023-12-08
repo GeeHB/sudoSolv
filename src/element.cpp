@@ -15,7 +15,7 @@
 //  @ status : new status
 //  @editMode : true if the grid is currentlin edit mode
 //
-void element::setValue(int value, uint8_t status, bool editMode){
+void element::setValue(uint8_t value, uint8_t status, bool editMode){
     if (!editMode){
         if (!_isStatusBitSet(STATUS_ORIGINAL)){
             if (value != EMPTY_VALUE){

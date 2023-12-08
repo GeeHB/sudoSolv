@@ -17,6 +17,7 @@
 #include "tinySquare.h"
 
 #include "shared/bFile.h"
+#include "shared/keyboard.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,6 +62,16 @@ public:
     //
     uint8_t save(FONTCHARACTER fName);
 
+#ifdef DEST_CASIO_CALC
+    // edit() : Edit / modify the current grid
+    //
+    //  @exitKey : key code of exit key
+    //
+    //  @return : true if grid has been modified or false if left unchanged
+    //
+    bool edit(uint exitKey);
+#endif // #ifdef DEST_CASIO_CALC
+
 private:
 
     //
@@ -70,7 +81,7 @@ private:
     // _checkValue() : Can we put the value at the current position ?
     //
     //  @pos : position
-    //  @value : Check thois value at this position
+    //  @value : Check the given value at this 'position'
     //
     //  @return : true if the given value is valid at the given position
     //
@@ -81,7 +92,7 @@ private:
     // _checkLine() : Can we put the value at the current position ?
     //
     //  @pos : position
-    //  @value : Check thois value at this position's line
+    //  @value : Check this value at this position's line
     //
     //  @return : true if the given value is valid in the given line
     //
@@ -105,6 +116,23 @@ private:
     //
     bool _checkTinySquare(position& pos, uint8_t value){
         return (false == tSquares_[pos.squareID()].inMe(elements_, value)); // Is the value in the tinySquare ?
+    }
+
+    // _checkAndSet() : Try to  put the value at the current position
+    //
+    //  @pos : position
+    //  @value : value to put
+    //
+    //  @return : true if value is set
+    //
+    bool _checkAndSet(position& pos, uint8_t value){
+        if (_checkLine(pos, value) && _checkRow(pos, value) && _checkTinySquare(pos, value)){
+            // set
+            elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
+            return true;
+        }
+
+        return false;
     }
 
 #ifdef DEST_CASIO_CALC

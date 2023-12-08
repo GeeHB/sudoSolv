@@ -45,12 +45,21 @@ public:
     uint8_t status(){
         return status_;
     }
+    
+    position& operator=(const position & other){
+        set(other);
+        return *this;
+    }
 
     // set() : Copy a position
     //
     //  other : position to copy
     //
-    void set(position& other);
+    void set(const position& other);
+
+    bool operator!=(const position& other){
+        return (index_ != other.index_);
+    }
 
     // moveTo() : Move to an absolute position
     //
@@ -76,10 +85,16 @@ public:
     // Change index
     //
 
-    // +=
+    position& operator+=(uint8_t inc){
+        forward(inc);
+        return *this;
+    }
     uint8_t forward(uint8_t inc = 1);
 
-    // -=
+    position& operator-=(uint8_t dec){
+        backward(dec);
+        return *this;
+    }
     uint8_t backward(uint8_t dec = 1);
 
     // Change "row"

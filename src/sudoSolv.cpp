@@ -6,6 +6,7 @@ int main(void)
 	
 	sudoku myGame;
 	myGame.display();
+	myGame.edit(KEY_CODE_EXIT);
 
 	getkey();
 	return 1;

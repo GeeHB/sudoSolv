@@ -9,13 +9,13 @@
 #ifndef __S_SOLVER_CONSTANTS_h__
 #define __S_SOLVER_CONSTANTS_h__    1
 
+#include "shared/casioCalcs.h"
+
 #ifdef DEST_CASIO_CALC
-#include <gint/display.h>
 #include <gint/keyboard.h>
 #else
 #include <iostream>
 #include <cstdint> // <stdint.h>
-
 using namespace std;
 #endif //
 
@@ -62,8 +62,8 @@ extern "C" {
 // Display
 //
 #ifdef DEST_CASIO_CALC
-#define DELTA_X                 3   // Distance from top left corner
-#define DELTA_Y                 DELTA_X // useless in firdt version ....
+#define DELTA_X                 5   // Distance from top left corner
+#define DELTA_Y                 DELTA_X // useless in first version ....
 
 #define BORDER_THICK            2   // Thickness of external border
 
@@ -73,15 +73,64 @@ extern "C" {
 #define GRID_SIZE               SQUARE_SIZE * ROW_COUNT
 
 #define BORDER_COLOUR           C_RGB(10, 19, 23)
-#define OBVIOUS_COLOUR          BORDER_COLOUR
 #define BK_COLOUR               C_RGB(28, 28, 30)
 
 #define TXT_COLOUR              C_RGB(8, 8, 8)
-#define HILITE_COLOUR           C_RGB(30, 15, 14)
+#define ORIGINAL_COLOUR         C_RGB(30, 15, 14)
+#define OBVIOUS_COLOUR          BORDER_COLOUR
 
 #define SEL_BK_COLOUR            C_RGB(6, 6, 31)
 #define SEL_TXT_COLOUR           C_WHITE
 
+#endif // #ifdef DEST_CASIO_CALC
+
+// Keyboard
+//
+
+// Key codes
+//
+#ifdef DEST_CASIO_CALC
+enum GAME_KEY{
+    KEY_CODE_F1 = KEY_F1,     // !!!
+    KEY_CODE_F6 = KEY_F6,
+    KEY_CODE_UP = KEY_UP,
+    KEY_CODE_DOWN = KEY_DOWN,
+    KEY_CODE_LEFT = KEY_LEFT,
+    KEY_CODE_RIGHT = KEY_RIGHT,
+    KEY_CODE_0 = KEY_0,
+    KEY_CODE_1 = KEY_1,
+    KEY_CODE_2 = KEY_2,
+    KEY_CODE_3 = KEY_3,
+    KEY_CODE_4 = KEY_4,
+    KEY_CODE_5 = KEY_5,
+    KEY_CODE_6 = KEY_6,
+    KEY_CODE_7 = KEY_7,
+    KEY_CODE_8 = KEY_8,
+    KEY_CODE_9 = KEY_9,
+    KEY_CODE_EXIT = KEY_EXIT,
+    KEY_CODE_EXE = KEY_EXE
+};
+#else
+enum GAME_KEY{
+    KEY_CODE_F1 = 'A',
+    KEY_CODE_F6 = 'F',
+    KEY_CODE_LEFT = 's',
+    KEY_CODE_RIGHT = 'f',
+    KEY_CODE_UP = 'e',
+    KEY_CODE_DOWN = 'x',
+    KEY_CODE_0 = '0',
+    KEY_CODE_1 = '1',
+    KEY_CODE_2 = '2',
+    KEY_CODE_3 = '3',
+    KEY_CODE_4 = '4',
+    KEY_CODE_5 = '5',
+    KEY_CODE_6 = '6',
+    KEY_CODE_7 = '7',
+    KEY_CODE_8 = '8',
+    KEY_CODE_9 = '9',
+    KEY_CODE_EXIT = 'q',
+    KEY_CODE_EXE = '\13'
+};
 #endif // #ifdef DEST_CASIO_CALC
 
 #ifdef __cplusplus

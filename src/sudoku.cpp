@@ -19,6 +19,13 @@ sudoku::sudoku(){
     }
 
     empty();    // Start with an empty grid
+
+    // basic grid for tests
+    position pos(0, false);
+    for (uint8_t i=0; i < 9; i++){
+        elements_[pos.index()].setValue(i+1, STATUS_ORIGINAL);
+        pos.forward(10);
+    }
 }
 
 // display() : Display the grid and it's content
@@ -50,7 +57,7 @@ void sudoku::display(){
                 cout << ',';
             }
 
-            pos.forward();  // next position
+            pos+=1;  // next position
         }
     }
 #endif // #ifdef DEST_CASIO_CALC
@@ -94,7 +101,7 @@ uint8_t sudoku::load(FONTCHARACTER fName){
     }
 
     if (FILE_SIZE != iFile.read(buffer, FILE_SIZE, 0)){
-        return SUDO_INVALID_FILESIZE;   // Invalid file size
+        return SUDO_INVALID_FILESIZE;
     }
 
     iFile.close();
@@ -105,23 +112,22 @@ uint8_t sudoku::load(FONTCHARACTER fName){
     char car;
     uint8_t value, index(0);
     while (index < FILE_SIZE){
-        // "value"
-        car = buffer[index++];
+        car = buffer[index++]; // "value"
         if (car >= '0' and car <= '9'){
             value = (uint8_t)(car - '0');
             if (value && _checkValue(pos, value)){
-                elements_[pos.index()].setValue(value);   // This value is valid at this position
+                elements_[pos.index()].setValue(value, STATUS_ORIGINAL);   // This value is valid at this position and is ORIGINAL
             }
         }
         else{
-            return false;   // Invalid value
+            return SUDO_INVALID_FORMAT;
         }
 
         // separator
         car = buffer[index++];
 
         // next element
-        pos.forward();
+        pos+=1;
     }
 
     // The new grid is valid
@@ -151,7 +157,7 @@ uint8_t sudoku::save(FONTCHARACTER fName){
             buffer[index++] = pElement->isEmpty()?'0':('0' + pElement->value());    // '0' means empty !
             buffer[index++] = VALUE_SEPARATOR;
 
-            pos.forward();  // next element
+            pos+=1;  // next element
         }
 
         // Replace separator by LF
@@ -176,6 +182,115 @@ uint8_t sudoku::save(FONTCHARACTER fName){
     // Done ?
     return (done?SUDO_NO_ERROR:SUDO_IO_ERROR);
 }
+
+#ifdef DEST_CASIO_CALC
+
+// edit() : Edit / modify the current grid
+//
+//  @exitKey : key code of exit key
+//
+//  @return : true if grid has been modified or false if left unchanged
+//
+bool sudoku::edit(uint exitKey){
+    bool modified(false);
+    bool cont(true);
+    uint car(0);
+    int8_t val(0);
+    position currentPos(0, false);
+    position prevPos(0, false);
+    keyboard keys;
+
+    while (cont){
+        // if sel. changed, erase previously selected element
+        if (prevPos != currentPos){
+            _drawSingleElement(prevPos.row(), prevPos.line(), elements_[prevPos.index()].value(), BK_COLOUR, ORIGINAL_COLOUR);
+        }
+
+        // Hilight the new value
+        _drawSingleElement(currentPos.row(), currentPos.line(), elements_[currentPos.index()].value(), SEL_BK_COLOUR, SEL_TXT_COLOUR);
+
+        dupdate();
+        prevPos = currentPos;
+
+        // Wait for a keyboard event
+        car = keys.getKey();
+
+        switch (car){
+        // Change the cursor's position
+        //
+        case KEY_CODE_LEFT:
+            currentPos.decRow();    // one row left
+            break;
+
+        case KEY_CODE_RIGHT:
+            currentPos.incRow();    // one row right
+            break;
+
+        case KEY_CODE_UP:
+            currentPos.decLine();   // one line up
+            break;
+
+        case KEY_CODE_DOWN:
+            currentPos.incLine();   // one line down
+            break;
+
+        // Change the current value
+        //
+        case KEY_CODE_0:
+            elements_[currentPos.index()].empty();
+            modified = true;
+            break;
+
+        case KEY_CODE_1:
+            modified =_checkAndSet(currentPos, 1);
+            break;
+
+        case KEY_CODE_2:
+            modified =_checkAndSet(currentPos, 2);
+            break;
+
+        case KEY_CODE_3:
+            modified =_checkAndSet(currentPos, 3);
+            break;
+
+        case KEY_CODE_4:
+            modified =_checkAndSet(currentPos, 4);
+            break;
+
+        case KEY_CODE_5:
+            modified =_checkAndSet(currentPos, 5);
+            break;
+
+        case KEY_CODE_6:
+            modified =_checkAndSet(currentPos, 6);
+            break;
+
+        case KEY_CODE_7:
+            modified =_checkAndSet(currentPos, 7);
+            break;
+
+        case KEY_CODE_8:
+            modified =_checkAndSet(currentPos, 8);
+            break;
+
+        case KEY_CODE_9:
+            modified =_checkAndSet(currentPos, 1);
+            break;
+
+        case KEY_CODE_EXE:
+            cont = false;
+            break;
+
+        // ???
+        default:
+            break;
+        } // switch (car)
+    } // while (cont)
+
+    return modified;
+}
+
+#endif // #ifdef DEST_CASIO_CALC
 
 //
 // Internal methods
@@ -260,10 +375,10 @@ void sudoku::_drawContent(){
         for (row = 0; row < ROW_COUNT; row++){
             pElement = &elements_[pos.index()];
             if (!pElement->isEmpty()){
-                _drawSingleElement(row, line, pElement->value(), BK_COLOUR, (pElement->isOriginal()?HILITE_COLOUR:(pElement->isObvious()?OBVIOUS_COLOUR:TXT_COLOUR)));
+                _drawSingleElement(row, line, pElement->value(), BK_COLOUR, (pElement->isOriginal()?ORIGINAL_COLOUR:(pElement->isObvious()?OBVIOUS_COLOUR:TXT_COLOUR)));
             }
 
-            pos.forward(); // next element
+            pos+=1; // next element
         }
     }
 }

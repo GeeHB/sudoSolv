@@ -12,7 +12,8 @@
 
 position::position(uint8_t index, bool gameMode){
     index_ = index;
-    status_ = POS_VALID;
+    status_ = (index <= INDEX_MAX)?POS_VALID:POS_INDEX_ERROR;
+
     gameMode_ = gameMode;
     row_ = line_ = 0;
 
@@ -23,7 +24,7 @@ position::position(uint8_t index, bool gameMode){
 //
 //  other : position to copy
 //
-void position::set(position& other){
+void position::set(const position& other){
     index_ = other.index_;
     status_ = other.status_;
     gameMode_ = other.gameMode_;
@@ -84,8 +85,9 @@ uint8_t position::backward(uint8_t dec){
 // Change "row"
 //
 void position::decRow(uint8_t dec){
-    int8_t row = row_ - dec;
-    index_ = (row < 0)?((1 + line_ ) * ROW_COUNT + row):(index_ - dec);
+    int8_t row(row_);
+    row-=dec;
+    index_ = (row < 0)?(line_ * ROW_COUNT - 1):(index_ - dec);
 
     _whereAmI();
 }
@@ -137,7 +139,6 @@ uint8_t position::decValue(uint8_t value){
 //          if false, only square index
 //
 void position::_whereAmI(bool all){
-
     if (all){
         line_ = floor(index_ / ROW_COUNT);
         row_ = index_ - ROW_COUNT * line_;

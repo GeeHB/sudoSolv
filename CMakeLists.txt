@@ -8,6 +8,7 @@ find_package(Gint 2.9 REQUIRED)
 set(SOURCES
 	src/sudoSolv.cpp
 	src/shared/bFile.cpp
+	src/shared/keyboard.cpp
 	src/position.cpp
 	src/element.cpp
 	src/tinySquare.cpp
