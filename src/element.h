@@ -46,7 +46,7 @@ public:
     //  @ status : new status
     //  @editMode : true if the grid is currentlin edit mode
     //
-    void setValue(int value = EMPTY_VALUE, uint8_t status = STATUS_EMPTY, bool editMode = false);
+    void setValue(int value, uint8_t status = STATUS_EMPTY, bool editMode = false);
 
     // Access
     //

@@ -138,9 +138,9 @@ bool bFile::create(FONTCHARACTER filename, int type, int *size){
             return (error_ == 0);	// Created ?
 #else
             // size if ignored
-            if (open(filename, BFile_ReadWrite)){
+            if (open(filename, BFile_WriteOnly)){
                 if (isOpen()){
-                    close();
+                    //close();
                     return true;
                 }
             }

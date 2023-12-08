@@ -18,13 +18,7 @@ sudoku::sudoku(){
         tSquares_[index].setIndex(index);
     }
 
-    empty();
-
-    position pos(0, false);
-    for (uint8_t i=0; i < 9; i++){
-        elements_[pos.index()].setValue(i+1);
-        pos.forward(10);
-    }
+    empty();    // Start with an empty grid
 }
 
 // display() : Display the grid and it's content
@@ -47,6 +41,7 @@ void sudoku::display(){
             if (!pElement->isEmpty()){
                 car += pElement->value();
             }
+
             cout << car;
             if (row == (ROW_COUNT-1)){
                 cout << endl;
@@ -112,10 +107,10 @@ uint8_t sudoku::load(FONTCHARACTER fName){
     while (index < FILE_SIZE){
         // "value"
         car = buffer[index++];
-        if (car >= '1' and car <= '0'){
+        if (car >= '0' and car <= '9'){
             value = (uint8_t)(car - '0');
-            if (_checkValue(pos, value)){
-                elements_[index].setValue();   // This value is valid at this position
+            if (value && _checkValue(pos, value)){
+                elements_[pos.index()].setValue(value);   // This value is valid at this position
             }
         }
         else{
@@ -149,8 +144,9 @@ uint8_t sudoku::save(FONTCHARACTER fName){
     element* pElement(NULL);
     position pos(INDEX_MIN, false);  // Begining ot matrix
     int index(0);
-    for (uint8_t lId = 0; lId < LINE_COUNT; lId++){
-        for (uint8_t cId; cId < ROW_COUNT; cId++){
+    uint8_t lId, cId;
+    for (lId = 0; lId < LINE_COUNT; lId++){
+        for (cId = 0; cId < ROW_COUNT; cId++){
             pElement = &elements_[pos.index()];
             buffer[index++] = pElement->isEmpty()?'0':('0' + pElement->value());    // '0' means empty !
             buffer[index++] = VALUE_SEPARATOR;
@@ -169,7 +165,7 @@ uint8_t sudoku::save(FONTCHARACTER fName){
     int fSize(FILE_SIZE);
     oFile.remove(fName);    // Remove the file (if already exist)
 
-    if (!oFile.create(fName, BFile_WriteOnly, &fSize)){
+    if (!oFile.create(fName, BFile_File, &fSize)){
         return SUDO_IO_ERROR;
     }
 
