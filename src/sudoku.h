@@ -65,12 +65,16 @@ public:
 #ifdef DEST_CASIO_CALC
     // edit() : Edit / modify the current grid
     //
-    //  @exitKey : key code of exit key
-    //
     //  @return : true if grid has been modified or false if left unchanged
     //
-    bool edit(uint exitKey);
+    bool edit();
 #endif // #ifdef DEST_CASIO_CALC
+
+    // findObviousValues() : Find all the obvious values
+    //
+    //  @return : #obvious values found
+    //
+    uint8_t findObviousValues();
 
 private:
 
@@ -135,6 +139,10 @@ private:
         return false;
     }
 
+    //
+    // Drawings
+    //
+
 #ifdef DEST_CASIO_CALC
     // _drawBorders() : Draw the grid's borders
     //
@@ -153,6 +161,43 @@ private:
     //
     void _drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bkColour, int txtColour);
 #endif // #ifdef DEST_CASIO_CALC
+
+    //
+    //   Obvious values
+    //
+
+    // _findObviousValues() :
+    //  Search and set all the possible obvious values in the grid
+    //
+    //  @return the # of values found (and set)
+    //
+    uint8_t _findObviousValues();
+
+    // _checkObviousValue() : Is there an obvious value for the given position ?
+    //
+    //  pos : current position in the grid
+    //
+    //  @returns the value or 0
+    //
+    uint8_t _checkObviousValue(position& pos);
+
+    // _setObviousValueInLines() : Try to put the value in another line
+    //
+    //  @pos : start position
+    //  @value : value to "put"
+    //
+    //  @return : count (0 or 1) of value set
+    //
+    uint8_t _setObviousValueInLines(position& pos, uint8_t value);
+
+    // _setObviousValueInRows() : Try to put the value in another row
+    //
+    //  @pos : start position
+    //  @value : value to "put"
+    //
+    //  @return : count (0 or 1) of value set
+    //
+    uint8_t _setObviousValueInRows(position& pos, uint8_t value);
 
     // Members
 private:

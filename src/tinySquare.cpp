@@ -55,9 +55,9 @@ bool tinySquare::setIndex(uint8_t index){
 //  @value : value to search for
 //  @where : pointer to the position of the value (can be NULL)
 //
-//   returns true if the value is in the current tinySquare
+//   @return : a CPOINT struct {line, row} if valid or {-1, -1} if not found
 //
-bool tinySquare::findValue(element* elements, uint8_t value, position* where){
+CPOINT tinySquare::findValue(element* elements, uint8_t value, position* where){
     // Check all the positions
     for (uint8_t line = 0; line < TINY_LINE_COUNT; line++){
         for (uint8_t row = 0; row < TINY_ROW_COUNT; row++){
@@ -66,13 +66,13 @@ bool tinySquare::findValue(element* elements, uint8_t value, position* where){
                 if (where){
                     where->moveTo(line, row);
                 }
-                return true;
+                return {(int8_t)line, (int8_t)row};
             }
         }
     }
 
     // No, this value is not in this square
-    return false;
+    return {-1, -1};
 }
 
 // _indexes() : Indexes matrix for the tinySquare

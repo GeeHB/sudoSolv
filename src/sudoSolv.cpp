@@ -6,8 +6,11 @@ int main(void)
 	
 	sudoku myGame;
 	myGame.display();
-	myGame.edit(KEY_CODE_EXIT);
-
+	myGame.edit();
+	
+	myGame.findObviousValues();
+	myGame.display();
+	
 	getkey();
 	return 1;
 }

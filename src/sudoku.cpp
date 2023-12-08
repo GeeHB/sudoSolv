@@ -10,6 +10,8 @@
 #include "sudoku.h"
 #include "shared/bFile.h"
 
+#include <math.h>
+
 // Construction
 //
 sudoku::sudoku(){
@@ -187,15 +189,12 @@ uint8_t sudoku::save(FONTCHARACTER fName){
 
 // edit() : Edit / modify the current grid
 //
-//  @exitKey : key code of exit key
-//
 //  @return : true if grid has been modified or false if left unchanged
 //
-bool sudoku::edit(uint exitKey){
+bool sudoku::edit(){
     bool modified(false);
     bool cont(true);
     uint car(0);
-    int8_t val(0);
     position currentPos(0, false);
     position prevPos(0, false);
     keyboard keys;
@@ -242,39 +241,39 @@ bool sudoku::edit(uint exitKey){
             break;
 
         case KEY_CODE_1:
-            modified =_checkAndSet(currentPos, 1);
+            modified = _checkAndSet(currentPos, 1);
             break;
 
         case KEY_CODE_2:
-            modified =_checkAndSet(currentPos, 2);
+            modified = _checkAndSet(currentPos, 2);
             break;
 
         case KEY_CODE_3:
-            modified =_checkAndSet(currentPos, 3);
+            modified = _checkAndSet(currentPos, 3);
             break;
 
         case KEY_CODE_4:
-            modified =_checkAndSet(currentPos, 4);
+            modified = _checkAndSet(currentPos, 4);
             break;
 
         case KEY_CODE_5:
-            modified =_checkAndSet(currentPos, 5);
+            modified = _checkAndSet(currentPos, 5);
             break;
 
         case KEY_CODE_6:
-            modified =_checkAndSet(currentPos, 6);
+            modified = _checkAndSet(currentPos, 6);
             break;
 
         case KEY_CODE_7:
-            modified =_checkAndSet(currentPos, 7);
+            modified = _checkAndSet(currentPos, 7);
             break;
 
         case KEY_CODE_8:
-            modified =_checkAndSet(currentPos, 8);
+            modified = _checkAndSet(currentPos, 8);
             break;
 
         case KEY_CODE_9:
-            modified =_checkAndSet(currentPos, 1);
+            modified = _checkAndSet(currentPos, 9);
             break;
 
         case KEY_CODE_EXE:
@@ -287,10 +286,28 @@ bool sudoku::edit(uint exitKey){
         } // switch (car)
     } // while (cont)
 
+    // unselect
+    _drawSingleElement(currentPos.row(), currentPos.line(), elements_[currentPos.index()].value(), BK_COLOUR, ORIGINAL_COLOUR);
+
     return modified;
 }
 
 #endif // #ifdef DEST_CASIO_CALC
+
+// findObviousValues() : Find all the obvious values
+//
+//  @return : #obvious values found
+//
+uint8_t sudoku::findObviousValues(){
+    uint8_t found(0);
+    uint values(0);
+    do{
+        values = _findObviousValues();
+        found += values;
+    } while(values);    // since we put some values, maybe we can guess new ones
+
+    return found;
+}
 
 //
 // Internal methods
@@ -338,8 +355,11 @@ bool sudoku::_checkRow(position& pos, uint8_t value){
     return true;
 }
 
-#ifdef DEST_CASIO_CALC
+//
+//   Drawings
+//
 
+#ifdef DEST_CASIO_CALC
 // _drawBorders() : Draw the grid's borders
 //
 void sudoku::_drawBorders(){
@@ -413,7 +433,250 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bk
         dtext_opt(x + dx, y + dy, txtColour, bkColour, DTEXT_LEFT, DTEXT_TOP, sVal, 1);
     }
 }
-
 #endif // #ifdef DEST_CASIO_CALC
+
+//
+//   Obvious values
+//
+
+// _findObviousValues() :
+//  Search and set all the possible obvious values in the grid
+//
+//  @return the # of values found (and set)
+//
+uint8_t sudoku::_findObviousValues(){
+    uint8_t found(0);
+    position pos(0, true);
+    int8_t value;
+
+    for (uint8_t index = 0; index <= INDEX_MAX; index++){
+        if (elements_[pos.index()].isEmpty()){
+            // Try to set a single value at this empty place
+            value = _checkObviousValue(pos);
+
+            if (value){
+                // One more obvious value !!!!
+                elements_[pos.index()].setValue(value, STATUS_OBVIOUS);
+                found += 1;
+            }
+        }
+        else{
+            value = elements_[pos.index()].value();    // Current "ORIGINAL" val.
+
+            // Can we put this value on another line ?
+            found += _setObviousValueInLines(pos, value);
+
+            // ... or/and put it in another row ?
+            found += _setObviousValueInRows(pos, value);
+        }
+
+        // Next pos.
+        pos+=1;
+
+    }   // for
+
+    return found;
+}
+
+// _checkObviousValue() : Is there an obvious value for the given position ?
+//
+//  pos : current position in the grid
+//
+//  @returns the value or 0
+//
+uint8_t sudoku::_checkObviousValue(position& pos){
+    uint8_t value(0);
+
+    for (uint8_t candidate = VALUE_MIN; candidate <= VALUE_MAX; candidate++){
+        if (_checkValue(pos, candidate)){
+            // This candidate value can be used
+            if (value){
+                // already a possible value at this pos.
+                // => no unique value can be guessed
+                return 0;
+            }
+            value = candidate;
+        }
+    }
+
+    return value;
+}
+
+// _setObviousValueInLines() : Try to put the value in another line
+//
+//  @pos : start position
+//  @value : value to "put"
+//
+//  @return : count (0 or 1) of value set
+//
+uint8_t sudoku::_setObviousValueInLines(position& pos, uint8_t value){
+
+    // Check for lines in the 3 tinySquares
+    //
+
+    // tinySquares IDs for this line
+    uint8_t modID(pos.squareID() % 3);
+    uint8_t firstID, secondID;
+    if (0 ==  modID){
+        // At the left pos
+        firstID = pos.squareID() + 1;
+        secondID = pos.squareID() + 2;
+    }
+    else{
+        if (1 == modID){
+            // centered
+            firstID = pos.squareID() - 1;
+            secondID = pos.squareID() + 1;
+        }
+        else{
+            // on the right
+            firstID = pos.squareID() - 2;
+            secondID = pos.squareID() - 1;
+        }
+    }
+
+    // Is the value already in theses tiny squares ?
+    CPOINT firstPos(tSquares_[firstID].findValue(elements_, value));
+    CPOINT secondPos(tSquares_[secondID].findValue(elements_, value));
+
+    // No for both them or yes for both
+    if ((-1 == firstPos.line && -1 == secondPos.line) || (-1 != firstPos.line && -1 != secondPos.line)){
+        return 0;
+    }
+
+    // Just one square misses the value => we'll try to put this value in the correct line
+    //
+    //   The sum of the 3 lineID is a consts and we know 2 of them ...
+    //
+    uint8_t candidate, candidateLine;
+    if (firstPos.line>=0){
+        candidate = firstID;
+        candidateLine = 2 * (tSquares_[firstID].topLine() + 1) - secondPos.line - pos.line() + 1;
+    }
+    else{
+        candidate = secondID;
+        candidateLine = 2 * (tSquares_[secondID].topLine() + 1) - firstPos.line - pos.line() + 1;
+    }
+
+    // Try to put the value in the line
+    //
+    bool found(false);
+    position candidatePos(0), foundPos;
+    candidatePos.moveTo(candidateLine, tSquares_[candidate].topRow());   // First row ID
+
+    for (uint8_t row = 0; row < TINY_ROW_COUNT; row++){
+        if (elements_[candidatePos.index()].isEmpty() && _checkValue(candidatePos, value)){
+            // found a valid pos. in the line for the value
+            if (found){
+                // Already a candiate => not obvious
+                return 0;
+            }
+
+            foundPos.set(candidatePos);
+            found = true;
+        }
+
+        // Next row
+        candidatePos+=1;
+    }
+
+    // Did we find a position ?
+    if (found){
+        // Yes !!!
+        elements_[foundPos.index()].setValue(value, STATUS_OBVIOUS);   // One more obvious value
+        return 1;
+    }
+
+    // No ...
+    return 0;
+}
+
+// _setObviousValueInRows() : Try to put the value in another row
+//
+//  @pos : start position
+//  @value : value to "put"
+//
+//  @return : count (0 or 1) of value set
+//
+uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
+
+    // Check for lines in the 3 tinySquares
+    //
+
+    // tinySquares IDs for this line
+    uint8_t modID(floor(pos.squareID() / 3));
+    uint8_t firstID, secondID;
+    if (0 ==  modID){
+        // At the top pos
+        firstID = pos.squareID() + TINY_ROW_COUNT;
+        secondID = pos.squareID() + 2 * TINY_ROW_COUNT;
+    }
+    else{
+        if (1 == modID){
+            // centered
+            firstID = pos.squareID() - TINY_ROW_COUNT;
+            secondID = pos.squareID() + TINY_ROW_COUNT;
+        }
+        else{
+            // on the bottom
+            firstID = pos.squareID() - 2 * TINY_ROW_COUNT;
+            secondID = pos.squareID() - 1 * TINY_ROW_COUNT;
+        }
+    }
+
+    // Is the value already in theses tiny squares ?
+    CPOINT firstPos(tSquares_[firstID].findValue(elements_, value));
+    CPOINT secondPos(tSquares_[secondID].findValue(elements_, value));
+
+    // No for both them or yes for both
+    if ((-1 == firstPos.row && -1 == secondPos.row) || (-1 != firstPos.row && -1 != secondPos.row)){
+        return 0;
+    }
+
+    // Just one square misses the value => we'll try to put this value in the correct line
+    //
+    //   The sum of the 3 lineID is a consts and we know 2 of them
+    //
+    uint8_t candidate, candidateRow;
+    if (firstPos.row == -1){
+        candidate = firstID;
+        candidateRow = 2 * (tSquares_[firstID].topRow() + 1) - secondPos.row - pos.row() + 1;
+    }
+    else{
+        candidate = secondID;
+        candidateRow = 2 * (tSquares_[secondID].topRow() + 1) - firstPos.row - pos.row() + 1;
+    }
+
+    // Try to put the value ...
+    //
+    bool found(false);
+    position candidatePos(0), foundPos;
+    candidatePos.moveTo(tSquares_[candidate].topLine(), candidateRow);
+
+    for (uint8_t line = 0; line < TINY_LINE_COUNT; line++){
+            if  (elements_[candidatePos.index()].isEmpty() && _checkValue(candidatePos, value)){
+                if (found){
+                    // Already a candiate => not obvious
+                    return 0;
+                }
+
+                foundPos.set(candidatePos);
+                found = true;
+            }
+
+            // Next line
+            candidatePos += ROW_COUNT;
+    }
+
+    // Did we find a valid position ?
+    if (found){
+        // Yes !!!
+        elements_[foundPos.index()].setValue(value, STATUS_OBVIOUS);
+        return 1;
+    }
+
+    // No ...
+    return 0;
+}
 
 // EOF

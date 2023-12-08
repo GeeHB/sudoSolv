@@ -24,6 +24,11 @@
 extern "C" {
 #endif // #ifdef __cplusplus
 
+typedef struct cpoint{
+    int8_t line;
+    int8_t row;
+}CPOINT;
+
 // tinySquare object
 //   A tiny-square is one of the 9 3x3 matrix composing the whole grid
 //
@@ -75,9 +80,9 @@ public:
     //  @value : value to search for
     //  @where : pointer to the position of the value (can be NULL)
     //
-    //   returns true if the value is in the current tinySquare
+    //   @return : a CPOINT struct {line, row} if valid or {-1, -1} if not found
     //
-    bool findValue(element* elements, uint8_t value, position* where = NULL);
+    CPOINT findValue(element* elements, uint8_t value, position* where = NULL);
 
      // inMe() : Is the given value "in" the square ?
     //
@@ -89,7 +94,8 @@ public:
     //  @return true if found
     //
     bool inMe(element* elements, uint8_t value){
-        return (findValue(elements, value));
+        CPOINT pos = findValue(elements, value);
+        return (pos.line >=0 && pos.row>=0);
     }
 
 private:
