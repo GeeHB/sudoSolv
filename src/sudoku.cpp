@@ -276,6 +276,7 @@ bool sudoku::edit(){
             modified = _checkAndSet(currentPos, 9);
             break;
 
+        // Exit from "edit" mode
         case KEY_CODE_EXE:
             cont = false;
             break;
@@ -546,10 +547,8 @@ uint8_t sudoku::_setObviousValueInLines(position& pos, uint8_t value){
 
     // Just one square misses the value => we'll try to put this value in the correct line
     //
-    //   The sum of the 3 lineID is a consts and we know 2 of them ...
-    //
     uint8_t candidate, candidateLine;
-    if (firstPos.line>=0){
+    if (-1 == firstPos.line){
         candidate = firstID;
         candidateLine = 2 * (tSquares_[firstID].topLine() + 1) - secondPos.line - pos.line() + 1;
     }
@@ -561,14 +560,14 @@ uint8_t sudoku::_setObviousValueInLines(position& pos, uint8_t value){
     // Try to put the value in the line
     //
     bool found(false);
-    position candidatePos(0), foundPos;
+    position candidatePos(0, true), foundPos;
     candidatePos.moveTo(candidateLine, tSquares_[candidate].topRow());   // First row ID
 
     for (uint8_t row = 0; row < TINY_ROW_COUNT; row++){
         if (elements_[candidatePos.index()].isEmpty() && _checkValue(candidatePos, value)){
             // found a valid pos. in the line for the value
             if (found){
-                // Already a candiate => not obvious
+                // Already a candiate
                 return 0;
             }
 
@@ -635,8 +634,6 @@ uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
 
     // Just one square misses the value => we'll try to put this value in the correct line
     //
-    //   The sum of the 3 lineID is a consts and we know 2 of them
-    //
     uint8_t candidate, candidateRow;
     if (firstPos.row == -1){
         candidate = firstID;
@@ -650,13 +647,13 @@ uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
     // Try to put the value ...
     //
     bool found(false);
-    position candidatePos(0), foundPos;
+    position candidatePos(0, true), foundPos;
     candidatePos.moveTo(tSquares_[candidate].topLine(), candidateRow);
 
     for (uint8_t line = 0; line < TINY_LINE_COUNT; line++){
             if  (elements_[candidatePos.index()].isEmpty() && _checkValue(candidatePos, value)){
                 if (found){
-                    // Already a candiate => not obvious
+                    // Already a candiate
                     return 0;
                 }
 
