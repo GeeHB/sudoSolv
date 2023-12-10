@@ -40,9 +40,9 @@ extern "C" {
 #define FILE_COMMENTS   '#'     // Comment lines start with
 
 #ifdef DEST_CASIO_CALC
-#define GRID_FOLDER      u"\\\\fls0\\grids"
+#define GRID_FOLDER      u"\\\\fls0\\GRIDS"
 #else
-#define GRID_FOLDER     "/home/jhb/grids"
+#define GRID_FOLDER     "/home/jhb/Nextcloud/personnel/JHB/dev/cpp/sudoSolv/GRIDS"
 #endif // #ifdef DEST_CASIO_CALC
 
 #define FILE_LINE_SIZE  ROW_COUNT * 2   // (value & separator) * ROW_COUNT

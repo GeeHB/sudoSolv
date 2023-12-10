@@ -45,7 +45,7 @@ public:
     uint8_t status(){
         return status_;
     }
-    
+
     position& operator=(const position & other){
         set(other);
         return *this;
@@ -67,11 +67,21 @@ public:
     //
     void moveTo(uint8_t line, uint8_t  row);
 
-    // Access
+
+    // Index (ie. absolute value)
     //
+
+    // implicit conversion
+    operator uint8_t() const{
+        return index_;
+    }
     uint8_t index(){
         return index_;
     }
+
+
+    // Access
+    //
     uint8_t row(){
         return row_;
     }
