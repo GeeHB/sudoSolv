@@ -22,6 +22,7 @@ sudoku::sudoku(){
 
     empty();    // Start with an empty grid
 
+    /*
     // basic grid for tests
 #ifdef DEST_CASIO_CALC
     position pos(0, false);
@@ -30,6 +31,7 @@ sudoku::sudoku(){
         pos.forward(10);    // pos += 10 (on remplit la diagonale)
     }
 #endif // #ifdef DEST_CASIO_CALC
+    */
 }
 
 // display() : Display the grid and it's content
