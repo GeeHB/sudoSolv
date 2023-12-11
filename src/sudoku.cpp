@@ -9,6 +9,7 @@
 
 #include "sudoku.h"
 #include "shared/bFile.h"
+#include "shared/keyboard.h"
 
 #include <math.h>
 

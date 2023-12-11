@@ -75,13 +75,12 @@ public:
     operator uint8_t() const{
         return index_;
     }
-    uint8_t index(){
-        return index_;
-    }
-
 
     // Access
     //
+    uint8_t index(){
+        return index_;
+    }
     uint8_t row(){
         return row_;
     }
@@ -116,11 +115,6 @@ public:
     //
     void decLine(uint8_t dec = 1);
     void incLine(uint8_t inc = 1);
-
-    // Change the value
-    //
-    uint8_t incValue(uint8_t value);
-    uint8_t decValue(uint8_t value);
 
 private:
     // _whereAmI() : Updating coordinates according to (new) index

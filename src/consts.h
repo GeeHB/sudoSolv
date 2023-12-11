@@ -67,6 +67,7 @@ extern "C" {
 
 #define BORDER_THICK            2   // Thickness of external border
 
+// Dimensions in pixels
 #define SQUARE_SIZE             20
 #define INT_SQUARE_SIZE         (SQUARE_SIZE - 2 * BORDER_THICK)
 
@@ -79,8 +80,8 @@ extern "C" {
 #define ORIGINAL_COLOUR         C_RGB(30, 15, 14)
 #define OBVIOUS_COLOUR          BORDER_COLOUR
 
-#define SEL_BK_COLOUR            C_RGB(6, 6, 31)
-#define SEL_TXT_COLOUR           C_WHITE
+#define SEL_BK_COLOUR           C_RGB(6, 6, 31)
+#define SEL_TXT_COLOUR          C_WHITE
 
 #endif // #ifdef DEST_CASIO_CALC
 

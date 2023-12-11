@@ -121,25 +121,13 @@ void position::incLine(uint8_t inc){
     _whereAmI();
 }
 
-// Change the value
-//
-uint8_t position::incValue(uint8_t value){
-    uint8_t newVal = value + 1;
-    return (newVal > VALUE_MAX)?(VALUE_MIN - 1):newVal;
-}
-
-uint8_t position::decValue(uint8_t value){
-    uint8_t newVal = value - 1;
-    return (newVal < (VALUE_MIN - 1))?VALUE_MAX:newVal;
-}
-
 //
 //   Internal methods
 //
 
 // _whereAmI() : Updating coordinates according to (new) index
 //
-//  @all :  if true, line,row and squareIndex are updated
+//  @all :  if true, line, row and square index are updated
 //          if false, only square index
 //
 void position::_whereAmI(bool all){
@@ -152,7 +140,7 @@ void position::_whereAmI(bool all){
     squareID_ = 3 * floor(line_ / 3) + floor(row_ / 3);
 }
 
-// _setInRange() : Set (force) a vlue in the col range
+// _setInRange() : Set (force) a value in the col. range
 //
 //  @value : value to check
 //

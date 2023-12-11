@@ -17,7 +17,6 @@
 #include "tinySquare.h"
 
 #include "shared/bFile.h"
-#include "shared/keyboard.h"
 
 #ifdef __cplusplus
 extern "C" {
