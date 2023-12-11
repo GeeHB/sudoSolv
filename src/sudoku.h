@@ -76,6 +76,12 @@ public:
     //
     uint8_t findObviousValues();
 
+    // resolve() : Find a solution for the current grid
+    //
+    //  @return : true if a solution was found
+    //
+    bool resolve();
+
 private:
 
     //
@@ -89,9 +95,7 @@ private:
     //
     //  @return : true if the given value is valid at the given position
     //
-    bool _checkValue(position& pos, uint8_t value){
-        return _checkLine(pos, value) && _checkRow(pos, value) && _checkTinySquare(pos, value);
-    }
+    bool _checkValue(position& pos, uint8_t value);
 
     // _checkLine() : Can we put the value at the current position ?
     //
@@ -198,6 +202,29 @@ private:
     //  @return : count (0 or 1) of value set
     //
     uint8_t _setObviousValueInRows(position& pos, uint8_t value);
+
+    //
+    // Resolving
+    //
+
+    // _findFirstEmptyPos() : Find the first empty pos.
+    //
+    //  @start : position where to start the search
+    //
+    //  @return : status of position (POS_VALID or POS_END_OF_LIST)
+    //
+    uint8_t _findFirstEmptyPos(position &start);
+
+    // _previousPos() : Returns to the previous position
+    //
+    //  Go backward in the grid to find a valid position.
+    //  If pisition index is -1, the method will return POS_INDEX_ERROR : no solution for this grid
+    //
+    //  @current : current position
+    //
+    //  @return the status of the position (POS_VALID or POS_INDEX_ERROR)
+    //
+    uint8_t _previousPos(position& current);
 
     // Members
 private:

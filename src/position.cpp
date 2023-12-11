@@ -58,6 +58,7 @@ uint8_t position::forward(uint8_t inc){
     if (index_ > INDEX_MAX){
         if (gameMode_){
             status_ = POS_END_OF_LIST;
+            return (index_ - inc);
         }
         else{
             if (index_ > (1+INDEX_MAX)){
@@ -76,10 +77,13 @@ uint8_t position::backward(uint8_t dec){
     int8_t index = index_ - dec;
     if (index < INDEX_MIN){
         status_ = POS_INDEX_ERROR;
+        return index_;
     }
 
+    index_ = index;
     _whereAmI();
-    return (index_ = index);
+
+    return index_;
 }
 
 // Change "row"

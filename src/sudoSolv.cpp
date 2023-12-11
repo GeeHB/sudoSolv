@@ -11,9 +11,18 @@ int main(void)
 	myGame.display();
 	myGame.edit();
 	
-	myGame.findObviousValues();
-	myGame.display();
+	// Any obvious value(s) ?
+	if (myGame.findObviousValues()){
+		myGame.display();
+		getkey();
+	}
 	
-	getkey();
+	// A solution ?
+	if (myGame.resolve()){
+		// yes !!!
+		myGame.display();
+		getkey();
+	}
+
 	return 1;
 }

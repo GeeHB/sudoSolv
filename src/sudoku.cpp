@@ -314,6 +314,52 @@ uint8_t sudoku::findObviousValues(){
     return found;
 }
 
+// resolve() : Find a solution for the current grid
+//
+//  @return : true if a solution was found
+//
+bool sudoku::resolve(){
+    uint8_t candidate(0);
+    position pos(0, true);
+    uint8_t status = _findFirstEmptyPos(pos);      // Start from the first empty place
+
+    // All the elements "before" the current position - pos - are set with possible/allowed values
+    // we'll try to put the "candidate" value (ie. the smallest possible value) at the current position
+    while (POS_VALID == status){
+        candidate++;   // Next possible value
+
+        if (candidate > VALUE_MAX){
+            // No possible value found at this position
+            // we'll have to go backward, to the last value setted
+            // when no position can be found (ie. all possibles values have  been previously
+            // tested), the next pos has an invalid index, -1, and status = POS_INDEX_ERROR
+            // no soluton can be found
+            if (POS_VALID == (status = _previousPos(pos))){
+                // The next candidate value is the currently used value + 1
+                candidate = elements_[pos].empty();
+            }
+        }
+        else{
+            // Try to put the "candidate" value at current position
+            //
+            if (_checkValue(pos, candidate)){
+                // Possible => put this candidate value
+                elements_[pos].setValue(candidate);
+
+                // Go to the next "empty" position
+                // if the grid is completed, the next pos is out of range ! (status = POS_END_OF_LIST)
+                status = _findFirstEmptyPos(pos);
+
+                // At the next pos., we'll use (again) the lowest possible value
+                candidate = 0;
+            }
+        }
+    } // while (!status)
+
+    // Found a solution ?
+    return (POS_END_OF_LIST == status);
+}
+
 //
 // Internal methods
 //
@@ -358,6 +404,21 @@ bool sudoku::_checkRow(position& pos, uint8_t value){
 
     // yes
     return true;
+}
+
+// _checkValue() : Can we put the value at the current position ?
+//
+//  @pos : position
+//  @value : Check the given value at this 'position'
+//
+//  @return : true if the given value is valid at the given position
+//
+bool sudoku::_checkValue(position& pos, uint8_t value){
+    bool line = _checkLine(pos, value);
+    bool row = _checkRow(pos, value);
+    bool square= _checkTinySquare(pos, value);
+
+    return (line && row && square);
 }
 
 //
@@ -675,6 +736,47 @@ uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
 
     // No ...
     return 0;
+}
+
+//
+// Resolving
+//
+
+// _findFirstEmptyPos() : Find the first empty pos.
+//
+//  @start : position where to start the search
+//
+//  @return : status of position (POS_VALID or POS_END_OF_LIST)
+//
+uint8_t sudoku::_findFirstEmptyPos(position &start){
+    while (POS_END_OF_LIST != start.status() && !elements_[start].isEmpty()){
+        start += 1; // next element
+    }
+
+    // Done ?
+    return start.status();
+}
+
+// _previousPos() : Returns to the previous position
+//
+//  Go backward in the grid to find a valid position.
+//  If pisition index is -1, the method will return POS_INDEX_ERROR : no solution for this grid
+//
+//  @current : current position
+//
+//  @return the status of the position (POS_VALID or POS_INDEX_ERROR)
+//
+uint8_t sudoku::_previousPos(position& current){
+    // Clear value at current post
+    elements_[current].empty();
+
+    // Don't touch "Original" nor "Obvious" values
+    current -= 1;
+    while (POS_VALID == current.status() && !elements_[current].isChangeable()){
+        current -= 1;
+    }
+
+    return current.status();
 }
 
 // EOF
