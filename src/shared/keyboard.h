@@ -1,21 +1,13 @@
 //---------------------------------------------------------------------------
 //--
-//--	File	: keyboard.h
-//--
-//--	Author	: Jérôme Henry-Barnaudière - GeeHB
-//--
-//--	Project	:
-//--
-//---------------------------------------------------------------------------
-//--
-//--	Description:
+//--	keyboard.h
 //--
 //--			Definition of keyboard object
 //--
 //---------------------------------------------------------------------------
 
-#ifndef __GEE_TOOLS_KEYBOARD_h__
-#define __GEE_TOOLS_KEYBOARD_h__    1
+#ifndef __GEE_TOOLS_KEYBOARD_C_h__
+#define __GEE_TOOLS_KEYBOARD_C_h__    1
 
 #include "casioCalcs.h"
 
@@ -85,6 +77,6 @@ protected:
 }
 #endif // #ifdef __cplusplus
 
-#endif // __GEE_TOOLS_KEYBOARD_h__
+#endif // __GEE_TOOLS_KEYBOARD_C_h__
 
 // EOF

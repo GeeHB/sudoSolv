@@ -91,7 +91,7 @@ uint8_t position::backward(uint8_t dec){
 void position::decRow(uint8_t dec){
     int8_t row(row_);
     row-=dec;
-    index_ = (row < 0)?(line_ * ROW_COUNT - 1):(index_ - dec);
+    index_ = (row < 0)?((line_ + 1) * ROW_COUNT - 1):(index_ - dec);
 
     _whereAmI();
 }

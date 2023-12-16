@@ -9,6 +9,7 @@ set(SOURCES
 	src/sudoSolv.cpp
 	src/shared/bFile.cpp
 	src/shared/keyboard.cpp
+	src/shared/menuBar.cpp
 	src/position.cpp
 	src/element.cpp
 	src/tinySquare.cpp

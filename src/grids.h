@@ -32,6 +32,7 @@ public:
     size_t size();
 
     // Access
+    void fileName(FONTCHARACTER fName);     // current
     bool nextFile(FONTCHARACTER fName);
     bool prevFile(FONTCHARACTER fName);
 

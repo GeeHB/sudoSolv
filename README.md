@@ -5,18 +5,13 @@ Un petit utilitaire en C++ pour Graph 90+E pour créer, éditer des grilles de S
 Cette première version ne contient que l'objet central, sans GUI et permet de valider les différentes méthodes de la classe.
 En séquence :
 
-* *load()* - Ouverture du fichier "\\fls0\GRIDS\1.txt".
-S'il n'existe pas le système partira avec une grille vide;
-* *display()* - Affichage 
-
+* *load()* - Ouverture du fichier "\\fls0\\GRIDS\\1.txt". S'il n'existe pas le système partira avec une grille vide;
+* *display()* - Affichage
 * *edit()* - Edition de la grille. Un appui sur "EXE" sort du mode;
-
-* *findObviousValues()* - Recherche des valeurs triviales (obvious values) : ie. les valeurs évidentes;
-Elles sont affichées en bleu
-
+* *findObviousValues()* - Recherche des valeurs triviales (obvious values) : ie. les valeurs évidentes; Elles sont affichées en bleu
 * *resolve()* - Recherche d'une solution
 
-~~~c
+```c
 #define GRID_FILE   u"\\\\fls0\\GRIDS\\1.txt"
 
 dclear(C_WHITE);
@@ -41,10 +36,7 @@ if (myGame.load((FONTCHARACTER)GRID_FILE)){
         getkey();
     }
 }
-~~~
+```
 
 Le dossier `GRIDS` contient différentes grilles.
 Une grille fait exactement 162 octets.
-
-
-

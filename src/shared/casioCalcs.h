@@ -97,8 +97,8 @@ typedef struct __point {
 // A simple rect. struct
 //
 typedef struct __rect{
-    uint16_t    x,y;    // top left
-    uint16_t    w, h;   // width and height
+    int    x,y;    // top left
+    int    w, h;   // width and height
 } RECT;
 
 #endif // #ifndef __GEE_CASIO_CALCS_h__
