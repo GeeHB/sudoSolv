@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    sudoSolv.cpp
 //--
@@ -6,7 +6,7 @@
 //--
 //--        App. entry point
 //--
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #include "sudoku.h"
 #include "menu.h"
@@ -28,7 +28,6 @@ void _homeScreen();
 int main(void)
 {
 	// Launch the application
-	dclear(C_WHITE);
 	_homeScreen();
 
 	// App menus
@@ -38,7 +37,7 @@ int main(void)
 
     RECT mainRect;
     menu.getRect(mainRect);     // menu bar position
-    mainRect = {0, 0, mainRect.w, CASIO_HEIGHT - mainRect.h};   // Screen dimensions
+    mainRect = {0, 0, mainRect.w, CASIO_HEIGHT - mainRect.h};
 
     //
     // App. main loop
@@ -66,6 +65,7 @@ int main(void)
 
                 // Modify current grid
                 case IDM_EDIT:{
+                    game.display();
                     bool modified = game.edit();
                     break;
                 }
@@ -78,6 +78,7 @@ int main(void)
 
                 // Try to find a solution
                 case IDM_SOLVE_FIND:
+                    game.display();
                     if (!game.resolve()){
                         // No soluce found ...
                         // ... return to original grid
@@ -121,7 +122,6 @@ int main(void)
 //
 void _createMenu(menuBar& menu){
     // "File" sub menu
-    //menuBar* subMenu = menu.createSubMenu(); // equivalent to new menuBar()
     menuBar fileMenu;
     fileMenu.appendItem(IDM_FILE_NEW, IDS_FILE_NEW);
     fileMenu.appendItem(IDM_FILE_PREV, IDS_FILE_PREV, ITEM_INACTIVE);
@@ -133,10 +133,10 @@ void _createMenu(menuBar& menu){
     menu.appendItem(IDM_EDIT, IDS_EDIT);
 
     // "Solve" submenu
-    menuBar solveMenu;
-    solveMenu.appendItem(IDM_SOLVE_OBVIOUS, IDS_SOLVE_OBVIOUS);
-    solveMenu.appendItem(IDM_SOLVE_FIND, IDS_SOLVE_FIND);
-    menu.appendSubMenu(&solveMenu, IDM_SOLVE_SUBMENU, IDS_SOLVE_SUBMENU);
+    menuBar sMenu;
+    sMenu.appendItem(IDM_SOLVE_OBVIOUS, IDS_SOLVE_OBVIOUS);
+    sMenu.appendItem(IDM_SOLVE_FIND, IDS_SOLVE_FIND);
+    menu.appendSubMenu(&sMenu, IDM_SOLVE_SUBMENU, IDS_SOLVE_SUBMENU);
 
     menu.addItem(ITEM_POS_RIGHT, IDM_QUIT, IDS_QUIT);
 }
@@ -145,8 +145,8 @@ void _createMenu(menuBar& menu){
 //
 void _homeScreen(){
 #ifdef DEST_CASIO_CALC
-    dclear(C_WHITE);
-    dimage(0, 0, &g_homeScreen);
+    drect(0,0,CASIO_WIDTH, CASIO_HEIGHT - MENUBAR_DEF_HEIGHT, C_WHITE);
+    dimage(0,0,&g_homeScreen);
 
     char copyright[255];
     strcpy(copyright, APP_NAME);
@@ -157,7 +157,10 @@ void _homeScreen(){
 
     int w, h;
     dsize(copyright, NULL, &w, &h);
-    dtext(CASIO_WIDTH - w - 5, CASIO_HEIGHT - MENUBAR_DEF_HEIGHT - h - 10, COLOUR_BLACK, copyright);
+    dtext(CASIO_WIDTH - w - 5, 
+		CASIO_HEIGHT - MENUBAR_DEF_HEIGHT - h - 10, 
+		COLOUR_BLACK, 
+		copyright);
 
     dupdate();
 #endif // #ifdef DEST_CASIO_CALC

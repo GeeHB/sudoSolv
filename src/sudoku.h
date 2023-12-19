@@ -1,11 +1,11 @@
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    sudoku.h
 //--
 //--        Definition of sudoku object - Edition and resolution of a
 //--        sudoku grid
 //--
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #ifndef __S_SOLVER_SUDOKU_h__
 #define __S_SOLVER_SUDOKU_h__    1
@@ -64,7 +64,7 @@ public:
 #ifdef DEST_CASIO_CALC
     // edit() : Edit / modify the current grid
     //
-    //  @return : true if grid has been modified or false if left unchanged
+    //  @return : true if grid has been modified or false if unchanged
     //
     bool edit();
 #endif // #ifdef DEST_CASIO_CALC
@@ -114,12 +114,12 @@ private:
     //
     bool _checkRow(position& pos, uint8_t value);
 
-    // _checTinySquare() : Can we put the value in the current tinySquare ?
+    // _checTinySquare() : Can we put the value in this tinySquare ?
     //
     //  @pos : position
     //  @value : Check this value
     //
-    //  @return : true if the given value is valid in the given tinySquare
+    //  @return : true if the given value is valid in the tinySquare
     //
     bool _checkTinySquare(position& pos, uint8_t value){
         return (false == tSquares_[pos.squareID()].inMe(elements_, value)); // Is the value in the tinySquare ?

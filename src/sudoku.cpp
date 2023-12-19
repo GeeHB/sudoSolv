@@ -1,11 +1,11 @@
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    sudoku.cpp
 //--
-//--        Implementation of sudoku object - Edition and resolution of a
-//--        sudoku grid
+//--        Implementation of sudoku object - Edition and 
+//--		resolution of a sudoku grid
 //--
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #include "sudoku.h"
 #include "shared/bFile.h"
@@ -135,7 +135,8 @@ uint8_t sudoku::load(FONTCHARACTER fName){
         if (car >= '0' and car <= '9'){
             value = (uint8_t)(car - '0');
             if (value && _checkValue(pos, value)){
-                elements_[pos].setValue(value, STATUS_ORIGINAL);   // This value is valid at this position and is ORIGINAL
+				// This value is valid at this position and is ORIGINAL
+                elements_[pos].setValue(value, STATUS_ORIGINAL);
             }
         }
         else{
@@ -173,7 +174,9 @@ uint8_t sudoku::save(FONTCHARACTER fName){
     for (lId = 0; lId < LINE_COUNT; lId++){
         for (cId = 0; cId < ROW_COUNT; cId++){
             pElement = &elements_[pos];
-            buffer[index++] = pElement->isEmpty()?'0':('0' + pElement->value());    // '0' means empty !
+            
+            // '0' means empty !
+            buffer[index++] = pElement->isEmpty()?'0':('0' + pElement->value());
             buffer[index++] = VALUE_SEPARATOR;
 
             pos+=1;  // next element
@@ -219,11 +222,15 @@ bool sudoku::edit(){
     while (cont){
         // if sel. changed, erase previously selected element
         if (prevPos != currentPos){
-            _drawSingleElement(prevPos.row(), prevPos.line(), elements_[prevPos].value(), BK_COLOUR, ORIGINAL_COLOUR);
+            _drawSingleElement(prevPos.row(), prevPos.line(), 
+					elements_[prevPos].value(), 
+					BK_COLOUR, ORIGINAL_COLOUR);
         }
 
         // Hilight the new value
-        _drawSingleElement(currentPos.row(), currentPos.line(), elements_[currentPos].value(), SEL_BK_COLOUR, SEL_TXT_COLOUR);
+        _drawSingleElement(currentPos.row(), currentPos.line(), 
+					elements_[currentPos].value(), 
+					SEL_BK_COLOUR, SEL_TXT_COLOUR);
 
         dupdate();
         prevPos = currentPos;
@@ -305,7 +312,9 @@ bool sudoku::edit(){
     } // while (cont)
 
     // unselect
-    _drawSingleElement(currentPos.row(), currentPos.line(), elements_[currentPos].value(), BK_COLOUR, ORIGINAL_COLOUR);
+    _drawSingleElement(currentPos.row(), currentPos.line(), 
+			elements_[currentPos].value(), 
+			BK_COLOUR, ORIGINAL_COLOUR);
 
     return modified;
 }
@@ -322,7 +331,7 @@ uint8_t sudoku::findObviousValues(){
     do{
         values = _findObviousValues();
         found += values;
-    } while(values);    // since we put some values, maybe we can guess new ones
+    } while(values);    // since we put values, we'll search new ones
 
     return found;
 }
@@ -336,19 +345,22 @@ bool sudoku::resolve(){
     position pos(0, true);
     uint8_t status = _findFirstEmptyPos(pos);      // Start from the first empty place
 
-    // All the elements "before" the current position - pos - are set with possible/allowed values
-    // we'll try to put the "candidate" value (ie. the smallest possible value) at the current position
+    // All the elements "before" the current position - pos - 
+    // are set with possible/allowed values
+    // we'll try to put the "candidate" value 
+    // (ie. the smallest possible value) at the current position
     while (POS_VALID == status){
         candidate++;   // Next possible value
 
         if (candidate > VALUE_MAX){
             // No possible value found at this position
             // we'll have to go backward, to the last value setted
-            // when no position can be found (ie. all possibles values have  been previously
-            // tested), the next pos has an invalid index, -1, and status = POS_INDEX_ERROR
+            // when no position can be found (ie. all possibles values 
+            // have  been previously tested), the next pos has an 
+            // invalid index, -1, and status = POS_INDEX_ERROR
             // no soluton can be found
             if (POS_VALID == (status = _previousPos(pos))){
-                // The next candidate value is the currently used value + 1
+                // next candidate value is the currently used value + 1
                 candidate = elements_[pos].empty();
             }
         }
@@ -360,7 +372,8 @@ bool sudoku::resolve(){
                 elements_[pos].setValue(candidate);
 
                 // Go to the next "empty" position
-                // if the grid is completed, the next pos is out of range ! (status = POS_END_OF_LIST)
+                // if the grid is completed, the next pos is 
+                // out of range ! (status = POS_END_OF_LIST)
                 status = _findFirstEmptyPos(pos);
 
                 // At the next pos., we'll use (again) the lowest possible value
@@ -446,21 +459,23 @@ void sudoku::_drawBackground(){
     drect(0, 0, grid_.w, grid_.h, BK_COLOUR);
 
     // draw thin borders
-    uint8_t pos;
-    uint8_t id;
+    int posX, posY;
+    int id;
     for (id = 1; id < LINE_COUNT; id++){
-        pos = grid_.x + id * SQUARE_SIZE;
-        dline(pos, grid_.y, pos, grid_.y + GRID_SIZE, BORDER_COLOUR);   // vert
-        dline (grid_.x, pos, grid_.x + GRID_SIZE, pos, BORDER_COLOUR);  // horz
+        posX = grid_.x + id * SQUARE_SIZE;
+        posY = grid_.y + id * SQUARE_SIZE;
+        dline(posX, grid_.y, posX, grid_.y + GRID_SIZE, BORDER_COLOUR);   // vert
+        dline (grid_.x, posY, grid_.x + GRID_SIZE, posY, BORDER_COLOUR);  // horz
     }
 
     // and large ext. borders
-    uint8_t lSquare(SQUARE_SIZE * 3);
-    uint8_t thick(BORDER_THICK - 1);
+    int lSquare(SQUARE_SIZE * 3);
+    int thick(BORDER_THICK - 1);
     for (id = 0; id <= 3; id++){
-        pos = grid_.x + id * lSquare;
-        drect(pos, grid_.y, pos + thick, grid_.y + GRID_SIZE, BORDER_COLOUR);   // vert
-        drect(grid_.x, pos, grid_.x + GRID_SIZE, pos + thick, BORDER_COLOUR);   // horz
+        posX = grid_.x + id * lSquare;
+        posY = grid_.y + id * lSquare;
+        drect(posX, grid_.y, posX + thick, grid_.y + GRID_SIZE, BORDER_COLOUR);   // vert
+        drect(grid_.x, posY, grid_.x + GRID_SIZE, posY + thick, BORDER_COLOUR);   // horz
     }
 }
 
@@ -474,7 +489,9 @@ void sudoku::_drawContent(){
         for (row = 0; row < ROW_COUNT; row++){
             pElement = &elements_[pos];
             if (!pElement->isEmpty()){
-                _drawSingleElement(row, line, pElement->value(), BK_COLOUR, (pElement->isOriginal()?ORIGINAL_COLOUR:(pElement->isObvious()?OBVIOUS_COLOUR:TXT_COLOUR)));
+                _drawSingleElement(row, line, 
+					pElement->value(), BK_COLOUR, 
+					(pElement->isOriginal()?ORIGINAL_COLOUR:(pElement->isObvious()?OBVIOUS_COLOUR:TXT_COLOUR)));
             }
             pos+=1; // next element
         }
@@ -489,8 +506,8 @@ void sudoku::_drawContent(){
 //  @txtColour : text colour
 //
 void sudoku::_drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bkColour, int txtColour){
-    uint8_t x(grid_.x + row * SQUARE_SIZE + BORDER_THICK);
-    uint8_t y(grid_.y + line * SQUARE_SIZE + BORDER_THICK);
+    uint16_t x(grid_.x + row * SQUARE_SIZE + BORDER_THICK);
+    uint16_t y(grid_.y + line * SQUARE_SIZE + BORDER_THICK);
 
     // Erase background
     drect(x, y, x + INT_SQUARE_SIZE, y + INT_SQUARE_SIZE, bkColour);
@@ -506,8 +523,8 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bk
         dsize(sVal, NULL, &w, &h);
 
         // Center the text
-        uint8_t dx(1 + (INT_SQUARE_SIZE - w) / 2);
-        uint8_t dy(1 + (INT_SQUARE_SIZE - h) / 2);
+        uint16_t dx(1 + (INT_SQUARE_SIZE - w) / 2);
+        uint16_t dy(1 + (INT_SQUARE_SIZE - h) / 2);
         dtext_opt(x + dx, y + dy, txtColour, bkColour, DTEXT_LEFT, DTEXT_TOP, sVal, 1);
     }
 }
@@ -615,7 +632,7 @@ uint8_t sudoku::_setObviousValueInLines(position& pos, uint8_t value){
     CPOINT firstPos(tSquares_[firstID].findValue(elements_, value));
     CPOINT secondPos(tSquares_[secondID].findValue(elements_, value));
 
-    // No for both them or yes for both
+    // No for both of them or yes for both
     if ((-1 == firstPos.line && -1 == secondPos.line) || (-1 != firstPos.line && -1 != secondPos.line)){
         return 0;
     }
@@ -702,7 +719,7 @@ uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
     CPOINT firstPos(tSquares_[firstID].findValue(elements_, value));
     CPOINT secondPos(tSquares_[secondID].findValue(elements_, value));
 
-    // No for both them or yes for both
+    // No for both of them or yes for both
     if ((-1 == firstPos.row && -1 == secondPos.row) || (-1 != firstPos.row && -1 != secondPos.row)){
         return 0;
     }

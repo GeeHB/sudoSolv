@@ -10,6 +10,7 @@ set(SOURCES
 	src/shared/bFile.cpp
 	src/shared/keyboard.cpp
 	src/shared/menuBar.cpp
+	src/shared/scrCapture.cpp
 	src/position.cpp
 	src/element.cpp
 	src/tinySquare.cpp

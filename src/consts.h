@@ -28,7 +28,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolv"
-#define APP_VERSION  "0.1-2"
+#define APP_VERSION  "0.1-3"
 #define APP_AUTHOR   "GeeHB"
 
 // Informations about the grid
