@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(MyAddin)
+project(sudoSolver)
 
 include(GenerateG3A)
 include(Fxconv)
@@ -20,17 +20,16 @@ set(ASSETS
   # ...
 )
 set(ASSETS_cg
-  assets-cg/example.png
-  # ...
+  assets-cg/about.png
 )
 
 fxconv_declare_assets(${ASSETS} ${ASSETS_cg} WITH_METADATA)
 
-add_executable(myaddin ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
-target_compile_options(myaddin PRIVATE -Wall -Wextra -Os -D=DEST_CASIO_CALC)
-target_link_libraries(myaddin Gint::Gint)
+add_executable(sudoSolver ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
+target_compile_options(sudoSolver PRIVATE -Wall -Wextra -Os -D=DEST_CASIO_CALC)
+target_link_libraries(sudoSolver Gint::Gint)
 
 if("${FXSDK_PLATFORM_LONG}" STREQUAL fxCG50)
-	generate_g3a(TARGET myaddin OUTPUT "sudoSolv.g3a"
+	generate_g3a(TARGET sudoSolver OUTPUT "sudoSolv.g3a"
 		NAME "sudoSolv" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)
 endif()

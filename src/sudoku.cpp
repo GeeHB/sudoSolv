@@ -15,7 +15,19 @@
 
 // Construction
 //
-sudoku::sudoku(){
+sudoku::sudoku(RECT* scr){
+    // Screen dimension
+    if (scr){
+        memcpy(&grid_, scr, sizeof(RECT));
+    }
+    else{
+        grid_ = {0, 0, CASIO_WIDTH, CASIO_HEIGHT};
+    }
+
+    // The grid is centered
+    grid_.x = (grid_.w - GRID_SIZE) / 2;
+    grid_.y = (grid_.h - GRID_SIZE) / 2;
+
     // Initializes tinySquares
     for (uint8_t index=0; index<TINY_COUNT; index++){
         tSquares_[index].setIndex(index);
@@ -39,7 +51,7 @@ sudoku::sudoku(){
 //
 void sudoku::display(){
 #ifdef DEST_CASIO_CALC
-    _drawBorders();
+    _drawBackground();
     _drawContent();
     dupdate();
 #else
@@ -427,28 +439,28 @@ bool sudoku::_checkValue(position& pos, uint8_t value){
 //
 
 #ifdef DEST_CASIO_CALC
-// _drawBorders() : Draw the grid's borders
+// _drawBackground() : Draw background and the grid's borders
 //
-void sudoku::_drawBorders(){
-    // background ...
-    drect(0, 0, GRID_SIZE + 2 * DELTA_X, GRID_SIZE + 2 * DELTA_Y, BK_COLOUR);
+void sudoku::_drawBackground(){
+    // Erase background
+    drect(0, 0, grid_.w, grid_.h, BK_COLOUR);
 
-    // thin borders ...
+    // draw thin borders
     uint8_t pos;
     uint8_t id;
     for (id = 1; id < LINE_COUNT; id++){
-        pos = DELTA_X + id * SQUARE_SIZE;
-        dline(pos, DELTA_Y, pos, DELTA_Y + GRID_SIZE, BORDER_COLOUR);   // vert
-        dline (DELTA_X, pos, DELTA_X + GRID_SIZE, pos, BORDER_COLOUR);  // horz
+        pos = grid_.x + id * SQUARE_SIZE;
+        dline(pos, grid_.y, pos, grid_.y + GRID_SIZE, BORDER_COLOUR);   // vert
+        dline (grid_.x, pos, grid_.x + GRID_SIZE, pos, BORDER_COLOUR);  // horz
     }
 
-    // ... large ext. borders
+    // and large ext. borders
     uint8_t lSquare(SQUARE_SIZE * 3);
     uint8_t thick(BORDER_THICK - 1);
     for (id = 0; id <= 3; id++){
-        pos = DELTA_X + id * lSquare;
-        drect(pos, DELTA_Y, pos + thick, DELTA_Y + GRID_SIZE, BORDER_COLOUR);   // vert
-        drect(DELTA_X, pos, DELTA_X + GRID_SIZE, pos + thick, BORDER_COLOUR);   // horz
+        pos = grid_.x + id * lSquare;
+        drect(pos, grid_.y, pos + thick, grid_.y + GRID_SIZE, BORDER_COLOUR);   // vert
+        drect(grid_.x, pos, grid_.x + GRID_SIZE, pos + thick, BORDER_COLOUR);   // horz
     }
 }
 
@@ -477,8 +489,8 @@ void sudoku::_drawContent(){
 //  @txtColour : text colour
 //
 void sudoku::_drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bkColour, int txtColour){
-    uint8_t x(DELTA_X + row * SQUARE_SIZE + BORDER_THICK);
-    uint8_t y(DELTA_Y + line * SQUARE_SIZE + BORDER_THICK);
+    uint8_t x(grid_.x + row * SQUARE_SIZE + BORDER_THICK);
+    uint8_t y(grid_.y + line * SQUARE_SIZE + BORDER_THICK);
 
     // Erase background
     drect(x, y, x + INT_SQUARE_SIZE, y + INT_SQUARE_SIZE, bkColour);

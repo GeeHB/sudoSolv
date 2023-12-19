@@ -28,7 +28,7 @@ class sudoku{
 public:
 
     // Construction & destruction
-    sudoku();
+    sudoku(RECT* scr = NULL);
     ~sudoku(){}
 
     // Display the grid and it's content
@@ -147,9 +147,9 @@ private:
     //
 
 #ifdef DEST_CASIO_CALC
-    // _drawBorders() : Draw the grid's borders
+    // _drawBackground() : Draw background and the grid's borders
     //
-    void _drawBorders();
+    void _drawBackground();
 
     // _drawContent() : : Draw all the elements
     //
@@ -227,8 +227,10 @@ private:
 
     // Members
 private:
-    element elements_[LINE_COUNT * ROW_COUNT];       // grid as a one dim. table
+    element elements_[LINE_COUNT * ROW_COUNT];      // grid as a one dim. table
     tinySquare  tSquares_[TINY_COUNT];              // Elements IDs in tinySquares
+
+    RECT    grid_;                                  // Position and dimensions of the grid
 };
 
 #ifdef __cplusplus

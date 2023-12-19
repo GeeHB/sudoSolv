@@ -1,4 +1,3 @@
-
 //---------------------------------------------------------------------------
 //--
 //--    menu.h
@@ -14,9 +13,9 @@
 
 // Main menu
 //
-#define IDS_FILE_SUB        "File"
+#define IDS_FILE_SUBMENU    "File"
 #define IDS_EDIT            "Edit"
-#define IDS_SOLVER_SUB      "Solver"
+#define IDS_SOLVE_SUBMENU   "Solve"
 #define IDS_QUIT            "Quit"
 
 #define IDM_EDIT             200
@@ -29,19 +28,23 @@
 #define IDS_FILE_PREV       "Previous"
 #define IDS_FILE_NEXT       "Next"
 #define IDS_FILE_SAVE       "Save"
+#define IDS_FILE_ABOUT      "About"
 
+#define IDM_FILE_SUBMENU    100
 #define IDM_FILE_NEW        101
 #define IDM_FILE_PREV       102
 #define IDM_FILE_NEXT       103
 #define IDM_FILE_SAVE       104
+#define IDM_FILE_ABOUT      111
 
 // "Solver" menu bar
 //
-#define IDS_SOLVER_OBVIOUS  "Obvious"
-#define IDS_SOLVER_FIND     "Find"
+#define IDS_SOLVE_OBVIOUS   "Obvious"
+#define IDS_SOLVE_FIND      "Find"
 
-#define IDM_SOLVER_OBVIOUS  301
-#define IDM_SOLVER_FIND     302
+#define IDM_SOLVE_SUBMENU   300
+#define IDM_SOLVE_OBVIOUS   301
+#define IDM_SOLVE_FIND      302
 
 #endif // __SUDOKU_S_MENU_h__
 

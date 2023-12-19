@@ -247,12 +247,16 @@ int bFile::read(void *data, int lg, int whence){
 //
 //  @return : file successfully renamed ?
 //
-bool bFile::rename(FONTCHARACTER oldpath, FONTCHARACTER newpath){
+bool bFile::rename([[maybe_unused]] FONTCHARACTER oldpath, [[maybe_unused]] FONTCHARACTER newpath){
     // File can't be open
     if (!isOpen()){
 #ifdef DEST_CASIO_CALC
+#ifdef FX9860G
+        return false;
+#else
         error_ = gint_world_switch(GINT_CALL(BFile_Rename, oldpath, newpath));
         return (error_ == 0);	// Renamed ?
+#endif // #ifdef FX9860G
 #else
 	return (0 == std::rename(oldpath, newpath));
 #endif // #ifdef DEST_CASIO_CALC

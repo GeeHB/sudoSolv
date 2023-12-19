@@ -2,7 +2,7 @@
 //--
 //--    menuBar.h
 //--
-//--        Definition of menuBar object - A bar of menu (or submenu)
+//--        Definition of menuBar object - A bar of menu (or a submenu)
 //--
 //---------------------------------------------------------------------------
 
@@ -12,6 +12,8 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
+#define _GEEHB_MENU_VER_        0.2
+
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
 // Dimensions in pixels
@@ -19,6 +21,11 @@
 #define MENUBAR_DEF_ITEM_WIDTH  (CASIO_WIDTH / MENU_MAX_ITEM_COUNT)
 
 #define ITEM_NAME_LEN           10  // Max length of item name
+
+// Item pos is a menu bar
+//
+#define ITEM_POS_LEFT           0
+#define ITEM_POS_RIGHT          (MENU_MAX_ITEM_COUNT-1)
 
 // Item state
 //
@@ -35,12 +42,10 @@
 
 // Reserved menu item ID
 //
-#define IDM_SUBMENU             0xFFFA  // This item holds a submenu
-#define IDM_BACK                0xFFFB  // Return to parent menu
+#define IDM_RESERVED_BACK       0xFFFB  // Return to parent menu
+#define STR_RESERVED_BACK       "^ back ^"
 
-#define STR_BACK                "^ back ^"
-
-// item colors
+// Item colors
 #define ITEM_COLOUR_SELECTED     COLOUR_BLUE
 #define ITEM_COLOUR_UNSELECTED   COLOUR_DK_GREY
 #define ITEM_COLOUR_INACTIVE     COLOUR_GREY
@@ -54,7 +59,7 @@ typedef struct _menuItem{
     int state;
     int status;
     char text[ITEM_NAME_LEN + 1];
-    void* subMenu;
+    void* subMenu;      // if item is a submenu, points to the sub menubar
 } MENUITEM,* PMENUITEM;
 
 // A menu bar
@@ -130,20 +135,42 @@ public:
 
     //  addSubMenu() : Add a sub menu
     //
+    //  @index : Index (position) in the menu bar
     //  @submenu : menubar corresponding to the new submenu
+    //  @id : ID associated to the menu
     //  @text : Submenu text
     //
     //  @return : true if sub menu is added
     //
-    bool addSubMenu(const menuBar* subMenu, const char* text);
-
-    //  createSubMenu() : Create an empty sub menu
+    bool addSubMenu(uint8_t index, const menuBar* subMenu, int id, const char* text){
+        return _addSubMenu(&current_, index, (PMENUBAR)subMenu, id, text);
+    }
+    //  appendSubMenu() : Append a sub menu
     //
-    //  @return : a pointer to the new menu object if created
+    //  @submenu : menubar corresponding to the new submenu
+    //  @id : ID associated to the menu
+    //  @text : Submenu text
     //
-    //menuBar* createSubMenu();
+    //  @return : true if sub menu is added
+    //
+    bool appendSubMenu(const menuBar* subMenu, int id, const char* text){
+        return _addSubMenu(&current_, current_.itemCount, (PMENUBAR)subMenu, id, text);
+    }
 
-    //  addItem() : Add an item to the current menu bar
+    //  adddItem() : Add an item to the current menu bar
+    //
+    //  @index : Index (position) in the menu bar
+    //  @id : Item ID
+    //  @text : Item text
+    //  @state : Item's initial state
+    //
+    //  @return : true if the item has been added
+    //
+    bool addItem(uint8_t index, int id, const char* text, int state = ITEM_DEFAULT){
+        return _addItem(&current_, index, id, text, state);
+    }
+
+    //  appendItem() : Append an item to the current menu bar
     //
     //  @id : Item ID
     //  @text : Item text
@@ -151,7 +178,29 @@ public:
     //
     //  @return : true if the item has been added
     //
-    bool addItem(int id, const char* text, int state = ITEM_DEFAULT);
+    bool appendItem(int id, const char* text, int state = ITEM_DEFAULT){
+        return _addItem(&current_, current_.itemCount, id, text, state);
+    }
+
+    //  removeItemByIndex() : Remove an item from the current menu bar
+    //      Remove the item menu or the submenu at the given index
+    //
+    //  @index : Item's index
+    //
+    //  @return : true if the item has been successfully removed
+    //
+    bool removeItemByIndex(uint8_t index){
+        return _removeItemByIndex(&current_, index);
+    }
+
+    //  removeItemByID() : Remove an item
+    //      Remove the item menu or the submenu with the given ID
+    //
+    //  @id : Item's id
+    //
+    //  @return : true if the item has been successfully removed
+    //
+    bool removeItemByID(int id);
 
     // Selection & activation
     //
@@ -205,6 +254,18 @@ private:
     // menu bars
     //
 
+    //  _addSubMenu() : Add a sub menu
+    //
+    //  @container : menubar container of the submenu
+    //  @index : index of position of the submenu
+    //  @submenu : submenu to add
+    //  @id : ID associated to the menu
+    //  @text : Submenu text
+    //
+    //  @return : true if sub menu is added
+    //
+    bool _addSubMenu(PMENUBAR container, uint8_t index, PMENUBAR subMenu, int id, const char* text);
+
     // _clearMenuBar() : Empty a menu bar
     //
     //  @bar : menu bar the clear
@@ -232,14 +293,30 @@ private:
     // menu items management
     //
 
-    //  _findItemByID() : Find an item in the current bar
+    //  _addItem() : Add an item to a menu bar
     //
-    //  @bar : menu bar containing items
+    //  @bar : Pointer to the container bar
+    //  @index : Index (position) in the menu bar
+    //  @id : Item ID
+    //  @text : Item text
+    //  @state : Item's initial state
+    //
+    //  @return : true if the item has been added
+    //
+    bool _addItem(PMENUBAR bar, uint8_t index, int id, const char* text, int state = ITEM_DEFAULT);
+
+    //  _findItemByID() : Find an item in the given bar
+    //
+    //  @bar : menu bar containing to search item in
     //  @id : id of the searched item
+    //
+    //  @containerBar : pointer to a PMENUBAR. when not NULL, if item is ofund,
+    //                  containerBar will point to the bar containing the item
+    //  @pIndex : when not NULL, will point to the Item'index in its menubar.
     //
     //  @return : pointer to the item if found or NULL
     //
-    PMENUITEM _findItemByID(PMENUBAR bar, int id);
+    PMENUITEM _findItemByID(PMENUBAR bar, int id, PMENUBAR* containerBar = NULL, uint8_t* pIndex = NULL);
 
     //  _createItem() : creae a new menu item
     //
@@ -259,6 +336,16 @@ private:
     //  @return : pointer to the copied item or NULL
     //
     PMENUITEM _copyItem(PMENUBAR bar, PMENUITEM source);
+
+    //  _removeItemByIndex() : Remove an item
+    //      Remove the item menu or the submenu at the given index
+    //
+    //  @bar : Bar containing item to remove
+    //  @index : Item's index
+    //
+    //  @return : true if the item has been successfully removed
+    //
+    bool _removeItemByIndex(PMENUBAR bar, uint8_t index);
 
     //  _selectIndex() : Select an item by index in the current bar
     //

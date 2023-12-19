@@ -2,7 +2,7 @@
 //--
 //--    menuBar.cpp
 //--
-//--        Implementation of menuBar object
+//--        Implementation of menuBar object  - A bar of menu (or a submenu)
 //--
 //---------------------------------------------------------------------------
 
@@ -16,6 +16,7 @@
 using namespace std;
 #define KEY_F1      'a'
 #define KEY_F6      'y'
+#define KEY_EXIT    'x'
 #endif // #ifndef DEST_CASIO_CALC
 
 // Construction
@@ -71,92 +72,26 @@ void menuBar::update(){
 #endif // #ifdef DEST_CASIO_CALC
 }
 
-//  addItem() : Add an item to the current menu bar
+//  removeItemByID() : Remove an item
+//      Remove the item menu or the submenu with the given ID
 //
-//  @id : Item ID
-//  @text : Item text
-//  @state : Item's initial state
+//  @id : Item's id
 //
-//  @return : true if the item has been added
+//  @return : true if the item has been successfully removed
 //
-bool menuBar::addItem(int id, const char* text, int state){
-    size_t len(0);
-    if (IDM_SUBMENU == id ||
-        _findItemByID(&current_, id) ||    // this ID is already handled
-        current_.itemCount == (MENU_MAX_ITEM_COUNT - 1) ||
-        ! text || !(len = strlen(text))){
-        return false;
-    }
+bool menuBar::removeItemByID(int id){
+    PMENUBAR bar(NULL);
+    uint8_t index(0);
+    PMENUITEM item(NULL);
 
-    PMENUITEM item = _createItem(id, text, state);
-    if (item){
-        // Append to the menu
-        if (IDM_BACK == id){
-            current_.items[MENU_MAX_ITEM_COUNT-1] = item;
-        }
-        else{
-            current_.items[current_.itemCount++] = item;
-        }
-
-        // one more item in menu
-        return true;
+    // Item exists ?
+    if ((item = _findItemByID(&current_, id, &bar, &index))){
+        // Yes => remove it
+        return _removeItemByIndex(bar, index);
     }
 
     return false;
 }
-
-//  addSubMenu() : Add a sub menu
-//
-//  @submenu : menubar corresponding to the new submenu
-//  @text : Submenu text
-//
-//  @return : true if sub menu is added
-//
-bool menuBar::addSubMenu(const menuBar* subMenu, const char* text){
-    size_t len(0);
-    if (!subMenu ||
-        current_.itemCount == (MENU_MAX_ITEM_COUNT - 1) ||
-        ! text || !(len = strlen(text))){
-        return false;
-    }
-
-    // Create a copy of the menu bar
-    PMENUBAR sub = _copyMenuBar((PMENUBAR)subMenu);
-    if (NULL == sub){
-        return false;
-    }
-
-    // Create item
-    PMENUITEM item = _createItem(IDM_SUBMENU, text, ITEM_DEFAULT);
-    if (NULL == item){
-        _freeMenuBar(sub, true);
-        return false;
-    }
-
-    item->status = ITEM_STATUS_SUBMENU;
-    item->subMenu = sub;
-    sub->parent = &current_;
-
-    current_.items[current_.itemCount++] = item;    // Add an item pointing to the sub menu
-
-    return true;
-}
-
-/*
-//  createSubMenu() : Create an empty sub menu
-//
-//  @return : a pointer to the new menu object if created
-//
-menuBar* menuBar::createSubMenu(){
-    menuBar* sub(NULL);
-
-    if (size() < (MENU_MAX_ITEM_COUNT - 1)){
-        sub = new menuBar;
-    }
-
-    return sub;
-}
-*/
 
 //  activate() : Activate or deactivate an item
 //
@@ -213,7 +148,7 @@ MENUACTION menuBar::handleKeyboard(){
                     }
                 }
                 else{
-                    if (IDM_BACK == item->id){
+                    if (IDM_RESERVED_BACK == item->id){
                         visible_ = visible_->parent;    // Return to previous menu
                         _selectIndex(-1, false, false);
                         update();
@@ -238,13 +173,78 @@ MENUACTION menuBar::handleKeyboard(){
 
         } // if in [KEY_F1, KEY_F6]
         else{
-            ret.value = key;
-            ret.type = ACTION_KEYBOARD;
-            readKeyboard = false;
+            switch (key){
+
+                // Back to prev. menu (if exists)
+                case KEY_EXIT:
+                    if (visible_ && visible_->parent){
+                        visible_ = visible_->parent;
+                        _selectIndex(-1, false, false);
+                        update();
+                    }
+                    else{
+                    }
+
+                    break;
+
+                default :
+                    ret.value = key;
+                    ret.type = ACTION_KEYBOARD;
+                    readKeyboard = false;
+                    break;
+            }
         }
     }
 
     return ret;
+}
+
+//
+// Menu bars
+//
+
+//  _addSubMenu() : Add a sub menu
+//
+//  @container : menubar container of the submenu
+//  @index : index of position of the submenu
+//  @submenu : submenu to add
+//  @id : ID associated to the menu
+//  @text : Submenu text
+//
+//  @return : true if sub menu is added
+//
+bool menuBar::_addSubMenu(PMENUBAR container, uint8_t index, PMENUBAR subMenu, int id, const char* text){
+    size_t len(0);
+    if (!container || !subMenu ||
+        index >= MENU_MAX_ITEM_COUNT ||
+        NULL != container->items[index] ||
+        _findItemByID(container, id) ||
+        container->itemCount == (MENU_MAX_ITEM_COUNT - 1) ||
+        ! text || !(len = strlen(text))){
+        return false;
+    }
+
+    // Create a copy of the menu bar
+    PMENUBAR sub = _copyMenuBar(subMenu);
+    if (NULL == sub){
+        return false;
+    }
+
+    // Create item
+    PMENUITEM item = _createItem(id, text, ITEM_DEFAULT);
+    if (NULL == item){
+        _freeMenuBar(sub, true);
+        return false;
+    }
+
+    item->status = ITEM_STATUS_SUBMENU;
+    item->subMenu = sub;
+    sub->parent = container;
+
+    container->items[index] = item;    // Add an item pointing to the sub menu
+    container->itemCount++;
+
+    return true;
 }
 
 // _clearMenuBar() : Empty a menu bar
@@ -282,7 +282,7 @@ PMENUBAR menuBar::_copyMenuBar(PMENUBAR source){
         }
 
         // In sub menus last right item is used to return to parent menu
-        bar->items[MENU_MAX_ITEM_COUNT-1] = _createItem(IDM_BACK, STR_BACK, ITEM_DEFAULT);
+        bar->items[MENU_MAX_ITEM_COUNT-1] = _createItem(IDM_RESERVED_BACK, STR_RESERVED_BACK, ITEM_DEFAULT);
     }
     return bar;
 }
@@ -316,26 +316,38 @@ void menuBar::_freeMenuBar(PMENUBAR bar, bool freeAll){
 // Menu items
 //
 
-//  _findItemByID() : Find an item in the current bar
+//  _findItemByID() : Find an item in the given bar
 //
-//  @bar : menu bar containing items
+//  @bar : menu bar containing to search item in
 //  @id : id of the searched item
+//
+//  @containerBar : pointer to a PMENUBAR. when not NULL, if item is ofund,
+//                  containerBar will point to the bar containing the item
+//  @pIndex : when not NULL, will point to the Item'index in its menubar.
 //
 //  @return : pointer to the item if found or NULL
 //
-PMENUITEM menuBar::_findItemByID(PMENUBAR bar, int id){
+PMENUITEM menuBar::_findItemByID(PMENUBAR bar, int id, PMENUBAR* containerBar, uint8_t* pIndex){
     if (bar){
         PMENUITEM item(NULL), sItem(NULL);
         for (uint8_t index = 0; index < MENU_MAX_ITEM_COUNT; index++){
             if ((item = bar->items[index])){
                 if (item->status & ITEM_STATUS_SUBMENU){
                     // in a sub menu ?
-                    if ((sItem = _findItemByID((PMENUBAR)item->subMenu, id))){
+                    if ((sItem = _findItemByID((PMENUBAR)item->subMenu, id, containerBar, pIndex))){
                         return sItem;   // Found in a sub menu
                     }
                 }
                 else{
                     if (item->id == id){
+                        if (containerBar){
+                            (*containerBar) = bar;
+                        }
+
+                        if (pIndex){
+                            (*pIndex) = index;
+                        }
+
                         return item;    // found
                     }
                 }
@@ -345,6 +357,45 @@ PMENUITEM menuBar::_findItemByID(PMENUBAR bar, int id){
 
     // not found
     return NULL;
+}
+
+//  _addItem() : Add an item to a menu bar
+//
+//  @bar : Pointer to the container bar
+//  @index : Index (position) in the menu bar
+//  @id : Item ID
+//  @text : Item text
+//  @state : Item's initial state
+//
+//  @return : true if the item has been added
+//
+bool menuBar::_addItem(PMENUBAR bar, uint8_t index, int id, const char* text, int state){
+    size_t len(0);
+    if (!bar ||
+        index >= MENU_MAX_ITEM_COUNT ||
+        NULL != bar->items[index] ||
+        _findItemByID(bar, id) ||    // this ID is already handled
+        current_.itemCount == (MENU_MAX_ITEM_COUNT - 1) ||
+        ! text || !(len = strlen(text))){
+        return false;
+    }
+
+    PMENUITEM item = _createItem(id, text, state);
+    if (item){
+        // Add to the menu
+        if (IDM_RESERVED_BACK == id){
+            bar->items[MENU_MAX_ITEM_COUNT-1] = item;
+        }
+        else{
+            bar->items[index] = item;
+            bar->itemCount++;
+        }
+
+        // Successfully added
+        return true;
+    }
+
+    return false;
 }
 
 //  _createItem() : creae a new menu item
@@ -400,6 +451,35 @@ PMENUITEM menuBar::_copyItem(PMENUBAR bar, PMENUITEM source){
         }
     }
     return item;
+}
+
+//  _removeItemByIndex() : Remove an item
+//      Remove the item menu or the submenu at the given index
+//
+//  @bar : Bar containing item to remove
+//  @index : Item's index
+//
+//  @return : true if the item has been successfully removed
+//
+bool menuBar::_removeItemByIndex(PMENUBAR bar, uint8_t index){
+    PMENUITEM item(NULL);
+    if (bar && index < MENU_MAX_ITEM_COUNT && (item = bar->items[index])){
+         // A sub menu ?
+         if (item->status & ITEM_STATUS_SUBMENU){
+            _freeMenuBar((PMENUBAR)item->subMenu, true);
+         }
+
+         // Position is free
+         free(item);
+         bar->items[index] = NULL;
+         bar->itemCount--;
+
+         // done
+         return true;
+    }
+
+    // not removed
+    return false;
 }
 
 //  _selectIndex() : Select an item by index in the current bar

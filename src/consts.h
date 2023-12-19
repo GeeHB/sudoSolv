@@ -15,13 +15,21 @@
 #include <gint/keyboard.h>
 #else
 #include <iostream>
-#include <cstdint> // <stdint.h>
+#include <cstdint>
 using namespace std;
-#endif //
+#endif // DEST_CASIO_CALC
+
+#include <cstring>
 
 #ifdef __cplusplus
 extern "C" {
 #endif // #ifdef __cplusplus
+
+// App. infos
+//
+#define APP_NAME     "sudoSolv"
+#define APP_VERSION  "0.1-2"
+#define APP_AUTHOR   "GeeHB"
 
 // Informations about the grid
 //
@@ -37,7 +45,6 @@ extern "C" {
 // Files
 //
 #define VALUE_SEPARATOR ','     // Value separator in files
-#define FILE_COMMENTS   '#'     // Comment lines start with
 
 #ifdef DEST_CASIO_CALC
 #define GRID_FOLDER      u"\\\\fls0\\GRIDS"
@@ -61,28 +68,22 @@ extern "C" {
 
 // Display
 //
-#ifdef DEST_CASIO_CALC
-#define DELTA_X                 5   // Distance from top left corner
-#define DELTA_Y                 DELTA_X // useless in first version ....
-
-#define BORDER_THICK            2   // Thickness of external border
 
 // Dimensions in pixels
 #define SQUARE_SIZE             20
 #define INT_SQUARE_SIZE         (SQUARE_SIZE - 2 * BORDER_THICK)
-
 #define GRID_SIZE               SQUARE_SIZE * ROW_COUNT
+#define BORDER_THICK            2   // Thickness of external border
 
+// Colors
+#ifdef DEST_CASIO_CALC
 #define BORDER_COLOUR           C_RGB(10, 19, 23)
 #define BK_COLOUR               C_RGB(28, 28, 30)
-
 #define TXT_COLOUR              C_RGB(8, 8, 8)
 #define ORIGINAL_COLOUR         C_RGB(30, 15, 14)
 #define OBVIOUS_COLOUR          BORDER_COLOUR
-
 #define SEL_BK_COLOUR           C_RGB(6, 6, 31)
 #define SEL_TXT_COLOUR          C_WHITE
-
 #endif // #ifdef DEST_CASIO_CALC
 
 // Keyboard

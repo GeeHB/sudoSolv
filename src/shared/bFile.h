@@ -26,7 +26,7 @@
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define VERSION_B_FILE_OBJECT       0.3
+#define VERSION_B_FILE_OBJECT       0.3.1
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>
@@ -128,7 +128,7 @@ public:
     //
     // @return : file successfully removed ?
     //
-    bool rename(FONTCHARACTER oldpath, FONTCHARACTER newpath);
+    bool rename([[maybe_unused]] FONTCHARACTER oldpath,[[maybe_unused]]  FONTCHARACTER newpath);
 
     // remove() : Remove a file
     //
