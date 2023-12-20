@@ -8,15 +8,15 @@
 //--
 //----------------------------------------------------------------------
 
+#include "grids.h"
 #include "sudoku.h"
 #include "menu.h"
 
-#define GRID_FILE      u"\\\\fls0\\GRIDS\\1.txt"
+#include "shared/scrCapture.h"
 
-// Background image
-#ifdef DEST_CASIO_CALC
-extern bopti_image_t g_homeScreen;
-#endif // #ifdef DEST_CASIO_CALC
+extern bopti_image_t g_homeScreen;  // Background image
+scrCapture  g_Capture;              // Screen capture object
+
 
 // Functions definitions
 //
@@ -106,6 +106,18 @@ int main(void)
                         end = true;
                         break;
 
+                    // Activate or deactivate screen capture
+                    case KEY_CODE_CAPTURE:
+                        if (action.modifier == MOD_SHIFT){
+                            if (!g_Capture.isSet()){
+                                g_Capture.install();
+                            }
+                            else{
+                                g_Capture.remove();
+                            }
+                        }
+                        break;
+
                     default:
                         break;
                 } // switch (action.value)
@@ -113,10 +125,8 @@ int main(void)
         }
     }
 
-#ifdef DEST_CASIO_CALC
     //gint_setrestart(1);
     gint_osmenu();
-#endif // #ifdef DEST_CASIO_CALC
 
 	return 1;
 }
@@ -147,7 +157,6 @@ void _createMenu(menuBar& menu){
 // Display home screen
 //
 void _homeScreen(){
-#ifdef DEST_CASIO_CALC
     drect(0,0,CASIO_WIDTH, CASIO_HEIGHT - MENUBAR_DEF_HEIGHT, C_WHITE);
     dimage(0,0,&g_homeScreen);
 
@@ -166,7 +175,6 @@ void _homeScreen(){
 		copyright);
 
     dupdate();
-#endif // #ifdef DEST_CASIO_CALC
 }
 
 // EOF

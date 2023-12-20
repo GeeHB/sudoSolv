@@ -44,7 +44,7 @@
 //
 #define IDM_RESERVED_BACK       0xFFFB  // Return to parent menu
 #ifdef DEST_CASIO_CALC
-#define STR_RESERVED_BACK       "  back"
+#define STR_RESERVED_BACK       "back"
 #else
 #define STR_RESERVED_BACK       "^ back ^"
 #endif // #ifdef DEST_CASIO_CALC
@@ -79,6 +79,7 @@ typedef struct _menuBar{
 //
 typedef struct _menuAction{
     int value;
+    uint modifier;
     uint8_t type;
 } MENUACTION;
 

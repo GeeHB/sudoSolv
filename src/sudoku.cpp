@@ -98,7 +98,7 @@ void sudoku::revert(){
 //
 uint8_t sudoku::load(FONTCHARACTER fName){
     if (!fName || !fName[0]){
-        return SUDO_NO_FILENAME;
+        return FILE_NO_FILENAME;
     }
 
     // Load the grid
@@ -106,11 +106,11 @@ uint8_t sudoku::load(FONTCHARACTER fName){
     char buffer[FILE_SIZE+1];
 
     if (!iFile.open(fName, BFile_ReadOnly)){
-        return SUDO_IO_ERROR;   // Unable to open the file
+        return FILE_IO_ERROR;   // Unable to open the file
     }
 
     if (FILE_SIZE != iFile.read(buffer, FILE_SIZE, 0)){
-        return SUDO_INVALID_FILESIZE;
+        return FILE_INVALID_FILESIZE;
     }
 
     iFile.close();
@@ -130,7 +130,7 @@ uint8_t sudoku::load(FONTCHARACTER fName){
             }
         }
         else{
-            return SUDO_INVALID_FORMAT;
+            return FILE_INVALID_FORMAT;
         }
 
         // separator
@@ -141,7 +141,7 @@ uint8_t sudoku::load(FONTCHARACTER fName){
     }
 
     // The new grid is valid
-    return SUDO_NO_ERROR;
+    return FILE_NO_ERROR;
 }
 
 // save() : Save the grid on a file
@@ -152,7 +152,7 @@ uint8_t sudoku::load(FONTCHARACTER fName){
 //
 uint8_t sudoku::save(FONTCHARACTER fName){
     if (!fName || !fName[0]){
-        return SUDO_NO_FILENAME;   // No valid file name
+        return FILE_NO_FILENAME;   // No valid file name
     }
 
     // Transfer content in a buffer
@@ -184,7 +184,7 @@ uint8_t sudoku::save(FONTCHARACTER fName){
     oFile.remove(fName);    // Remove the file (if already exist)
 
     if (!oFile.create(fName, BFile_File, &fSize)){
-        return SUDO_IO_ERROR;
+        return FILE_IO_ERROR;
     }
 
     // copy the buffer to the file
@@ -192,7 +192,7 @@ uint8_t sudoku::save(FONTCHARACTER fName){
     oFile.close();
 
     // Done ?
-    return (done?SUDO_NO_ERROR:SUDO_IO_ERROR);
+    return (done?FILE_NO_ERROR:FILE_IO_ERROR);
 }
 
 #ifdef DEST_CASIO_CALC
@@ -210,6 +210,7 @@ bool sudoku::edit(){
     menuBar menu;       // A simple menu bar
     MENUACTION action;
     menu.addItem(1, IDM_EDIT_OK, IDS_EDIT_OK);
+    menu.update();
 
     while (cont){
         // if sel. changed, erase previously selected element

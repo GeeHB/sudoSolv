@@ -1,3 +1,7 @@
+# Personnal fils
+/src/locals.h
+
+# Outputs
 /build-cg
 /build-cg-push
 /*.g3a

@@ -55,6 +55,9 @@ public:
     bool isPressed(uint mod){
         return (mod != MOD_NONE && _isSet(mod));
     }
+    uint modifier(){
+        return mod_;
+    }
 
 private:
     // bitwise ops for modifiers

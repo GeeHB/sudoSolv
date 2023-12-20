@@ -1,6 +1,6 @@
 #### Ajouts
 - [ ] menuBar
-    - [ ] icones de navigation
+    - [x] icones de navigation
     - [x] addItem
     - [x] appenItem
     - [x] appendMenu(PMENUBAR)
@@ -9,8 +9,9 @@
     - [x] MENU -> retour au menu (exit app)
     - [ ] callback pour le dessin d'un item
 - [x] _homeScreen()
-- [ ] icones
+- [x] icones
 - [ ] grids
+- [x] Copie d'écran - *fxlink*
 
 #### Corrections
 - [x] Affichage de la grille centrée

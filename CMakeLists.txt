@@ -14,6 +14,7 @@ set(SOURCES
 	src/position.cpp
 	src/element.cpp
 	src/tinySquare.cpp
+	#src/grids.cpp
 	src/sudoku.cpp
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
@@ -22,6 +23,7 @@ set(ASSETS
 )
 set(ASSETS_cg
   assets-cg/about.png
+  assets-cg/back.png
 )
 
 fxconv_declare_assets(${ASSETS} ${ASSETS_cg} WITH_METADATA)

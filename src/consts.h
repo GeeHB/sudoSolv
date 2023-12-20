@@ -10,6 +10,7 @@
 #define __S_SOLVER_CONSTANTS_h__    1
 
 #include "shared/casioCalcs.h"
+#include "locals.h"
 
 #ifdef DEST_CASIO_CALC
 #include <gint/keyboard.h>
@@ -31,6 +32,13 @@ extern "C" {
 #define APP_VERSION  "0.1-3"
 #define APP_AUTHOR   "GeeHB"
 
+// Grids folder
+//
+#ifdef DEST_CASIO_CALC
+#define GRIDS_FOLDER    u"\\\\fls0\\GRIDS"
+#define GRID_FILE_EXT   u".txt"
+#endif // DEST_CASIO_CALC
+
 // Informations about the grid
 //
 #define ROW_COUNT   9
@@ -46,25 +54,23 @@ extern "C" {
 //
 #define VALUE_SEPARATOR ','     // Value separator in files
 
-#ifdef DEST_CASIO_CALC
-#define GRID_FOLDER      u"\\\\fls0\\GRIDS"
-#else
-#define GRID_FOLDER     "/home/jhb/Nextcloud/personnel/JHB/dev/cpp/sudoSolv/GRIDS"
-#endif // #ifdef DEST_CASIO_CALC
+#ifndef GRIDS_FOLDER
+#define GRIDS_FOLDER            u"\\\\fls0\\GRIDS"
+#endif // #ifdef GRIDS_FOLDER
 
 #define FILE_LINE_SIZE  ROW_COUNT * 2   // (value & separator) * ROW_COUNT
 #define FILE_SIZE       LINE_COUNT * FILE_LINE_SIZE
 
 // Error codes
 //
-#define SUDO_NO_ERROR           0
-#define SUDO_INVALID_FILENAME   1       // File doesn't exist
-#define SUDO_INVALID_FILESIZE   2
-#define SUDO_NO_FILENAME        3
-#define SUDO_IO_ERROR           4
-#define SUDO_INVALID_LINE       11
-#define SUDO_INVALID_FORMAT     12
-#define SUDO_VALUE_ERROR        13      // The value can't be set at this position
+#define FILE_NO_ERROR           0
+#define FILE_INVALID_FILENAME   1       // File doesn't exist
+#define FILE_INVALID_FILESIZE   2
+#define FILE_NO_FILENAME        3
+#define FILE_IO_ERROR           4
+#define FILE_INVALID_LINE       11
+#define FILE_INVALID_FORMAT     12
+#define FILE_VALUE_ERROR        13      // The value can't be set at this position
 
 // Display
 //
@@ -109,6 +115,7 @@ enum GAME_KEY{
     KEY_CODE_7 = KEY_7,
     KEY_CODE_8 = KEY_8,
     KEY_CODE_9 = KEY_9,
+    KEY_CODE_CAPTURE = KEY_7,
     KEY_CODE_EXIT = KEY_EXIT,
     KEY_CODE_EXE = KEY_EXE
 };

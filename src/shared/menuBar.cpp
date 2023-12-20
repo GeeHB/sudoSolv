@@ -17,6 +17,14 @@ using namespace std;
 #define KEY_F1      'a'
 #define KEY_F6      'y'
 #define KEY_EXIT    'x'
+#else
+// Background image
+//
+extern bopti_image_t g_backMenu;
+
+#define MENU_BACK_IMG_WIDTH 12
+#define MENU_BACK_IMG_HEIGHT 10
+
 #endif // #ifndef DEST_CASIO_CALC
 
 // Construction
@@ -125,7 +133,7 @@ MENUACTION menuBar::handleKeyboard(){
     uint8_t kID(0);
     keyboard kb;
     PMENUITEM item(NULL);
-    MENUACTION ret = {0, ACTION_KEYBOARD};
+    MENUACTION ret = {0, MOD_NONE, ACTION_KEYBOARD};
     bool readKeyboard(true);
 
     if (readKeyboard){
@@ -196,6 +204,8 @@ MENUACTION menuBar::handleKeyboard(){
         }
     }
 
+    // Return keyboard event
+    ret.modifier = kb.modifier();
     return ret;
 }
 
@@ -563,11 +573,22 @@ void menuBar::_drawItem(const RECT* anchor, const MENUITEM* item){
         // Text
         if (item->text){
             int x,y, w, h;
-            dsize(item->text, NULL, &w, &h);
 
-            // center text
-            x = anchor->x + (anchor->w - w) / 2;
+            // Text is centerd
+            dsize(item->text, NULL, &w, &h);
             y = anchor->y + (anchor->h - h) / 2;
+
+            if (IDM_RESERVED_BACK == item->id){
+                // New text position
+                x = anchor->x + (anchor->w - w - MENU_BACK_IMG_WIDTH - 2) / 2;
+
+                // Draw icon on left of text
+                dimage(x, y, &g_backMenu);
+                x+=(MENU_BACK_IMG_WIDTH + 2);
+            }
+            else{
+                x = anchor->x + (anchor->w - w) / 2;
+            }
 
             // text too large ?
 
