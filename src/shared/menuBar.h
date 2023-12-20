@@ -43,7 +43,11 @@
 // Reserved menu item ID
 //
 #define IDM_RESERVED_BACK       0xFFFB  // Return to parent menu
+#ifdef DEST_CASIO_CALC
+#define STR_RESERVED_BACK       "  back"
+#else
 #define STR_RESERVED_BACK       "^ back ^"
+#endif // #ifdef DEST_CASIO_CALC
 
 // Item colors
 #define ITEM_COLOUR_SELECTED     COLOUR_BLUE
@@ -208,6 +212,7 @@ public:
     //  selectIndex() : Select an item by index in the current bar
     //
     //  @index : index of menu item to select or unselect
+    //          if equal to -1, unselect the currently selected item
     //  @selected : true if item is to be selected
     //
     //  @return : true if item is selected

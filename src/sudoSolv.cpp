@@ -67,6 +67,9 @@ int main(void)
                 case IDM_EDIT:{
                     game.display();
                     bool modified = game.edit();
+
+                    menu.selectIndex(-1);
+                    menu.update();  // redraw the whole menu bar
                     break;
                 }
 
@@ -157,9 +160,9 @@ void _homeScreen(){
 
     int w, h;
     dsize(copyright, NULL, &w, &h);
-    dtext(CASIO_WIDTH - w - 5, 
-		CASIO_HEIGHT - MENUBAR_DEF_HEIGHT - h - 10, 
-		COLOUR_BLACK, 
+    dtext(CASIO_WIDTH - w - 5,
+		CASIO_HEIGHT - MENUBAR_DEF_HEIGHT - h - 10,
+		COLOUR_BLACK,
 		copyright);
 
     dupdate();

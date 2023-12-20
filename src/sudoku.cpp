@@ -2,12 +2,13 @@
 //--
 //--    sudoku.cpp
 //--
-//--        Implementation of sudoku object - Edition and 
+//--        Implementation of sudoku object - Edition and
 //--		resolution of a sudoku grid
 //--
 //----------------------------------------------------------------------
 
 #include "sudoku.h"
+#include "menu.h"
 #include "shared/bFile.h"
 #include "shared/keyboard.h"
 
@@ -34,17 +35,6 @@ sudoku::sudoku(RECT* scr){
     }
 
     empty();    // Start with an empty grid
-
-    /*
-    // basic grid for tests
-#ifdef DEST_CASIO_CALC
-    position pos(0, false);
-    for (uint8_t i=0; i < 9; i++){
-        elements_[pos].setValue(i+1, STATUS_ORIGINAL);
-        pos.forward(10);    // pos += 10 (on remplit la diagonale)
-    }
-#endif // #ifdef DEST_CASIO_CALC
-    */
 }
 
 // display() : Display the grid and it's content
@@ -174,7 +164,7 @@ uint8_t sudoku::save(FONTCHARACTER fName){
     for (lId = 0; lId < LINE_COUNT; lId++){
         for (cId = 0; cId < ROW_COUNT; cId++){
             pElement = &elements_[pos];
-            
+
             // '0' means empty !
             buffer[index++] = pElement->isEmpty()?'0':('0' + pElement->value());
             buffer[index++] = VALUE_SEPARATOR;
@@ -214,31 +204,33 @@ uint8_t sudoku::save(FONTCHARACTER fName){
 bool sudoku::edit(){
     bool modified(false);
     bool cont(true);
-    uint car(0);
     position currentPos(0, false);
     position prevPos(0, false);
-    keyboard keys;
+
+    menuBar menu;       // A simple menu bar
+    MENUACTION action;
+    menu.addItem(1, IDM_EDIT_OK, IDS_EDIT_OK);
 
     while (cont){
         // if sel. changed, erase previously selected element
         if (prevPos != currentPos){
-            _drawSingleElement(prevPos.row(), prevPos.line(), 
-					elements_[prevPos].value(), 
+            _drawSingleElement(prevPos.row(), prevPos.line(),
+					elements_[prevPos].value(),
 					BK_COLOUR, ORIGINAL_COLOUR);
         }
 
         // Hilight the new value
-        _drawSingleElement(currentPos.row(), currentPos.line(), 
-					elements_[currentPos].value(), 
+        _drawSingleElement(currentPos.row(), currentPos.line(),
+					elements_[currentPos].value(),
 					SEL_BK_COLOUR, SEL_TXT_COLOUR);
 
         dupdate();
         prevPos = currentPos;
 
         // Wait for a keyboard event
-        car = keys.getKey();
+        action = menu.handleKeyboard();
 
-        switch (car){
+        switch (action.value){
         // Change the cursor's position
         //
         case KEY_CODE_LEFT:
@@ -301,7 +293,9 @@ bool sudoku::edit(){
             break;
 
         // Exit from "edit" mode
-        case KEY_CODE_EXE:
+        case KEY_MENU:
+        case KEY_EXIT:
+        case IDM_EDIT_OK:
             cont = false;
             break;
 
@@ -312,8 +306,8 @@ bool sudoku::edit(){
     } // while (cont)
 
     // unselect
-    _drawSingleElement(currentPos.row(), currentPos.line(), 
-			elements_[currentPos].value(), 
+    _drawSingleElement(currentPos.row(), currentPos.line(),
+			elements_[currentPos].value(),
 			BK_COLOUR, ORIGINAL_COLOUR);
 
     return modified;
@@ -345,9 +339,9 @@ bool sudoku::resolve(){
     position pos(0, true);
     uint8_t status = _findFirstEmptyPos(pos);      // Start from the first empty place
 
-    // All the elements "before" the current position - pos - 
+    // All the elements "before" the current position - pos -
     // are set with possible/allowed values
-    // we'll try to put the "candidate" value 
+    // we'll try to put the "candidate" value
     // (ie. the smallest possible value) at the current position
     while (POS_VALID == status){
         candidate++;   // Next possible value
@@ -355,8 +349,8 @@ bool sudoku::resolve(){
         if (candidate > VALUE_MAX){
             // No possible value found at this position
             // we'll have to go backward, to the last value setted
-            // when no position can be found (ie. all possibles values 
-            // have  been previously tested), the next pos has an 
+            // when no position can be found (ie. all possibles values
+            // have  been previously tested), the next pos has an
             // invalid index, -1, and status = POS_INDEX_ERROR
             // no soluton can be found
             if (POS_VALID == (status = _previousPos(pos))){
@@ -372,7 +366,7 @@ bool sudoku::resolve(){
                 elements_[pos].setValue(candidate);
 
                 // Go to the next "empty" position
-                // if the grid is completed, the next pos is 
+                // if the grid is completed, the next pos is
                 // out of range ! (status = POS_END_OF_LIST)
                 status = _findFirstEmptyPos(pos);
 
@@ -459,8 +453,8 @@ void sudoku::_drawBackground(){
     drect(0, 0, grid_.w, grid_.h, BK_COLOUR);
 
     // draw thin borders
-    int posX, posY;
-    int id;
+    uint16_t posX, posY;
+    uint8_t id;
     for (id = 1; id < LINE_COUNT; id++){
         posX = grid_.x + id * SQUARE_SIZE;
         posY = grid_.y + id * SQUARE_SIZE;
@@ -469,8 +463,7 @@ void sudoku::_drawBackground(){
     }
 
     // and large ext. borders
-    int lSquare(SQUARE_SIZE * 3);
-    int thick(BORDER_THICK - 1);
+    uint16_t lSquare(SQUARE_SIZE * 3), thick(BORDER_THICK - 1);
     for (id = 0; id <= 3; id++){
         posX = grid_.x + id * lSquare;
         posY = grid_.y + id * lSquare;
@@ -489,8 +482,8 @@ void sudoku::_drawContent(){
         for (row = 0; row < ROW_COUNT; row++){
             pElement = &elements_[pos];
             if (!pElement->isEmpty()){
-                _drawSingleElement(row, line, 
-					pElement->value(), BK_COLOUR, 
+                _drawSingleElement(row, line,
+					pElement->value(), BK_COLOUR,
 					(pElement->isOriginal()?ORIGINAL_COLOUR:(pElement->isObvious()?OBVIOUS_COLOUR:TXT_COLOUR)));
             }
             pos+=1; // next element

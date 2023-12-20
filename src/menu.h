@@ -14,11 +14,16 @@
 // Main menu
 //
 #define IDS_FILE_SUBMENU    "File"
+
 #define IDS_EDIT            "Edit"
+#define IDS_EDIT_OK          "Ok"
+
 #define IDS_SOLVE_SUBMENU   "Solve"
 #define IDS_QUIT            "Quit"
 
-#define IDM_EDIT             200
+#define IDM_EDIT             200        // In the "main" menu bar
+#define IDM_EDIT_OK          201
+
 #define IDM_QUIT             400
 
 
