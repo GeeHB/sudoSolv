@@ -35,9 +35,13 @@ extern "C" {
 // Grids folder
 //
 #ifdef DEST_CASIO_CALC
-#define GRIDS_FOLDER    u"\\\\fls0\\GRIDS"
-#define GRID_FILE_EXT   u".txt"
+#define CHAR_PATH_SEPARATOR  '\\'
+#define PATH_SEPARATOR  "\\"
+#define GRIDS_FOLDER    "\\\\fls0\\GRIDS"
 #endif // DEST_CASIO_CALC
+
+#define GRID_FILE_SEARCH_PATTERN    "*.txt"
+
 
 // Informations about the grid
 //

@@ -13,30 +13,19 @@
 #include "grids.h"
 #include <cstdlib>
 
+#define VECTOR_INCREMENT        10      // # of items addded
+
 // Construction
 //
 grids::grids(const FONTCHARACTER folder){
     index_ = -1;    // No file is selected
-    firstFreeID_ = 0;   // Folder is empty
+
+    //firstFreeID_ = 0;   // Folder is empty
+    files_ = NULL;
+    count_ = 0;
+    capacity_ = 0;
+
     _browse();
-}
-
-// Destruction
-//
-grids::~grids(){
-    // Free list of files
-    grids::PFNAME pFile;
-    for (size_t index = 0; index < files_.size(); index++){
-        if (NULL != (pFile = files_[index])){
-            if (pFile->fileName){
-                free((void*)pFile->fileName);  // Free the name
-            }
-            free(pFile);    // free the struct.
-        }
-    }
-
-    // list is empty
-    files_.clear();
 }
 
 // nextFile() : Get next file name
@@ -46,13 +35,12 @@ grids::~grids(){
 //  @return : true if the next file name is valid
 //
 bool grids::nextFile(FONTCHARACTER& fName){
-    index_++;
-    if (index_ >= (int)files_.size()){
+    if (index_ >= (size() - 1)){
         return false;
     }
 
     // Copy the file name
-    fName = files_[index_]->fileName;
+    fName = files_[++index_]->fileName;
     return true;
 }
 
@@ -78,11 +66,177 @@ bool grids::prevFile(FONTCHARACTER& fName){
 bool newFileName(FONTCHARACTER folder);
 
 bool deleteFile();  // current
+*/
+
 
 // Internal methods
+//
 
-void _browse
-*/
+// _browse() : browse folder and fill list with file names
+//
+void grids::_browse(){
+
+    bFile folder;
+    char szPattern[BFILE_MAX_PATH + 1];
+
+#ifdef DEST_CASIO_CALC
+    uint16_t fName[255];
+    uint16_t FCPattern[255];
+#else
+    char fName[BFILE_MAX_PATH + 1];
+    char FCPattern[BFILE_MAX_PATH + 1];
+#endif // DEST_CASIO_CALC
+
+    // Ensure folder exist
+    strcpy(szPattern, GRIDS_FOLDER);
+    folder.FC_str2FC(szPattern, fName);
+    if (!folder.exist(fName)){
+        // create the folder
+        if (!folder.create(fName, BFile_Folder, NULL)){
+            return;
+        }
+    }
+
+    // Empty the list
+    if (capacity_){
+        __vector_clear();
+    }
+
+    // Browse folder
+    int shandle;
+    struct BFile_FileInfo fileInfo;
+
+    strcpy(szPattern, GRIDS_FOLDER);
+#ifdef DEST_CASIO_CALC
+    strcat(szPattern, PATH_SEPARATOR);
+    strcat(szPattern, GRID_FILE_SEARCH_PATTERN);
+#endif // DEST_CASIO_PATTERN
+    folder.FC_str2FC(szPattern, FCPattern);
+
+    if (folder.findFirst(FCPattern, &shandle, fName, &fileInfo)){
+        do{
+            // a file ?
+            if (BFile_Type_File == fileInfo.type){
+                _addFile(fName);
+            }
+        } while(folder.findNext(shandle, fName, &fileInfo));
+
+        folder.findClose(shandle);
+    }
+}
+
+// _addFile() - Add file to the list
+//
+//  @fileName : file to add
+//
+//  @return : ture if added
+//
+bool grids::_addFile(FONTCHARACTER fileName){
+    PFNAME file = (PFNAME)malloc(sizeof(FNAME));
+    if (NULL == file){
+        return false;
+    }
+
+    // fill struct. with file informations
+    if (NULL == (file->fileName = bFile::FC_dup(fileName)) ||
+        -1 == (file->ID = __atoi(fileName))){
+        free(file);
+        return false;   // Unable to copy the filename or invalid name
+    }
+
+    // Add
+    __vector_append(file);
+    return true;
+}
+
+//
+//  "vector" management
+//
+
+// __vector_append() : append an file item pointer to the list
+//
+//  @file : pointer to the struct to add to the list
+//
+//  @return : true if succesfully added
+//
+bool grids::__vector_append(PFNAME file){
+    if (NULL == file){
+        return false;   // Nothing to add !
+    }
+
+    if (count_ >= capacity_){
+        if (!__vector_resize()){
+            return false;
+        }
+    }
+
+    // Append to the list
+    files_[count_++] = file;
+    return true;
+}
+
+// __vector_resize() : resize the list
+//
+//  @return : true if succesfully resized
+//
+bool grids::__vector_resize(){
+    size_t cBytes;
+
+    // First allocation ?
+    if (NULL == files_){
+        capacity_ = VECTOR_INCREMENT;
+        count_ = 0;
+
+        cBytes = capacity_ * sizeof(PFNAME);
+        if (NULL == files_){
+            capacity_ = 0;
+            return false;
+        }
+
+        // list is empty
+        files_ = (PFNAME*)malloc(cBytes);
+        memset(files_, 0x00, cBytes);
+        return true;
+    }
+
+    // resize the "vector"
+    if (count_ >= capacity_) {
+        // New size
+        capacity_ += VECTOR_INCREMENT;
+        files_ = (PFNAME*)realloc(files_, capacity_ * sizeof(PFNAME));
+        if (NULL == files_) {
+            return false;
+        }
+    }
+
+    // done
+    return true;
+}
+
+// __vector_CLEAR() : clear the list and its content
+//
+void grids::__vector_clear(){
+    PFNAME pFile(NULL);
+    for (int index=0; index < count_; index++){
+        if ((pFile = files_[index])){
+            if (pFile->fileName){
+                free((void*)pFile->fileName);  // Free the name
+            }
+
+            free(pFile);    // Free the struct.
+        }
+    }
+
+    // The list is empty
+    free(files_);
+    capacity_ = 0;
+    count_ = 0;
+    files_ = NULL;
+}
+
+//
+// strings utils
+//
 
 // __atoi()- Convert a filename (without folder) to int
 //
@@ -91,10 +245,33 @@ void _browse
 //  @return : numeric value or -1 on error
 //
 int grids::__atoi(FONTCHARACTER src){
+    size_t len;
+    if (0 == (len = bFile::FC_len(src))){
+        return -1;
+    }
+
     char* buffer = (char*)src;
     int num(0);
     uint8_t index(0);
     char car;
+
+    uint8_t sCar(1);
+#ifdef DEST_CASIO_CALC
+    sCar = 2;
+#endif // DEST_CASIO_CALC
+
+    // remove path
+    if (len > 1){
+        int index = len - sCar;
+        while (index && buffer[index] != CHAR_PATH_SEPARATOR){
+            index-=sCar;
+        }
+
+        buffer=(index?buffer+(index+sCar):buffer);
+    }
+
+    // convert the file name
+    index = 0;
     while (num >= 0 && buffer[index]){
         car = buffer[index];
         if (car >= '0' && car <= '9'){
@@ -106,12 +283,7 @@ int grids::__atoi(FONTCHARACTER src){
         }
 
         // Next char.
-#ifdef DEST_CASIO_CALC
-        index+=2;
-#else
-        index++;
-#endif // DEST_CASIO_CALC
-
+        index+=sCar;
     }
 
     // Done or error
@@ -128,24 +300,20 @@ int grids::__atoi(FONTCHARACTER src){
 char* grids::__itoa(int num, char* str){
     char* strVal(str);
 
-    // Append num. value
-	int sum ((num < 0)?-1*num:num);
-	uint8_t i(0), digit, dCount(0);
+
+
+    int sum ((num < 0)?-1*num:num);
+	uint8_t i(0), digit;
+
+	// buid the string in reverse order
 	do{
 		digit = sum % 10;
 		strVal[i++] = '0' + digit;
-		if (!(++dCount % 3)){
-		    strVal[i++] = ' ';  // for large numbers lisibility
-		}
-
 		sum /= 10;
 	}while (sum);
 
 	strVal[i] = '\0';
-
-	// Reverse the string (just the num. part)
-	__strrev(strVal);
-
+	__strrev(strVal);   // reverse the string
 	return str;
 }
 

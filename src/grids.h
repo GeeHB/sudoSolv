@@ -15,8 +15,10 @@
 #include "consts.h"
 #include "shared/bFile.h"
 
+/*
 #include <vector>
 using namespace std;
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,11 +31,14 @@ public:
     grids(const FONTCHARACTER folder);
 
     // Destruction
-    ~grids();
+    ~grids(){
+        __vector_clear();
+    }
 
     // # files in folder
-    size_t size(){
-        return files_.size();
+    int size(){
+        //return files_.size();
+        return count_;
     }
 
     // pos() : Get current position index in list
@@ -67,11 +72,49 @@ public:
 
     // Internal methods
 private:
-    // Browsre grids'folder
+
+    // _browse() : browse folder and fill list with file names
+    //
     void _browse();
+
+    // Add file
+    bool _addFile(FONTCHARACTER fileName);
 
     // Generate a name associated with an ID
     bool _ID2Name(uint16_t id, FONTCHARACTER folder);
+
+    // Informations about a file
+    //
+    typedef struct _FNAME{
+        FONTCHARACTER   fileName;   // FQN
+        int ID;
+    }FNAME,* PFNAME;
+
+    //
+    //  "vector" management
+    //
+
+    // __vector_append() : append an file item pointer to the list
+    //
+    //  @file : pointer to the struct to add to the list
+    //
+    //  @return : true if succesfully added
+    //
+    bool __vector_append(PFNAME file);
+
+    // __vector_resize() : resize the list
+    //
+    //  @return : true if succesfully resized
+    //
+    bool __vector_resize();
+
+    // __vector_CLEAR() : clear the list and its content
+    //
+    void __vector_clear();
+
+    //
+    // strings utils
+    //
 
     // __atoi()- Convert a filename (without folder) to int
     //
@@ -96,21 +139,16 @@ private:
     //
     void __strrev(char *str);
 
-#ifdef DEST_CASIO_CALC
-
-#endif // DEST_CASIO_CALC
-
     // Members
 private:
 
-    typedef struct _FNAME{
-        FONTCHARACTER   fileName;   // full name
-        int ID;
-    }FNAME,* PFNAME;
-
-    vector<PFNAME> files_;     // List of "file names"
     int index_;     // Index of current file in list (-1 if none)
-    int firstFreeID_;
+
+    // We can't use vectors, so let's use my own "vector" like table
+    // vector<PFNAME> files_;     // List of "file names"
+    PFNAME* files_;     // List of files
+    int     capacity_;  // max. size of buffer
+    int     count_;     // Item count
 };
 
 #ifdef __cplusplus

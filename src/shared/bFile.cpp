@@ -18,7 +18,6 @@
 //--		Missing :
 //--					- BFile_Rename
 //--					- BFile_Ext_Stat
-//--					- search API
 //--					- seek API
 //--
 //----------------------------------------------------------------------
@@ -39,6 +38,7 @@ bFile::bFile(){
     fd_ = 0;    // no file
 #else
     fileName_ = "";
+    dir_ = NULL;
 #endif // #ifdef DEST_CASIO_CALC
 
     error_ = 0; // no error
@@ -48,6 +48,33 @@ bFile::bFile(){
 //
 bFile::~bFile(){
     close();
+}
+
+// exist() : Check wether the file or folder exists
+//
+// @return : true if the file or folder exists
+//
+bool bFile::exist(FONTCHARACTER fName){
+    if (!FC_len(fName)){
+        return false;
+    }
+
+    bool exist(false);
+    int handle(0);
+#ifdef DEST_CASIO_CALC
+    uint16_t foundFile[BFILE_MAX_PATH+1];
+#else
+    char foundFile[BFILE_MAX_PATH+1];
+#endif // DEST_CASIO_CALC
+    struct BFile_FileInfo fileInfo;
+    foundFile[0] = 0;
+
+    if (findFirst(fName, &handle, foundFile, &fileInfo)){
+        exist = true;   // The file or foilder exists
+        findClose(handle);
+    }
+
+    return exist;
 }
 
 // isOpen() : Is the file already open ?
@@ -242,23 +269,49 @@ int bFile::read(void *data, int lg, int whence){
 
 // rename() : Rename or move a file
 //
-//  @oldpath : name of the file to rename
-//  @newpath : destination path
+//  @oldPath : name of the file to rename
+//  @newPath : destination path
 //
 //  @return : file successfully renamed ?
 //
-bool bFile::rename([[maybe_unused]] FONTCHARACTER oldpath, [[maybe_unused]] FONTCHARACTER newpath){
+bool bFile::rename(FONTCHARACTER oldPath, FONTCHARACTER newPath){
     // File can't be open
     if (!isOpen()){
 #ifdef DEST_CASIO_CALC
 #ifdef FX9860G
+        if (exist(oldPath)){
+            if (open(oldPath, BFile_ReadOnly){
+                int size = size();
+                bool done(false);
+                if (size){
+                    // Create buffer
+                    char* buffer = (char*)malloc(size);
+                    if (buffer &&  read(buffer, size, 0)){
+                        // Create a new file with oldPath content
+                        bFile newFile();
+                        newFile.create(newPath, BFile_File, NULL);
+                        newFile.write(buffer, size);
+                        newFile.close();
+                        free(buffer);
+                        done = true;
+                    }
+                }
+
+                close();
+                if (done){
+                    remove(oldPath);
+                }
+                return done;
+            }
+        }
+
         return false;
 #else
-        error_ = gint_world_switch(GINT_CALL(BFile_Rename, oldpath, newpath));
+        error_ = gint_world_switch(GINT_CALL(BFile_Rename, oldPath, newPath));
         return (error_ == 0);	// Renamed ?
 #endif // #ifdef FX9860G
 #else
-	return (0 == std::rename(oldpath, newpath));
+	return (0 == std::rename(oldPath, newPath));
 #endif // #ifdef DEST_CASIO_CALC
     }
 
@@ -300,6 +353,168 @@ void bFile::close(){
 
     fileName_ = "";
 #endif // #ifdef DEST_CASIO_CALC
+}
+
+// findFirst(): Search the storage memory for paths matching a pattern
+//
+//  @pattern    FONTCHARACTER glob pattern
+//  @shandle    Will receive search handle (to use in BFile_FindNext/FindClose)
+//  @foundFile  Will receive FONTCHARACTER path of matching entry
+//  @fileInfo   Will receive metadata of matching entry
+//
+// @return :  True on success
+//
+bool bFile::findFirst(const FONTCHARACTER pattern, int *shandle, FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo){
+#ifdef DEST_CASIO_CALC
+    if (!(*shandle)){
+        error_ = gint_world_switch(GINT_CALL(BFile_FindFirst, pattern, shandle, foundFile, fileInfo));
+        return (error_ == 0);
+    }
+#else
+    if (!dir_){
+        dir_ = opendir(pattern);
+        if (NULL != dir_){
+            // Read first value
+            return findNext(0, foundFile, fileInfo);
+        }
+
+        return false;
+    }
+#endif // DEST_CASIO_CALC
+
+    // Error
+    return false;
+}
+
+// findNext(): Continue a search
+//
+// Continues the search for matches. The search handle is the value set in
+//
+//  @shandle : search handle
+//  @foundFile : next filename
+//  @fileinfo : file metadatas
+//
+//  @returns true if ok
+//
+bool bFile::findNext(int shandle, FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo){
+#ifdef DEST_CASIO_CALC
+    if (shandle){
+        error_ = gint_world_switch(GINT_CALL(BFile_FindNext, shandle, foundFile, fileInfo));
+        return (error_ == 0);
+    }
+#else
+    if (dir_){
+        struct dirent *de;
+        if (NULL != (de = readdir(dir_))){
+            fileInfo->type = (de->d_type=DT_DIR?BFile_Type_Directory:BFile_Type_File);
+            FC_str2FC(de->d_name, foundFile);
+        }
+    }
+#endif // #ifdef DEST_CASIO_CALC
+
+    // Error
+    return false;
+}
+
+// findClose() :  Close a search handle (with or without exhausting the matches).
+//
+//  @shandle : Search handle
+//
+//  @return : done ?
+//
+bool bFile::findClose(int shandle){
+#ifdef DEST_CASIO_CALC
+    if (shandle){
+        error_ = gint_world_switch(GINT_CALL(BFile_FindClose, shandle));
+        return (error_ == 0);
+    }
+#else
+    if (dir_){
+        closedir(dir_);
+        dir_ = NULL;
+        return true;
+    }
+#endif // #ifdef DEST_CASIO_CALC
+
+    // Error
+    return false;
+}
+
+//
+// Utilities
+//
+
+// FC_str2FC() : Convert a string to FC format
+//
+//  @src : string to copy
+//  @dest : destination buffer
+//
+//  @return : pointer to a FONTCHARACTER
+//
+bool bFile::FC_str2FC(const char* src, FONTCHARACTER dest){
+    size_t len;
+    if (!src || 0 == (len = strlen(src))){
+        return false;
+    }
+
+   // Copy string content
+    char* buffer = (char*)dest;
+    for (size_t index = 0; index < len; index++){
+        buffer[2*index] = src[index];
+        buffer[2*index + 1] = 0;
+    }
+
+    return true;
+}
+
+// FC_dup() : Duplicate a filename
+//
+//  @fName : filename to duplicate
+//
+//  @return : filename copy or NULL on error
+//
+FONTCHARACTER bFile::FC_dup(const FONTCHARACTER src){
+#ifdef DEST_CASIO_CALC
+    size_t len(FC_len(src));
+    if (0 == len){
+        return NULL;
+    }
+
+    // Allocates
+    int count = (len + 1) * sizeof(uint16_t);
+    FONTCHARACTER dst = (FONTCHARACTER)malloc(count);
+    if (dst){
+        memcpy((void*)dst, src, count);
+    }
+
+    return dst;
+#else
+    return strdup(src);
+#endif // #ifdef DEST_CASIO_CALC
+}
+
+// FC_len() : length of a fileName in "char"
+//
+//  @fName : pointer to the string
+//
+//  @return : size of fName (O on error)
+//
+size_t bFile::FC_len(const FONTCHARACTER fName){
+    if (fName){
+#ifdef DEST_CASIO_CALC
+        size_t len(0);
+        char* buffer = (char*)fName;
+        while(buffer[len*2]){
+            len++;
+        }
+
+        return len;
+#else
+        return strlen(fName);
+#endif // #ifdef DEST_CASIO_CALC
+    }
+
+    return 0;
 }
 
 // EOF
