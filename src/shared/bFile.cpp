@@ -1,22 +1,13 @@
 //----------------------------------------------------------------------
 //--
-//--	File	: bFile.cpp
+//--	bFile.cpp
 //--
-//--	Author	: Jérôme Henry-Barnaudière - GeeHB
+//--		Implementation of bFile object
 //--
-//--	Project	:
-//--
-//----------------------------------------------------------------------
-//--
-//--	Description:
-//--
-//--			Implementation of bFile object
-//--
-//--		This release isn't fully tested.
-//--		At this time, it's only functionnal for FXCG50 calculator
+//--		This release isn't fully tested
 //--
 //--		Missing :
-//--					- BFile_Rename
+//--                    - whence in read ops
 //--					- BFile_Ext_Stat
 //--					- seek API
 //--
@@ -38,7 +29,7 @@ bFile::bFile(){
     fd_ = 0;    // no file
 #else
     fileName_ = "";
-    dir_ = NULL;
+    folderName_ = "";
 #endif // #ifdef DEST_CASIO_CALC
 
     error_ = 0; // no error
@@ -60,7 +51,7 @@ bool bFile::exist(FONTCHARACTER fName){
     }
 
     bool exist(false);
-    int handle(0);
+    SEARCHHANDLE handle;
 #ifdef DEST_CASIO_CALC
     uint16_t foundFile[BFILE_MAX_PATH+1];
 #else
@@ -120,7 +111,8 @@ int bFile::size(){
 bool bFile::open(FONTCHARACTER filename, int access){
     if (access && !isOpen()){
 #ifdef DEST_CASIO_CALC
-        fd_ = gint_world_switch(GINT_CALL(BFile_Open, filename, access));
+        fd_ = gint_world_switch(GINT_CALL(BFile_Open,
+								filename, access));
         if (fd_ < 0){
             error_ = fd_;
             fd_ = 0;
@@ -152,7 +144,8 @@ bool bFile::open(FONTCHARACTER filename, int access){
 //
 // @filename : name of the file or folder to create (must not exist)
 // @type : Entry type (BFile_File or BFile_Folder)
-// @size : Pointer to file size if type is BFile_File, use NULL otherwise
+// @size : Pointer to file size if type is BFile_File,
+//			use NULL otherwise
 //
 // @return : file successfully created ?
 //
@@ -161,7 +154,8 @@ bool bFile::create(FONTCHARACTER filename, int type, int *size){
         // File can't be open
         if (!isOpen()){
 #ifdef DEST_CASIO_CALC
-            error_ = gint_world_switch(GINT_CALL(BFile_Create, filename, BFile_File, size));
+            error_ = gint_world_switch(GINT_CALL(BFile_Create,
+									filename, BFile_File, size));
             return (error_ == 0);	// Created ?
 #else
             // size if ignored
@@ -177,7 +171,8 @@ bool bFile::create(FONTCHARACTER filename, int type, int *size){
     else{
         // Create a folder
 #ifdef DEST_CASIO_CALC
-            error_ = gint_world_switch(GINT_CALL(BFile_Create, filename, BFile_Folder, size));
+            error_ = gint_world_switch(GINT_CALL(BFile_Create, filename,
+									BFile_Folder, size));
             return (error_ == 0);	// Created ?
 #else
             return fs::create_directory(filename);
@@ -218,7 +213,8 @@ bool bFile::write(void const *data, int even_size){
 			buffer = (void*)data;
 		}
 
-        error_ = gint_world_switch(GINT_CALL(BFile_Write, fd_, buffer, mySize));
+        error_ = gint_world_switch(GINT_CALL(BFile_Write,
+										fd_, buffer, mySize));
         done =  (error_ == 0);	// data written ?
 
         // Free the buffer ?
@@ -247,7 +243,8 @@ bool bFile::write(void const *data, int even_size){
 int bFile::read(void *data, int lg, int whence){
     if (data && lg && isOpen()){
 #ifdef DEST_CASIO_CALC
-        int read = gint_world_switch(GINT_CALL(BFile_Read, fd_, data, lg, whence));
+        int read = gint_world_switch(GINT_CALL(BFile_Read,
+											fd_, data, lg, whence));
         if (read < 0){
         	error_ = read;
         	return 0;
@@ -289,9 +286,11 @@ bool bFile::rename(FONTCHARACTER oldPath, FONTCHARACTER newPath){
                     if (buffer &&  read(buffer, size, 0)){
                         // Create a new file with oldPath content
                         bFile newFile();
-                        newFile.create(newPath, BFile_File, NULL);
-                        newFile.write(buffer, size);
-                        newFile.close();
+                        if (newFile.create(newPath, BFile_File, &size)){
+							newFile.write(buffer, size);
+							newFile.close();
+						}
+
                         free(buffer);
                         done = true;
                     }
@@ -307,7 +306,8 @@ bool bFile::rename(FONTCHARACTER oldPath, FONTCHARACTER newPath){
 
         return false;
 #else
-        error_ = gint_world_switch(GINT_CALL(BFile_Rename, oldPath, newPath));
+        error_ = gint_world_switch(GINT_CALL(BFile_Rename,
+												oldPath, newPath));
         return (error_ == 0);	// Renamed ?
 #endif // #ifdef FX9860G
 #else
@@ -358,83 +358,84 @@ void bFile::close(){
 // findFirst(): Search the storage memory for paths matching a pattern
 //
 //  @pattern    FONTCHARACTER glob pattern
-//  @shandle    Will receive search handle (to use in BFile_FindNext/FindClose)
+//  @sHandle    Will receive search handle
 //  @foundFile  Will receive FONTCHARACTER path of matching entry
 //  @fileInfo   Will receive metadata of matching entry
 //
-// @return :  True on success
+//  @return :  True on success
 //
-bool bFile::findFirst(const FONTCHARACTER pattern, int *shandle, FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo){
+bool bFile::findFirst(const FONTCHARACTER pattern,SEARCHHANDLE *sHandle,
+		FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo){
 #ifdef DEST_CASIO_CALC
-    if (!(*shandle)){
-        error_ = gint_world_switch(GINT_CALL(BFile_FindFirst, pattern, shandle, foundFile, fileInfo));
-        return (error_ == 0);
-    }
+    error_ = gint_world_switch(GINT_CALL(BFile_FindFirst,
+            pattern, sHandle, foundFile, fileInfo));
+    return (error_ == 0);
 #else
-    if (!dir_){
-        dir_ = opendir(pattern);
-        if (NULL != dir_){
-            // Read first value
-            return findNext(0, foundFile, fileInfo);
-        }
-
-        return false;
+    (*sHandle) = opendir(pattern);
+    if (NULL != (*sHandle)){
+       folderName_ = pattern;
+        // Read first value
+        return findNext(*sHandle, foundFile, fileInfo);
     }
-#endif // DEST_CASIO_CALC
 
     // Error
     return false;
+#endif // DEST_CASIO_CALC
 }
 
 // findNext(): Continue a search
 //
-// Continues the search for matches. The search handle is the value set in
+// Continues the search for matches.
 //
-//  @shandle : search handle
+//  @sHandle : search handle
 //  @foundFile : next filename
 //  @fileinfo : file metadatas
 //
-//  @returns true if ok
+//  @return ;  true if ok
 //
-bool bFile::findNext(int shandle, FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo){
+bool bFile::findNext(SEARCHHANDLE sHandle, FONTCHARACTER foundFile,
+			struct BFile_FileInfo *fileInfo){
+	if (sHandle){
 #ifdef DEST_CASIO_CALC
-    if (shandle){
-        error_ = gint_world_switch(GINT_CALL(BFile_FindNext, shandle, foundFile, fileInfo));
+        error_ = gint_world_switch(GINT_CALL(BFile_FindNext,
+				sHandle, foundFile, fileInfo));
         return (error_ == 0);
-    }
 #else
-    if (dir_){
         struct dirent *de;
-        if (NULL != (de = readdir(dir_))){
-            fileInfo->type = (de->d_type=DT_DIR?BFile_Type_Directory:BFile_Type_File);
-            FC_str2FC(de->d_name, foundFile);
+        char fName[BFILE_MAX_PATH + 1];
+        if (NULL != (de = readdir(sHandle))){
+            fileInfo->type = (DT_DIR == de->d_type?
+								BFile_Type_Directory:BFile_Type_File);
+            strcpy(fName, folderName_.c_str());
+            strcat(fName, "/");
+            strcat(fName, de->d_name);
+            FC_str2FC(fName, foundFile);
+            return true;
         }
-    }
 #endif // #ifdef DEST_CASIO_CALC
+	}
 
     // Error
     return false;
 }
 
-// findClose() :  Close a search handle (with or without exhausting the matches).
+// findClose() :  Close a search handle
 //
-//  @shandle : Search handle
+//  @sHandle : Search handle
 //
 //  @return : done ?
 //
-bool bFile::findClose(int shandle){
+bool bFile::findClose(SEARCHHANDLE sHandle){
+	if (sHandle){
 #ifdef DEST_CASIO_CALC
-    if (shandle){
-        error_ = gint_world_switch(GINT_CALL(BFile_FindClose, shandle));
+        error_ = gint_world_switch(GINT_CALL(BFile_FindClose, sHandle));
         return (error_ == 0);
-    }
 #else
-    if (dir_){
-        closedir(dir_);
-        dir_ = NULL;
+        closedir(sHandle);
+        folderName_ = "";
         return true;
-    }
 #endif // #ifdef DEST_CASIO_CALC
+	}
 
     // Error
     return false;
@@ -456,7 +457,7 @@ bool bFile::FC_str2FC(const char* src, FONTCHARACTER dest){
     if (!src || 0 == (len = strlen(src))){
         return false;
     }
-
+#ifdef DEST_CASIO_CALC
    // Copy string content
     char* buffer = (char*)dest;
     for (size_t index = 0; index < len; index++){
@@ -465,9 +466,35 @@ bool bFile::FC_str2FC(const char* src, FONTCHARACTER dest){
     }
 
     return true;
+#else
+    return (NULL != strcpy(dest, src));
+#endif // #ifdef DEST_CASIO_CALC
 }
 
-// FC_dup() : Duplicate a filename
+// FC_cpy() : Copy a FONTCHARACTER to another FONTCHARACTER
+//
+//  @dest : pointer to a destination string (already allocated)
+//  @src : pointer to the source string
+//
+//  @return : pointer to the copy orif done  NULL on error
+//
+FONTCHARACTER bFile::FC_cpy(FONTCHARACTER dest, const FONTCHARACTER src){
+#ifdef DEST_CASIO_CALC
+    size_t len(FC_len(src));
+    if (0 == len){
+        return NULL;
+    }
+
+    // Allocates
+    int count = (len + 1) * sizeof(uint16_t);
+    memcpy((void*)dest, src, count);
+    return dest;
+#else
+    return strcpy(dest, src);
+#endif // #ifdef DEST_CASIO_CALC
+}
+
+// FC_dup() : Duplicate a FONTCHARACTER
 //
 //  @fName : filename to duplicate
 //
@@ -495,7 +522,7 @@ FONTCHARACTER bFile::FC_dup(const FONTCHARACTER src){
 
 // FC_len() : length of a fileName in "char"
 //
-//  @fName : pointer to the string
+//  @fName : pointer to the FONTCHARACTER
 //
 //  @return : size of fName (O on error)
 //
@@ -504,7 +531,7 @@ size_t bFile::FC_len(const FONTCHARACTER fName){
 #ifdef DEST_CASIO_CALC
         size_t len(0);
         char* buffer = (char*)fName;
-        while(buffer[len*2]){
+        while(buffer[len*sizeof(uint16_t)]){
             len++;
         }
 

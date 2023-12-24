@@ -1,19 +1,10 @@
 //----------------------------------------------------------------------
 //--
-//--	File	: bFile.h
+//--	bFile.h
 //--
-//--	Author	: Jérôme Henry-Barnaudière - GeeHB
+//--		Definition of bFile object
 //--
-//--	Project	:
-//--
-//----------------------------------------------------------------------
-//--
-//--	Description:
-//--
-//--			Definition of bFile object
-//--
-//--		This release isn't fully tested.
-//--		At this time, it's only functionnal for FXCG50 calculator
+//--		This release isn't fully tested
 //--
 //--		Missing :
 //--                    - whence in read ops
@@ -25,13 +16,14 @@
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define VERSION_B_FILE_OBJECT       0.3.1
+#define VERSION_B_FILE_OBJECT       0.3.2
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>
 #include <gint/bfile.h>
 
 typedef uint16_t const * FONTCHARACTER;
+typedef int SEARCHHANDLE;
 #else
 #include <cstdio>
 #include <fstream>
@@ -41,6 +33,7 @@ typedef uint16_t const * FONTCHARACTER;
 namespace fs = std::filesystem;
 
 typedef char* FONTCHARACTER;
+typedef DIR* SEARCHHANDLE;
 
 // Entry types
 //
@@ -132,7 +125,8 @@ public:
     //
     // @filename : name of the file or folder to create (must not exist)
     // @type : Entry type (BFile_File or BFile_Folder)
-    // @size : Pointer to file size if type is BFile_File, use NULL otherwise
+    // @size : Pointer to file size if type is BFile_File,
+    //			use NULL otherwise
     //
     // @return : file successfully created ?
     //
@@ -178,41 +172,40 @@ public:
     //
     void close();
 
-    // findFirst(): Search the storage memory for paths matching a pattern
+    // findFirst(): Search the storage memory for paths
+    //	matching a pattern
     //
     //  @pattern    FONTCHARACTER glob pattern
-    //  @shandle    Will receive search handle (to use in BFile_FindNext/FindClose)
+    //  @sHandle    Will receive search handle
     //  @foundFile  Will receive FONTCHARACTER path of matching entry
     //  @fileInfo   Will receive metadata of matching entry
     //
-    // @return :  True on success
+    //  @return :  True on success
     //
-    bool findFirst(const FONTCHARACTER pattern, int *shandle, FONTCHARACTER foundFile,
+    bool findFirst(const FONTCHARACTER pattern,
+				SEARCHHANDLE*sHandle, FONTCHARACTER foundFile,
         struct BFile_FileInfo *fileInfo);
 
     // findNext(): Continue a search
     //
-    // Continues the search for matches. The search handle is the value set in
+    // Continues the search for matches.
     //
-    //  @shandle : search handle
+    //  @sHandle : search handle
     //  @foundFile : next filename
     //  @fileinfo : file metadatas
     //
-    //  @returns true if ok
+    //  @return : true if ok
     //
-    bool findNext(int shandle, FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo);
+    bool findNext(SEARCHHANDLE sHandle,
+			FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo);
 
-    // findClose() :  Close a search handle (with or without exhausting the matches).
+    // findClose() :  Close a search handle
     //
-    //  @shandle : Search handle
+    //  @sHandle : Search handle
     //
     //  @return : done ?
     //
-    bool findClose(int shandle);
-
-    //
-    // Utilities
-    //
+    bool findClose(SEARCHHANDLE sHandle);
 
     // getLastError() : Get last error code
     //
@@ -221,6 +214,10 @@ public:
     int getLastError(){
         return error_;
     }
+
+	//
+    // Utilities
+    //
 
     // FC_str2FC() : Convert a string to FC format
     //
@@ -231,7 +228,16 @@ public:
     //
     static bool FC_str2FC(const char* src, FONTCHARACTER dest);
 
-    // FC_dup() : Duplicate a filename
+    // FC_cpy() : Copy a FONTCHARACTER to another FONTCHARACTER
+    //
+    //  @dest : pointer to a destination string (already allocated)
+    //  @src : pointer to the source string
+    //
+    //  @return : pointer to the copy orif done  NULL on error
+    //
+    static FONTCHARACTER FC_cpy(FONTCHARACTER dest, const FONTCHARACTER src);
+
+    // FC_dup() : Duplicate a FONTCHARACTER
     //
     //  @fName : filename to copy
     //
@@ -241,7 +247,7 @@ public:
 
     // FC_len() : length of a fileName in "char"
     //
-    //  @fName : pointer to the string
+    //  @fName : pointer to the FONTCHARACTER
     //
     //  @return : size of fName (O on error)
     //
@@ -253,7 +259,7 @@ private:
 #else
     std::fstream file_;
     std::string fileName_;
-    DIR*        dir_;
+    std::string folderName_;
 #endif // #ifdef DEST_CASIO_CALC
 
     int error_;     // Last error code

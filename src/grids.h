@@ -28,7 +28,7 @@ class grids{
 public:
 
     // Construction
-    grids(const FONTCHARACTER folder);
+    grids();
 
     // Destruction
     ~grids(){
@@ -96,6 +96,8 @@ private:
 
     // __vector_append() : append an file item pointer to the list
     //
+    //  This method automaticaly resizes the list
+    //
     //  @file : pointer to the struct to add to the list
     //
     //  @return : true if succesfully added
@@ -108,7 +110,7 @@ private:
     //
     bool __vector_resize();
 
-    // __vector_CLEAR() : clear the list and its content
+    // __vector_clear() : clear the list and its content
     //
     void __vector_clear();
 
@@ -116,13 +118,13 @@ private:
     // strings utils
     //
 
-    // __atoi()- Convert a filename (without folder) to int
+    // __fileName2i()- Convert a fully qualified filename to int
     //
     //  @src : Filename to convert
     //
     //  @return : numeric value or -1 on error
     //
-    int __atoi(FONTCHARACTER src);
+    int __fileName2i(FONTCHARACTER src);
 
     // __itoa() : Transform a numeric value into a string
     //

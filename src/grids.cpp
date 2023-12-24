@@ -17,7 +17,7 @@
 
 // Construction
 //
-grids::grids(const FONTCHARACTER folder){
+grids::grids(){
     index_ = -1;    // No file is selected
 
     //firstFreeID_ = 0;   // Folder is empty
@@ -40,7 +40,7 @@ bool grids::nextFile(FONTCHARACTER& fName){
     }
 
     // Copy the file name
-    fName = files_[++index_]->fileName;
+    bFile::FC_cpy(fName, files_[++index_]->fileName);
     return true;
 }
 
@@ -56,7 +56,7 @@ bool grids::prevFile(FONTCHARACTER& fName){
     }
 
     // Copy the file name
-    fName = files_[--index_]->fileName;
+    bFile::FC_cpy(fName, files_[--index_]->fileName);
     return true;
 }
 
@@ -103,7 +103,7 @@ void grids::_browse(){
     }
 
     // Browse folder
-    int shandle;
+    SEARCHHANDLE shandle;
     struct BFile_FileInfo fileInfo;
 
     strcpy(szPattern, GRIDS_FOLDER);
@@ -139,7 +139,7 @@ bool grids::_addFile(FONTCHARACTER fileName){
 
     // fill struct. with file informations
     if (NULL == (file->fileName = bFile::FC_dup(fileName)) ||
-        -1 == (file->ID = __atoi(fileName))){
+        -1 == (file->ID = __fileName2i(fileName))){
         free(file);
         return false;   // Unable to copy the filename or invalid name
     }
@@ -154,6 +154,8 @@ bool grids::_addFile(FONTCHARACTER fileName){
 //
 
 // __vector_append() : append an file item pointer to the list
+//
+//  This method automaticaly resizes the list
 //
 //  @file : pointer to the struct to add to the list
 //
@@ -188,13 +190,12 @@ bool grids::__vector_resize(){
         count_ = 0;
 
         cBytes = capacity_ * sizeof(PFNAME);
-        if (NULL == files_){
+        if (NULL == (files_ = (PFNAME*)malloc(cBytes))){
             capacity_ = 0;
             return false;
         }
 
         // list is empty
-        files_ = (PFNAME*)malloc(cBytes);
         memset(files_, 0x00, cBytes);
         return true;
     }
@@ -213,7 +214,7 @@ bool grids::__vector_resize(){
     return true;
 }
 
-// __vector_CLEAR() : clear the list and its content
+// __vector_clear() : clear the list and its content
 //
 void grids::__vector_clear(){
     PFNAME pFile(NULL);
@@ -238,13 +239,13 @@ void grids::__vector_clear(){
 // strings utils
 //
 
-// __atoi()- Convert a filename (without folder) to int
+// __fileName2i()- Convert a fully qualified filename to int
 //
 //  @src : Filename to convert
 //
 //  @return : numeric value or -1 on error
 //
-int grids::__atoi(FONTCHARACTER src){
+int grids::__fileName2i(FONTCHARACTER src){
     size_t len;
     if (0 == (len = bFile::FC_len(src))){
         return -1;
@@ -257,7 +258,7 @@ int grids::__atoi(FONTCHARACTER src){
 
     uint8_t sCar(1);
 #ifdef DEST_CASIO_CALC
-    sCar = 2;
+    sCar = sizeof(uint16_t);
 #endif // DEST_CASIO_CALC
 
     // remove path
@@ -272,8 +273,7 @@ int grids::__atoi(FONTCHARACTER src){
 
     // convert the file name
     index = 0;
-    while (num >= 0 && buffer[index]){
-        car = buffer[index];
+    while (num >= 0 && (car = buffer[index]) && car != '.'){
         if (car >= '0' && car <= '9'){
             num = num * 10 + (car - '0');
         }

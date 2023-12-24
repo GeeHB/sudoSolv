@@ -147,8 +147,10 @@ public:
     //
     //  @return : true if sub menu is added
     //
-    bool addSubMenu(uint8_t index, const menuBar* subMenu, int id, const char* text){
-        return _addSubMenu(&current_, index, (PMENUBAR)subMenu, id, text);
+    bool addSubMenu(uint8_t index, const menuBar* subMenu, 
+					int id, const char* text){
+        return _addSubMenu(&current_, index, 
+							(PMENUBAR)subMenu, id, text);
     }
     //  appendSubMenu() : Append a sub menu
     //
@@ -158,8 +160,10 @@ public:
     //
     //  @return : true if sub menu is added
     //
-    bool appendSubMenu(const menuBar* subMenu, int id, const char* text){
-        return _addSubMenu(&current_, current_.itemCount, (PMENUBAR)subMenu, id, text);
+    bool appendSubMenu(const menuBar* subMenu, 
+				int id, const char* text){
+        return _addSubMenu(&current_, current_.itemCount, 
+							(PMENUBAR)subMenu, id, text);
     }
 
     //  adddItem() : Add an item to the current menu bar
@@ -171,7 +175,8 @@ public:
     //
     //  @return : true if the item has been added
     //
-    bool addItem(uint8_t index, int id, const char* text, int state = ITEM_DEFAULT){
+    bool addItem(uint8_t index, int id, const char* text, 
+				int state = ITEM_DEFAULT){
         return _addItem(&current_, index, id, text, state);
     }
 
@@ -249,7 +254,8 @@ public:
 
     // handleKeyboard() : Handle the keyboard events
     //
-    // @return : MENUACTION struct containing info about item selected b user
+    // @return : MENUACTION struct containing info 
+    //			 about item selected b user
     //
     MENUACTION handleKeyboard();
 
@@ -270,7 +276,8 @@ private:
     //
     //  @return : true if sub menu is added
     //
-    bool _addSubMenu(PMENUBAR container, uint8_t index, PMENUBAR subMenu, int id, const char* text);
+    bool _addSubMenu(PMENUBAR container, uint8_t index, 
+					PMENUBAR subMenu, int id, const char* text);
 
     // _clearMenuBar() : Empty a menu bar
     //
@@ -309,21 +316,24 @@ private:
     //
     //  @return : true if the item has been added
     //
-    bool _addItem(PMENUBAR bar, uint8_t index, int id, const char* text, int state = ITEM_DEFAULT);
+    bool _addItem(PMENUBAR bar, uint8_t index, int id, 
+						const char* text, int state = ITEM_DEFAULT);
 
     //  _findItemByID() : Find an item in the given bar
     //
     //  @bar : menu bar containing to search item in
     //  @id : id of the searched item
     //
-    //  @containerBar : pointer to a PMENUBAR. when not NULL, if item is ofund,
-    //                  containerBar will point to the bar containing the item
-    //  @pIndex : when not NULL, will point to the Item'index in its menubar.
+    //  @containerBar : pointer to a PMENUBAR. when not NULL, 
+	//			if item is found, containerBar will point to the bar 
+	//			containing the item
+    //  @pIndex : when not NULL, will point to the Item'ID in its menu
     //
     //  @return : pointer to the item if found or NULL
     //
-    PMENUITEM _findItemByID(PMENUBAR bar, int id, PMENUBAR* containerBar = NULL, uint8_t* pIndex = NULL);
-
+    PMENUITEM _findItemByID(PMENUBAR bar, int id, 
+    			PMENUBAR* containerBar = NULL, uint8_t* pIndex = NULL);
+    			
     //  _createItem() : creae a new menu item
     //
     //  @id : Item's id
@@ -357,8 +367,8 @@ private:
     //
     //  @index : index of menu item to select or unselect
     //  @selected : true if item is to be selected
-    //  @redraw : when true, item and previously (un)selected item are drawn in their
-    //            new states
+    //  @redraw : when true, item and previously (un)selected 
+	//				item are drawn in their new states
     //
     //  @return : true if item is selected
     //
@@ -367,7 +377,8 @@ private:
     //  _drawItem() : Draw an item
     //
     //  @anchor : Position of the item in screen coordinates
-    //  @item : Pointer to a MENUITEM strcut containing informations about item to draw
+    //  @item : Pointer to a MENUITEM strcut containing informations 
+    //			about item to draw
     //
     void _drawItem(const RECT* anchor, const MENUITEM* item);
 
