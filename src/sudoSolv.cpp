@@ -14,9 +14,10 @@
 
 #include "shared/scrCapture.h"
 
+#ifdef DEST_CASIO_CALC
 extern bopti_image_t g_homeScreen;  // Background image
 scrCapture  g_Capture;              // Screen capture object
-
+#endif // #ifdef DEST_CASIO_CALC
 
 // Functions definitions
 //
@@ -95,6 +96,7 @@ int main(void)
                     break;
 
                 // Modify current grid
+#ifdef DEST_CASIO_CALC
                 case IDM_EDIT:{
                     game.display();
                     bool modified = game.edit();
@@ -103,6 +105,7 @@ int main(void)
                     menu.update();  // redraw the whole menu bar
                     break;
                 }
+#endif // #ifdef DEST_CASIO_CALC
 
                 // Search for obvious values
                 case IDM_SOLVE_OBVIOUS:
@@ -133,10 +136,13 @@ int main(void)
             if (ACTION_KEYBOARD == action.type){
                 switch (action.value){
                     // Return to main menu
+#ifdef DEST_CASIO_CALC
                     case KEY_MENU:
                         end = true;
                         break;
+#endif // #ifdef DEST_CASIO_CALC
 
+#ifdef DEST_CASIO_CALC
                     // Activate or deactivate screen capture
                     case KEY_CODE_CAPTURE:
                         if (action.modifier == MOD_SHIFT){
@@ -148,6 +154,7 @@ int main(void)
                             }
                         }
                         break;
+#endif // #ifdef DEST_CASIO_CALC
 
                     default:
                         break;
@@ -156,8 +163,10 @@ int main(void)
         }
     }
 
+#ifdef DEST_CASIO_CALC
     //gint_setrestart(1);
     gint_osmenu();
+#endif // #ifdef DEST_CASIO_CALC
 
 	return 1;
 }
@@ -188,6 +197,7 @@ void _createMenu(menuBar& menu){
 // Display home screen
 //
 void _homeScreen(){
+#ifdef DEST_CASIO_CALC
     drect(0,0,CASIO_WIDTH, CASIO_HEIGHT - MENUBAR_DEF_HEIGHT, C_WHITE);
     dimage(0,0,&g_homeScreen);
 
@@ -206,6 +216,7 @@ void _homeScreen(){
 		copyright);
 
     dupdate();
+#endif // #ifdef DEST_CASIO_CALC
 }
 
 // EOF
