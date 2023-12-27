@@ -454,13 +454,13 @@ bool bFile::findClose(SEARCHHANDLE sHandle){
 //
 bool bFile::FC_str2FC(const char* src, FONTCHARACTER dest){
     size_t len;
-    if (!src || 0 == (len = strlen(src))){
+    if (!src || 0 == (len = strlen(src)) || !dest){
         return false;
     }
 #ifdef DEST_CASIO_CALC
    // Copy string content
     char* buffer = (char*)dest;
-    for (size_t index = 0; index < len; index++){
+    for (size_t index = 0; index <= len; index++){
         buffer[2*index] = src[index];
         buffer[2*index + 1] = 0;
     }

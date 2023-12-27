@@ -1,10 +1,10 @@
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    menuBar.cpp
 //--
-//--        Implementation of menuBar object  - A bar of menu (or a submenu)
+//--        Implementation of menuBar - A bar of menu (or a submenu)
 //--
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #include "menuBar.h"
 
@@ -20,7 +20,7 @@ using namespace std;
 #else
 // Background image
 //
-extern bopti_image_t g_backMenu;
+extern bopti_image_t g_menuImg;
 
 #define MENU_BACK_IMG_WIDTH 12
 #define MENU_BACK_IMG_HEIGHT 10
@@ -52,7 +52,8 @@ void menuBar::update(){
         return;
     }
 
-    RECT anchor = {rect_.x, rect_.y, MENUBAR_DEF_ITEM_WIDTH, rect_.h};   // First item's rect
+	// First item's rect
+    RECT anchor = {rect_.x, rect_.y, MENUBAR_DEF_ITEM_WIDTH, rect_.h};
     PMENUITEM item(nullptr);
     for (uint8_t index(0); index < MENU_MAX_ITEM_COUNT; index++){
         item = visible_->items[index];
@@ -80,48 +81,50 @@ void menuBar::update(){
 #endif // #ifdef DEST_CASIO_CALC
 }
 
-//  removeItemByID() : Remove an item
-//      Remove the item menu or the submenu with the given ID
-//
-//  @id : Item's id
-//
-//  @return : true if the item has been successfully removed
-//
-bool menuBar::removeItemByID(int id){
-    PMENUBAR bar(NULL);
-    uint8_t index(0);
-    PMENUITEM item(NULL);
-
-    // Item exists ?
-    if ((item = _findItemByID(&current_, id, &bar, &index))){
-        // Yes => remove it
-        return _removeItemByIndex(bar, index);
-    }
-
-    return false;
-}
-
 //  activate() : Activate or deactivate an item
 //
 //  When an item is deactivated, it can't be called by the user
 //
-//  @id : Menu item's ID
+//  @searchedID : Menu item's ID
+//  @searchMode : Type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
 //  @activated : true if item must be activated
 //
 //  @return : true if activation state changed
 //
-bool menuBar::activate(int id, bool activated){
-    PMENUITEM item = _findItemByID(&current_, id);
+bool menuBar::activate(int searchedID, int searchMode, bool activated){
+    PMENUITEM item = _findItem(&current_, searchedID, searchMode);
     if (item){
         // Found an item with this ID
-        bool inactive = (item->state == ITEM_INACTIVE);
+        bool inactive = _isBitSet(item->state, ITEM_INACTIVE);
         if (inactive == activated){
-            item->state = (activated?ITEM_DEFAULT:ITEM_INACTIVE);   // change item's state
+            // change item's state
+			if (!activated){
+				_removeBit(item->state, ITEM_INACTIVE);
+			}
+			else{
+				item->state |= ITEM_INACTIVE;
+			}
+
             return true;
         }
     }
 
     return false;
+}
+
+//  freeMenuItem() : Free memory used by a menu item
+//
+//  @item : Pointer to the menu item to be released
+//
+void menuBar::freeMenuItem(PMENUITEM item){
+	if (item){
+		// A submenu ?
+		if (_isBitSet(item->status, ITEM_STATUS_SUBMENU) && item->subMenu){
+			_freeMenuBar((PMENUBAR)item->subMenu, true);
+		}
+
+		free(item); // free the item
+	}
 }
 
 // handleKeyboard() : Handle the keyboard events
@@ -148,7 +151,7 @@ MENUACTION menuBar::handleKeyboard(){
                 (item = visible_->items[kID]) &&
                 item->state != ITEM_INACTIVE){
                 // A sub menu ?
-                if (item->status == ITEM_STATUS_SUBMENU){
+                if (_isBitSet(item->status, ITEM_STATUS_SUBMENU)){
                     if (item->subMenu){
                         visible_ = (MENUBAR*)item->subMenu; // new "visible" menu
                         _selectIndex(-1, false, false);
@@ -220,22 +223,24 @@ MENUACTION menuBar::handleKeyboard(){
 //  @submenu : submenu to add
 //  @id : ID associated to the menu
 //  @text : Submenu text
+//  @state : initial state of submenu
 //
 //  @return : true if sub menu is added
 //
-bool menuBar::_addSubMenu(PMENUBAR container, uint8_t index, PMENUBAR subMenu, int id, const char* text){
+bool menuBar::_addSubMenu(PMENUBAR container, uint8_t index, PMENUBAR subMenu, int id,
+                            const char* text, int itemState){
     size_t len(0);
     if (!container || !subMenu ||
         index >= MENU_MAX_ITEM_COUNT ||
         NULL != container->items[index] ||
-        _findItemByID(container, id) ||
+        _findItem(container, id, SEARCH_BY_ID) ||
         container->itemCount == (MENU_MAX_ITEM_COUNT - 1) ||
         ! text || !(len = strlen(text))){
         return false;
     }
 
     // Create a copy of the menu bar
-    PMENUBAR sub = _copyMenuBar(subMenu);
+    PMENUBAR sub = _copyMenuBar(subMenu, _isBitSet(itemState, ITEM_NO_BACK_BUTTON));
     if (NULL == sub){
         return false;
     }
@@ -275,24 +280,28 @@ void menuBar::_clearMenuBar(PMENUBAR bar){
 //  All contained items and sub menus will be copied.
 //
 //  @source : Pointer to the source or NULL on error
+//  @noBackButton : Don't add a "back button" at the last position
+//                  to return to previous menu
 //
 //  @return : Pointer to the new copy
 //
-PMENUBAR menuBar::_copyMenuBar(PMENUBAR source){
+PMENUBAR menuBar::_copyMenuBar(PMENUBAR source, bool noBackButton){
     PMENUBAR bar(NULL);
     if (source && (bar = (PMENUBAR)malloc(sizeof(MENUBAR)))){
         _clearMenuBar(bar);
         bar->itemCount = source->itemCount;
         bar->parent = source->parent;
-        uint8_t maxItem(MENU_MAX_ITEM_COUNT-1);
+        uint8_t maxItem(noBackButton?MENU_MAX_ITEM_COUNT:(MENU_MAX_ITEM_COUNT - 1));
         PMENUITEM sitem, nitem;
         for (uint8_t index(0); index < maxItem; index++){
             nitem = _copyItem(bar, (sitem = source->items[index]));
             bar->items[index] = nitem;  // simple item copy
         }
 
-        // In sub menus last right item is used to return to parent menu
-        bar->items[MENU_MAX_ITEM_COUNT-1] = _createItem(IDM_RESERVED_BACK, STR_RESERVED_BACK, ITEM_DEFAULT);
+        if (false == noBackButton){
+            // In sub menus last right item is used to return to parent menu
+            bar->items[MENU_MAX_ITEM_COUNT-1] = _createItem(IDM_RESERVED_BACK, STR_RESERVED_BACK, ITEM_DEFAULT);
+        }
     }
     return bar;
 }
@@ -307,12 +316,7 @@ void menuBar::_freeMenuBar(PMENUBAR bar, bool freeAll){
         PMENUITEM item(NULL);
         for (uint8_t index(0); index < MENU_MAX_ITEM_COUNT; index++){
             if ((item = bar->items[index])){
-                // A submenu ?
-                if ((item->status & ITEM_STATUS_SUBMENU) && item->subMenu){
-                    _freeMenuBar((PMENUBAR)item->subMenu, true);
-                }
-
-                free(item); // free the item
+                freeMenuItem(item);
             }
         }
 
@@ -325,49 +329,6 @@ void menuBar::_freeMenuBar(PMENUBAR bar, bool freeAll){
 //
 // Menu items
 //
-
-//  _findItemByID() : Find an item in the given bar
-//
-//  @bar : menu bar containing to search item in
-//  @id : id of the searched item
-//
-//  @containerBar : pointer to a PMENUBAR. when not NULL, if item is ofund,
-//                  containerBar will point to the bar containing the item
-//  @pIndex : when not NULL, will point to the Item'index in its menubar.
-//
-//  @return : pointer to the item if found or NULL
-//
-PMENUITEM menuBar::_findItemByID(PMENUBAR bar, int id, PMENUBAR* containerBar, uint8_t* pIndex){
-    if (bar){
-        PMENUITEM item(NULL), sItem(NULL);
-        for (uint8_t index = 0; index < MENU_MAX_ITEM_COUNT; index++){
-            if ((item = bar->items[index])){
-                if (item->status & ITEM_STATUS_SUBMENU){
-                    // in a sub menu ?
-                    if ((sItem = _findItemByID((PMENUBAR)item->subMenu, id, containerBar, pIndex))){
-                        return sItem;   // Found in a sub menu
-                    }
-                }
-                else{
-                    if (item->id == id){
-                        if (containerBar){
-                            (*containerBar) = bar;
-                        }
-
-                        if (pIndex){
-                            (*pIndex) = index;
-                        }
-
-                        return item;    // found
-                    }
-                }
-            }
-        }
-    } // if (bar)
-
-    // not found
-    return NULL;
-}
 
 //  _addItem() : Add an item to a menu bar
 //
@@ -384,8 +345,8 @@ bool menuBar::_addItem(PMENUBAR bar, uint8_t index, int id, const char* text, in
     if (!bar ||
         index >= MENU_MAX_ITEM_COUNT ||
         NULL != bar->items[index] ||
-        _findItemByID(bar, id) ||    // this ID is already handled
-        current_.itemCount == (MENU_MAX_ITEM_COUNT - 1) ||
+        _findItem(bar, id, SEARCH_BY_ID) ||    // this ID is already handled
+        current_.itemCount >= MENU_MAX_ITEM_COUNT ||
         ! text || !(len = strlen(text))){
         return false;
     }
@@ -453,7 +414,7 @@ PMENUITEM menuBar::_copyItem(PMENUBAR bar, PMENUITEM source){
         strcpy(item->text, source->text);;
 
         if (source->status & ITEM_STATUS_SUBMENU){
-            item->subMenu = _copyMenuBar((PMENUBAR)source->subMenu);
+            item->subMenu = _copyMenuBar((PMENUBAR)source->subMenu, _isBitSet(item->state, ITEM_NO_BACK_BUTTON));
             ((PMENUBAR)(item->subMenu))->parent = bar;  // attach it to the new bar
         }
         else{
@@ -463,29 +424,108 @@ PMENUITEM menuBar::_copyItem(PMENUBAR bar, PMENUITEM source){
     return item;
 }
 
-//  _removeItemByIndex() : Remove an item
-//      Remove the item menu or the submenu at the given index
+//  _findItem() : Find an item in the given bar
 //
-//  @bar : Bar containing item to remove
-//  @index : Item's index
+//  @bar : menu bar containing to search item in
+//  @searchedID : id or index of the searched item
+//  @searchMode : Type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+//
+//  @containerBar : pointer to a PMENUBAR. when not NULL,
+//			if item is found, containerBar will point to the bar
+//			containing the item
+//  @pIndex : when not NULL, will point to the Item'ID in its menu
+//
+//  @return : pointer to the item if found or NULL
+//
+PMENUITEM menuBar::_findItem(PMENUBAR bar, int searchedID, int searchMode,
+				PMENUBAR* containerBar, uint8_t* pIndex){
+    PMENUITEM item(NULL), sItem(NULL), foundItem(NULL);
+    if (bar){
+        if (SEARCH_BY_ID == searchMode){
+            for (uint8_t index = 0; !foundItem && index < MENU_MAX_ITEM_COUNT; index++){
+                if ((item = bar->items[index])){
+                    if (item->status & ITEM_STATUS_SUBMENU){
+                        // in a sub menu ?
+                        if ((sItem = _findItem((PMENUBAR)item->subMenu, searchedID, searchMode, containerBar, pIndex))){
+                            foundItem = sItem;   // Found in a sub menu
+                        }
+                    }
+                    else{
+                        if (item->id == searchedID){
+                            if (pIndex){
+                                (*pIndex) = index;
+                            }
+
+                            foundItem = item;
+                        }
+                    }
+                }
+            }
+        }
+        else{
+            if (SEARCH_BY_INDEX == searchMode){
+                foundItem = bar->items[searchedID];
+                if (foundItem && pIndex){
+                    (*pIndex) = item?searchedID:0;
+                }
+            }
+        }
+    } // if (bar)
+
+    if (foundItem && containerBar){
+        (*containerBar) = (bar)?bar:NULL;
+    }
+
+    return foundItem;
+}
+
+//  _removeItem() : Remove an item from the current menu bar
+//      Remove the item menu or the submenu
+//
+//  @bar : menu bar in wich the item is to be searched
+//  @searchedID : Item's ID or index
+//  @searchMode : if SEARCH_BY_ID, searchedID is the ID of item to be removed
+//                if SEARCH_BY_INDEX serachedID is the index in the menu bar
 //
 //  @return : true if the item has been successfully removed
 //
-bool menuBar::_removeItemByIndex(PMENUBAR bar, uint8_t index){
+bool menuBar::_removeItem(PMENUBAR bar, int searchedID, int searchMode){
     PMENUITEM item(NULL);
-    if (bar && index < MENU_MAX_ITEM_COUNT && (item = bar->items[index])){
-         // A sub menu ?
-         if (item->status & ITEM_STATUS_SUBMENU){
-            _freeMenuBar((PMENUBAR)item->subMenu, true);
-         }
+    if (bar){
+        switch(searchMode){
 
-         // Position is free
-         free(item);
-         bar->items[index] = NULL;
-         bar->itemCount--;
+        case SEARCH_BY_INDEX:
+            if (searchedID >= 0 && searchedID < MENU_MAX_ITEM_COUNT){
+                item = bar->items[searchedID];
+                bar->items[searchedID] = NULL;
 
-         // done
-         return true;
+                // A sub menu ?
+                 if (item->status & ITEM_STATUS_SUBMENU){
+                    _freeMenuBar((PMENUBAR)item->subMenu, true);
+                 }
+
+                 // Position is free
+                 free(item);
+                 bar->itemCount--;
+                 return true;
+            }
+            break;
+
+        case SEARCH_BY_ID:{
+            MENUBAR* subBar;
+            uint8_t index;
+
+            // Item exists ?
+            if ((item = _findItem(bar, searchedID, SEARCH_BY_ID, &subBar, &index))){
+                // Yes => remove it
+                return _removeItem(subBar, index, SEARCH_BY_INDEX);
+            }
+            break;
+        }
+
+        default:
+            break;
+        }
     }
 
     // not removed
@@ -583,7 +623,7 @@ void menuBar::_drawItem(const RECT* anchor, const MENUITEM* item){
                 x = anchor->x + (anchor->w - w - MENU_BACK_IMG_WIDTH - 2) / 2;
 
                 // Draw icon on left of text
-                dimage(x, y, &g_backMenu);
+                dimage(x, y, &g_menuImg);
                 x+=(MENU_BACK_IMG_WIDTH + 2);
             }
             else{

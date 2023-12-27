@@ -106,7 +106,6 @@ void grids::_browse(){
     SEARCHHANDLE shandle;
     struct BFile_FileInfo fileInfo;
 
-    strcpy(szPattern, GRIDS_FOLDER);
 #ifdef DEST_CASIO_CALC
     strcat(szPattern, PATH_SEPARATOR);
     strcat(szPattern, GRID_FILE_SEARCH_PATTERN);

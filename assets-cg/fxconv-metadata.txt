@@ -2,6 +2,6 @@ about.png:
   type: bopti-image
   name: g_homeScreen
 
-back.png:
+menu.png:
   type: bopti-image
-  name: g_backMenu
+  name: g_menuImg

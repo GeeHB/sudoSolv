@@ -133,7 +133,8 @@ private:
     //  @return : true if value is set
     //
     bool _checkAndSet(position& pos, uint8_t value){
-        if (_checkLine(pos, value) && _checkRow(pos, value) && _checkTinySquare(pos, value)){
+        if (_checkLine(pos, value) && _checkRow(pos, value) && 
+			_checkTinySquare(pos, value)){
             // set
             elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
             return true;

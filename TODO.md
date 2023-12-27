@@ -12,6 +12,8 @@
 - [x] icones
 - [ ] grids
 - [x] Copie d'écran - *fxlink*
+- [ ] Durée des traitements
 
 #### Corrections
 - [x] Affichage de la grille centrée
+- [ ] Code refactoring

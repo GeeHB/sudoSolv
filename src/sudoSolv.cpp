@@ -39,6 +39,15 @@ int main(void)
     menu.getRect(mainRect);     // menu bar position
     mainRect = {0, 0, mainRect.w, CASIO_HEIGHT - mainRect.h};
 
+    // List of grid files
+    grids files;
+    int max = files.size();
+    if (max){
+        menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
+    }
+
+    FONTCHARACTER fileName;
+
     //
     // App. main loop
     //
@@ -57,6 +66,28 @@ int main(void)
                 case IDM_FILE_NEW:
                     game.empty();
                     game.display();
+                    break;
+
+                // Show prev file
+                case IDM_FILE_PREV:
+                    files.prevFile(fileName);
+                    menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
+
+                    if (!files.pos()){
+                        menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, false);
+                        menu.update();
+                    }
+                    break;
+
+                // Show next file
+                case IDM_FILE_NEXT:
+                    files.nextFile(fileName);
+                    menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, true);
+
+                    if (files.pos() == files.size()){
+                        menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
+                        menu.update();
+                    }
                     break;
 
                 case IDM_FILE_ABOUT:
