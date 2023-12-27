@@ -447,7 +447,7 @@ bool bFile::findClose(SEARCHHANDLE sHandle){
 
 // FC_str2FC() : Convert a string to FC format
 //
-//  @src : string to copy
+//  @src : string to convert
 //  @dest : destination buffer
 //
 //  @return : pointer to a FONTCHARACTER
@@ -461,13 +461,37 @@ bool bFile::FC_str2FC(const char* src, FONTCHARACTER dest){
    // Copy string content
     char* buffer = (char*)dest;
     for (size_t index = 0; index <= len; index++){
-        buffer[2*index] = src[index];
-        buffer[2*index + 1] = 0;
+        buffer[2*index] = 0;
+        buffer[2*index + 1] = src[index];
     }
 
     return true;
 #else
     return (NULL != strcpy(dest, src));
+#endif // #ifdef DEST_CASIO_CALC
+}
+
+// FC_FC2str() : Convert a string from FC format to char*
+//
+//  @src : FC to convert
+//  @dest : destination buffer
+//
+//  @return : pointer to a FONTCHARACTER
+//
+bool bFile::FC_FC2str(const FONTCHARACTER src, char* dest){
+#ifdef DEST_CASIO_CALC
+    size_t len;
+    if (!src || 0 == (len = FC_len(src)) || !dest){
+        return false;
+    }
+
+   // Copy string content
+    char* buffer = (char*)src;
+    for (size_t index = 0; index <= len; index++){
+        dest[index] = buffer[2*index + 1];
+    }
+
+    return true;
 #endif // #ifdef DEST_CASIO_CALC
 }
 
@@ -531,7 +555,7 @@ size_t bFile::FC_len(const FONTCHARACTER fName){
 #ifdef DEST_CASIO_CALC
         size_t len(0);
         char* buffer = (char*)fName;
-        while(buffer[len*sizeof(uint16_t)]){
+        while(buffer[1+ len*sizeof(uint16_t)]){
             len++;
         }
 

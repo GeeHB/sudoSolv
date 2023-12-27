@@ -25,6 +25,10 @@ grids::grids(){
     count_ = 0;
     capacity_ = 0;
 
+    // this folder
+    strcpy(folder_, GRIDS_FOLDER);
+    strcat(folder_, PATH_SEPARATOR);
+
     _browse();
 }
 
@@ -40,7 +44,12 @@ bool grids::nextFile(FONTCHARACTER& fName){
     }
 
     // Copy the file name
-    bFile::FC_cpy(fName, files_[++index_]->fileName);
+#ifdef DEST_CASIO_CALC
+    bFile::FC_str2FC(folder_, fName);
+    bFile::FC_cpy(fName + bFile::FC_len(fName), files_[++index_]->fileName);
+#else
+#endif // DEST_CASIO_CALC 
+    //bFile::FC_cpy(fName, files_[++index_]->fileName);
     return true;
 }
 
@@ -56,7 +65,14 @@ bool grids::prevFile(FONTCHARACTER& fName){
     }
 
     // Copy the file name
-    bFile::FC_cpy(fName, files_[--index_]->fileName);
+#ifdef DEST_CASIO_CALC
+    bFile::FC_str2FC(folder_, fName);
+    bFile::FC_cpy(fName + bFile::FC_len(fName), files_[--index_]->fileName);
+#else
+#endif // DEST_CASIO_CALC 
+    //bFile::FC_cpy(fName, files_[++index_]->fileName);
+
+    //bFile::FC_cpy(fName, files_[--index_]->fileName);
     return true;
 }
 
@@ -80,8 +96,8 @@ void grids::_browse(){
     char szPattern[BFILE_MAX_PATH + 1];
 
 #ifdef DEST_CASIO_CALC
-    uint16_t fName[255];
-    uint16_t FCPattern[255];
+    uint16_t fName[BFILE_MAX_PATH + 1];
+    uint16_t FCPattern[BFILE_MAX_PATH + 1];
 #else
     char fName[BFILE_MAX_PATH + 1];
     char FCPattern[BFILE_MAX_PATH + 1];
@@ -245,34 +261,17 @@ void grids::__vector_clear(){
 //  @return : numeric value or -1 on error
 //
 int grids::__fileName2i(FONTCHARACTER src){
-    size_t len;
-    if (0 == (len = bFile::FC_len(src))){
-        return -1;
-    }
-
     char* buffer = (char*)src;
     int num(0);
     uint8_t index(0);
     char car;
-
+    
     uint8_t sCar(1);
 #ifdef DEST_CASIO_CALC
     sCar = sizeof(uint16_t);
 #endif // DEST_CASIO_CALC
 
-    // remove path
-    if (len > 1){
-        int index = len - sCar;
-        while (index && buffer[index] != CHAR_PATH_SEPARATOR){
-            index-=sCar;
-        }
-
-        buffer=(index?buffer+(index+sCar):buffer);
-    }
-
-    // convert the file name
-    index = 0;
-    while (num >= 0 && (car = buffer[index]) && car != '.'){
+    while (num >= 0 && (car = buffer[index + 1]) && car != '.'){
         if (car >= '0' && car <= '9'){
             num = num * 10 + (car - '0');
         }

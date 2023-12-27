@@ -144,6 +144,7 @@ private:
     // Members
 private:
 
+    char folder_[BFILE_MAX_PATH + 1];
     int index_;     // Index of current file in list (-1 if none)
 
     // We can't use vectors, so let's use my own "vector" like table

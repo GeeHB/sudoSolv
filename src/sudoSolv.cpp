@@ -12,9 +12,8 @@
 #include "sudoku.h"
 #include "menu.h"
 
-#include "shared/scrCapture.h"
-
 #ifdef DEST_CASIO_CALC
+#include "shared/scrCapture.h"
 extern bopti_image_t g_homeScreen;  // Background image
 scrCapture  g_Capture;              // Screen capture object
 #endif // #ifdef DEST_CASIO_CALC

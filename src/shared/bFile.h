@@ -221,12 +221,21 @@ public:
 
     // FC_str2FC() : Convert a string to FC format
     //
-    //  @src : string to copy
+    //  @src : string to convert
     //  @dest : destination buffer
     //
     //  @return : pointer to a FONTCHARACTER
     //
     static bool FC_str2FC(const char* src, FONTCHARACTER dest);
+
+    // FC_FC2str() : Convert a string from FC format to char*
+    //
+    //  @src : FC to convert
+    //  @dest : destination buffer
+    //
+    //  @return : pointer to a FONTCHARACTER
+    //
+    static bool FC_FC2str(const FONTCHARACTER src, char* dest);
 
     // FC_cpy() : Copy a FONTCHARACTER to another FONTCHARACTER
     //

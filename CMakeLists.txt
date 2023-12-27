@@ -7,6 +7,7 @@ find_package(Gint 2.9 REQUIRED)
 
 set(SOURCES
 	src/sudoSolv.cpp
+	#src/main.cpp
 	src/shared/bFile.cpp
 	src/shared/keyboard.cpp
 	src/shared/menuBar.cpp
@@ -34,5 +35,5 @@ target_link_libraries(sudoSolver Gint::Gint)
 
 if("${FXSDK_PLATFORM_LONG}" STREQUAL fxCG50)
 	generate_g3a(TARGET sudoSolver OUTPUT "sudoSolv.g3a"
-		NAME "sudoSolv" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)
+		NAME "sudoSolver" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)
 endif()
