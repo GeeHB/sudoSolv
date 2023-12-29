@@ -55,7 +55,7 @@ public:
     //
     //  @return : true if the next file name is valid
     //
-    bool nextFile(FONTCHARACTER& fName);
+    bool nextFile(FONTCHARACTER fName);
 
     // prevFile() : Get previous file name
     //
@@ -63,12 +63,16 @@ public:
     //
     //  @return : true if the previous file name is valid
     //
-    bool prevFile(FONTCHARACTER& fName);
+    bool prevFile(FONTCHARACTER fName);
 
     // File management
     bool newFileName(FONTCHARACTER fName);
 
-    bool deleteFile();  // current
+    // deleteFile() : Delete current file
+    //
+    //  @return : true if deleted
+    //
+    bool deleteFile();
 
     // Internal methods
 private:
@@ -115,7 +119,7 @@ private:
     void __vector_clear();
 
     //
-    // strings utils
+    // Utils
     //
 
     // __fileName2i()- Convert a fully qualified filename to int

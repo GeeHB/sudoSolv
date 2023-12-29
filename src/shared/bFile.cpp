@@ -29,7 +29,6 @@ bFile::bFile(){
     fd_ = 0;    // no file
 #else
     fileName_ = "";
-    folderName_ = "";
 #endif // #ifdef DEST_CASIO_CALC
 
     error_ = 0; // no error
@@ -373,7 +372,6 @@ bool bFile::findFirst(const FONTCHARACTER pattern,SEARCHHANDLE *sHandle,
 #else
     (*sHandle) = opendir(pattern);
     if (NULL != (*sHandle)){
-       folderName_ = pattern;
         // Read first value
         return findNext(*sHandle, foundFile, fileInfo);
     }
@@ -402,14 +400,10 @@ bool bFile::findNext(SEARCHHANDLE sHandle, FONTCHARACTER foundFile,
         return (error_ == 0);
 #else
         struct dirent *de;
-        char fName[BFILE_MAX_PATH + 1];
         if (NULL != (de = readdir(sHandle))){
             fileInfo->type = (DT_DIR == de->d_type?
 								BFile_Type_Directory:BFile_Type_File);
-            strcpy(fName, folderName_.c_str());
-            strcat(fName, "/");
-            strcat(fName, de->d_name);
-            FC_str2FC(fName, foundFile);
+            FC_str2FC(de->d_name, foundFile);
             return true;
         }
 #endif // #ifdef DEST_CASIO_CALC
@@ -432,7 +426,6 @@ bool bFile::findClose(SEARCHHANDLE sHandle){
         return (error_ == 0);
 #else
         closedir(sHandle);
-        folderName_ = "";
         return true;
 #endif // #ifdef DEST_CASIO_CALC
 	}
@@ -493,6 +486,7 @@ bool bFile::FC_FC2str(const FONTCHARACTER src, char* dest){
 
     return true;
 #endif // #ifdef DEST_CASIO_CALC
+    return false;
 }
 
 // FC_cpy() : Copy a FONTCHARACTER to another FONTCHARACTER
@@ -500,7 +494,7 @@ bool bFile::FC_FC2str(const FONTCHARACTER src, char* dest){
 //  @dest : pointer to a destination string (already allocated)
 //  @src : pointer to the source string
 //
-//  @return : pointer to the copy orif done  NULL on error
+//  @return : pointer to the copy if done  NULL on error
 //
 FONTCHARACTER bFile::FC_cpy(FONTCHARACTER dest, const FONTCHARACTER src){
 #ifdef DEST_CASIO_CALC
@@ -516,6 +510,25 @@ FONTCHARACTER bFile::FC_cpy(FONTCHARACTER dest, const FONTCHARACTER src){
 #else
     return strcpy(dest, src);
 #endif // #ifdef DEST_CASIO_CALC
+}
+
+// FC_cat() : Cancatenate 2 FONTCHARACTER
+//
+//  @dest : pointer to the destination string
+//  @add : pointer to the FONTCHARACTER to cancatenate
+//
+//  @return : pointer to the destination string if done  NULL on error
+//
+FONTCHARACTER bFile::FC_cat(FONTCHARACTER dest, const FONTCHARACTER add){
+    if (!dest || !add){
+        return NULL;
+    }
+
+#ifdef DEST_CASIO_CALC
+    return FC_cpy(dest + FC_len(dest), add);
+#else
+    return strcat(dest, add);
+#endif // DEST_CASIO_CALC
 }
 
 // FC_dup() : Duplicate a FONTCHARACTER

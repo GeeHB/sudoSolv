@@ -12,7 +12,7 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        0.3.1
+#define _GEEHB_MENU_VER_        0.3.3
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
@@ -57,7 +57,7 @@
 // Item colors
 #define ITEM_COLOUR_SELECTED     COLOUR_BLUE
 #define ITEM_COLOUR_UNSELECTED   COLOUR_DK_GREY
-#define ITEM_COLOUR_INACTIVE     COLOUR_GREY
+#define ITEM_COLOUR_INACTIVE     COLOUR_LT_GREY
 
 #define ITEM_ROUNDED_DIM         4
 
@@ -413,8 +413,13 @@ private:
     bool _isBitSet(int value, int bit){
 		return (bit == (value & bit));
 	}
-	void _removeBit(int value, int bit){
+	int _setBit(int& value, int bit){
+		value |= bit;
+		return value;
+	}
+    int _removeBit(int& value, int bit){
 		value = value & ~bit;
+		return value;
 	}
 
     // Members

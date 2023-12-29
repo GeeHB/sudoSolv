@@ -30,7 +30,7 @@
 // "File" menu bar
 //
 #define IDS_FILE_NEW        "New"
-#define IDS_FILE_PREV       "Previous"
+#define IDS_FILE_PREV       "Prev."
 #define IDS_FILE_NEXT       "Next"
 #define IDS_FILE_SAVE       "Save"
 #define IDS_FILE_ABOUT      "About"

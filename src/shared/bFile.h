@@ -16,7 +16,7 @@
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define VERSION_B_FILE_OBJECT       0.3.2
+#define VERSION_B_FILE_OBJECT       0.3.3
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>
@@ -62,7 +62,7 @@ struct BFile_FileInfo
 
 #define BFile_Type_Directory  0x0000
 #define BFile_Type_File       0x0001
-#define BFile_Type_Addin      0x0002
+#define BFile_Type_Addin      BFile_Type_File
 #define BFile_Type_Eact       0x0003
 #define BFile_Type_Language   0x0004
 #define BFile_Type_Bitmap     0x0005
@@ -71,7 +71,7 @@ struct BFile_FileInfo
 #define BFile_Type_Dot        0x0008
 #define BFile_Type_DotDot     0x0009
 #define BFile_Type_Volume     0x000a
-#define BFile_Type_Archived   0x0041
+#define BFile_Type_Archived   BFile_Type_File
 #endif // #ifndef DEST_CASIO_CALC
 
 // Max length in char of a path
@@ -219,7 +219,7 @@ public:
     // Utilities
     //
 
-    // FC_str2FC() : Convert a string to FC format
+    // FC_str2FC() : Convert a char* to FC format
     //
     //  @src : string to convert
     //  @dest : destination buffer
@@ -242,9 +242,18 @@ public:
     //  @dest : pointer to a destination string (already allocated)
     //  @src : pointer to the source string
     //
-    //  @return : pointer to the copy orif done  NULL on error
+    //  @return : pointer to the copy if done  NULL on error
     //
     static FONTCHARACTER FC_cpy(FONTCHARACTER dest, const FONTCHARACTER src);
+
+    // FC_cat() : Cancatenate 2 FONTCHARACTER
+    //
+    //  @dest : pointer to the destination string
+    //  @add : pointer to the FONTCHARACTER to cancatenate
+    //
+    //  @return : pointer to the destination string if done  NULL on error
+    //
+    static FONTCHARACTER FC_cat(FONTCHARACTER dest, const FONTCHARACTER add);
 
     // FC_dup() : Duplicate a FONTCHARACTER
     //
@@ -268,7 +277,6 @@ private:
 #else
     std::fstream file_;
     std::string fileName_;
-    std::string folderName_;
 #endif // #ifdef DEST_CASIO_CALC
 
     int error_;     // Last error code

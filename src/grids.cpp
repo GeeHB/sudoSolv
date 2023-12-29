@@ -38,18 +38,13 @@ grids::grids(){
 //
 //  @return : true if the next file name is valid
 //
-bool grids::nextFile(FONTCHARACTER& fName){
-    if (index_ >= (size() - 1)){
+bool grids::nextFile(FONTCHARACTER fName){
+    if (index_ >= count_){
         return false;
     }
 
     // Copy the file name
-#ifdef DEST_CASIO_CALC
-    bFile::FC_str2FC(folder_, fName);
-    bFile::FC_cpy(fName + bFile::FC_len(fName), files_[++index_]->fileName);
-#else
-#endif // DEST_CASIO_CALC 
-    //bFile::FC_cpy(fName, files_[++index_]->fileName);
+    bFile::FC_cpy(fName, files_[++index_]->fileName);
     return true;
 }
 
@@ -59,20 +54,13 @@ bool grids::nextFile(FONTCHARACTER& fName){
 //
 //  @return : true if the previous file name is valid
 //
-bool grids::prevFile(FONTCHARACTER& fName){
+bool grids::prevFile(FONTCHARACTER fName){
     if (index_ <= 0){
         return false;
     }
 
     // Copy the file name
-#ifdef DEST_CASIO_CALC
-    bFile::FC_str2FC(folder_, fName);
-    bFile::FC_cpy(fName + bFile::FC_len(fName), files_[--index_]->fileName);
-#else
-#endif // DEST_CASIO_CALC 
-    //bFile::FC_cpy(fName, files_[++index_]->fileName);
-
-    //bFile::FC_cpy(fName, files_[--index_]->fileName);
+    bFile::FC_cpy(fName, files_[--index_]->fileName);
     return true;
 }
 
@@ -80,9 +68,29 @@ bool grids::prevFile(FONTCHARACTER& fName){
 
 // File management
 bool newFileName(FONTCHARACTER folder);
-
-bool deleteFile();  // current
 */
+
+// deleteFile() : Delete current file
+//
+//  @return : true if deleted
+//
+bool grids::deleteFile(){
+    if (index_ != -1 && index_ < count_){
+#ifdef DEST_CASIO_CALC
+        uint16_t fName[BFILE_MAX_PATH + 1];
+#else
+        char fName[BFILE_MAX_PATH + 1];
+#endif // DEST_CASIO_CALC
+
+        // Get filename
+        bFile::FC_cpy((FONTCHARACTER)fName, files_[index_]->fileName);
+
+        bFile current;
+        return current.remove(fName);
+    }
+
+    return false;
+}
 
 
 // Internal methods
@@ -131,7 +139,7 @@ void grids::_browse(){
     if (folder.findFirst(FCPattern, &shandle, fName, &fileInfo)){
         do{
             // a file ?
-            if (BFile_Type_File == fileInfo.type){
+            if (BFile_Type_Archived == fileInfo.type){
                 _addFile(fName);
             }
         } while(folder.findNext(shandle, fName, &fileInfo));
@@ -144,17 +152,31 @@ void grids::_browse(){
 //
 //  @fileName : file to add
 //
-//  @return : ture if added
+//  @return : true if added
 //
 bool grids::_addFile(FONTCHARACTER fileName){
     PFNAME file = (PFNAME)malloc(sizeof(FNAME));
     if (NULL == file){
         return false;
     }
+    memset(file, 0x00, sizeof(FNAME));  // empty struct.
+
+    // Full name
+#ifdef DEST_CASIO_CALC
+    uint16_t fName[BFILE_MAX_PATH + 1];
+#else
+    char fName[BFILE_MAX_PATH + 1];
+#endif // DEST_CASIO_CALC
+    bFile::FC_str2FC(folder_, fName);   // convert folder to FONTCHARACTER
+    bFile::FC_cat(fName, fileName);     // add filename
 
     // fill struct. with file informations
-    if (NULL == (file->fileName = bFile::FC_dup(fileName)) ||
+    if (NULL == (file->fileName = bFile::FC_dup(fName)) ||
         -1 == (file->ID = __fileName2i(fileName))){
+        if (file->fileName){
+            free((void*)file->fileName);
+        }
+
         free(file);
         return false;   // Unable to copy the filename or invalid name
     }
@@ -251,7 +273,7 @@ void grids::__vector_clear(){
 }
 
 //
-// strings utils
+// Utils
 //
 
 // __fileName2i()- Convert a fully qualified filename to int
@@ -261,27 +283,32 @@ void grids::__vector_clear(){
 //  @return : numeric value or -1 on error
 //
 int grids::__fileName2i(FONTCHARACTER src){
-    char* buffer = (char*)src;
-    int num(0);
-    uint8_t index(0);
-    char car;
-    
-    uint8_t sCar(1);
+    int num(-1);
+    if (src){
+        char* buffer = (char*)src;
+        uint8_t index(0);
+        char car;
 #ifdef DEST_CASIO_CALC
-    sCar = sizeof(uint16_t);
+        uint8_t sCar(sizeof(uint16_t));
+#else
+        uint8_t sCar(1);
 #endif // DEST_CASIO_CALC
 
-    while (num >= 0 && (car = buffer[index + 1]) && car != '.'){
-        if (car >= '0' && car <= '9'){
-            num = num * 10 + (car - '0');
-        }
-        else{
-            // Invalid char.
-            num = -1;
-        }
+        num = 0;
+        while (num >= 0
+            && (car = buffer[index + 1])
+            && car != '.')      // no extension
+        {
+            if (car >= '0' && car <= '9'){
+                num = num * 10 + (car - '0');
+            }
+            else{
+                num = -1;   // invalid char
+            }
 
-        // Next char.
-        index+=sCar;
+            // Next char.
+            index+=sCar;
+        }
     }
 
     // Done or error
@@ -297,8 +324,6 @@ int grids::__fileName2i(FONTCHARACTER src){
 //
 char* grids::__itoa(int num, char* str){
     char* strVal(str);
-
-
 
     int sum ((num < 0)?-1*num:num);
 	uint8_t i(0), digit;

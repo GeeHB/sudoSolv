@@ -98,11 +98,11 @@ bool menuBar::activate(int searchedID, int searchMode, bool activated){
         bool inactive = _isBitSet(item->state, ITEM_INACTIVE);
         if (inactive == activated){
             // change item's state
-			if (!activated){
+			if (activated){
 				_removeBit(item->state, ITEM_INACTIVE);
 			}
 			else{
-				item->state |= ITEM_INACTIVE;
+				_setBit(item->state, ITEM_INACTIVE);
 			}
 
             return true;

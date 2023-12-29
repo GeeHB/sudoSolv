@@ -41,18 +41,19 @@ int main(void)
 
     // List of grid files
     grids files;
-    int max = files.size();
-    if (max){
+    if (files.size()){
         menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
+        menu.update();
     }
 
-    FONTCHARACTER fileName;
-
+    uint16_t fileName[BFILE_MAX_PATH + 1];
+    
     //
     // App. main loop
     //
     sudoku game(&mainRect);
     bool end(false);
+    uint8_t error(FILE_NO_ERROR);
     MENUACTION action;
     while (!end){
         // A menu action ?
@@ -70,23 +71,43 @@ int main(void)
 
                 // Show prev file
                 case IDM_FILE_PREV:
-                    files.prevFile(fileName);
-                    menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
+                    if (files.prevFile(fileName)){
+                        menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
 
-                    if (!files.pos()){
-                        menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, false);
+                        if (!files.pos()){
+                            menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, false);
+                        }
                         menu.update();
-                    }
+
+                        // Update grid on screen
+                        if (FILE_NO_ERROR == (error = game.load(fileName))){
+                            game.display();
+                        }
+                        else{
+                            dprint(5, 5, C_BLACK, "Error loading file : %d", (int)error);
+                            dupdate();
+                        }
+                    } 
                     break;
 
                 // Show next file
                 case IDM_FILE_NEXT:
-                    files.nextFile(fileName);
-                    menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, true);
-
-                    if (files.pos() == files.size()){
-                        menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
+                    if (files.nextFile(fileName)){
+                        // Menu changes
+                        menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, true);
+                        if (files.pos() == files.size()){
+                            menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
+                        }
                         menu.update();
+
+                        // Update grid on screen
+                        if (FILE_NO_ERROR == (error = game.load(fileName))){
+                            game.display();
+                        }
+                        else{
+                            dprint(5, 5, C_BLACK, "Error loading file : %d", (int)error);
+                            dupdate();
+                        }
                     }
                     break;
 
