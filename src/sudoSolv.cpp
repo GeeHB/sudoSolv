@@ -15,7 +15,10 @@
 #ifdef DEST_CASIO_CALC
 #include "shared/scrCapture.h"
 extern bopti_image_t g_homeScreen;  // Background image
-scrCapture  g_Capture;              // Screen capture object
+
+    #ifndef NO_CAPTURE
+    scrCapture  g_Capture;              // Screen capture object
+    #endif // #ifndef NO_CAPTURE
 #endif // #ifdef DEST_CASIO_CALC
 
 // Functions definitions
@@ -47,8 +50,7 @@ int main(void)
     }
 
     uint16_t fileName[BFILE_MAX_PATH + 1];
-    
-    //
+
     // App. main loop
     //
     sudoku game(&mainRect);
@@ -59,17 +61,16 @@ int main(void)
         // A menu action ?
         action = menu.handleKeyboard();
 
-        // ... from menu ?
+        // push a menu key ?
         if (ACTION_MENU == action.type){
             switch (action.value){
-
                 // (re)start with a new empty grid
                 case IDM_FILE_NEW:
                     game.empty();
                     game.display();
                     break;
 
-                // Show prev file
+                // Load previous file
                 case IDM_FILE_PREV:
                     if (files.prevFile(fileName)){
                         menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
@@ -90,7 +91,7 @@ int main(void)
                     } 
                     break;
 
-                // Show next file
+                // Load next file
                 case IDM_FILE_NEXT:
                     if (files.nextFile(fileName)){
                         // Menu changes
@@ -115,8 +116,7 @@ int main(void)
                     _homeScreen();
                     break;
 
-                // Modify current grid
-#ifdef DEST_CASIO_CALC
+				// Modify current grid
                 case IDM_EDIT:{
                     game.display();
                     bool modified = game.edit();
@@ -125,7 +125,6 @@ int main(void)
                     menu.update();  // redraw the whole menu bar
                     break;
                 }
-#endif // #ifdef DEST_CASIO_CALC
 
                 // Search for obvious values
                 case IDM_SOLVE_OBVIOUS:
@@ -144,6 +143,7 @@ int main(void)
                     game.display();
                     break;
 
+                // Quit the application
                 case IDM_QUIT:
                     end = true;
                     break;
@@ -156,14 +156,12 @@ int main(void)
             if (ACTION_KEYBOARD == action.type){
                 switch (action.value){
                     // Return to main menu
-#ifdef DEST_CASIO_CALC
                     case KEY_MENU:
                         end = true;
                         break;
-#endif // #ifdef DEST_CASIO_CALC
 
-#ifdef DEST_CASIO_CALC
                     // Activate or deactivate screen capture
+#ifndef NO_CAPTURE
                     case KEY_CODE_CAPTURE:
                         if (action.modifier == MOD_SHIFT){
                             if (!g_Capture.isSet()){
@@ -174,7 +172,7 @@ int main(void)
                             }
                         }
                         break;
-#endif // #ifdef DEST_CASIO_CALC
+#endif // #ifndef NO_CAPTURE
 
                     default:
                         break;
@@ -183,15 +181,13 @@ int main(void)
         }
     }
 
-#ifdef DEST_CASIO_CALC
     //gint_setrestart(1);
     gint_osmenu();
-#endif // #ifdef DEST_CASIO_CALC
 
 	return 1;
 }
 
-// Create menu bars
+// Create menu bar
 //
 void _createMenu(menuBar& menu){
     // "File" sub menu
@@ -231,8 +227,7 @@ void _homeScreen(){
     int w, h;
     dsize(copyright, NULL, &w, &h);
     dtext(CASIO_WIDTH - w - 5,
-		CASIO_HEIGHT - MENUBAR_DEF_HEIGHT - h - 10,
-		COLOUR_BLACK,
+		CASIO_HEIGHT - MENUBAR_DEF_HEIGHT - h - 10, COLOUR_BLACK,
 		copyright);
 
     dupdate();

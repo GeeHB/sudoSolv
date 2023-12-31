@@ -1,10 +1,10 @@
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    consts.h
 //--
 //--		App. constants
 //--
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #ifndef __S_SOLVER_CONSTANTS_h__
 #define __S_SOLVER_CONSTANTS_h__    1
@@ -29,7 +29,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolv"
-#define APP_VERSION  "0.1.5"
+#define APP_VERSION  "0.1.6"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -54,6 +54,11 @@ extern "C" {
 #define VALUE_MIN   1
 #define VALUE_MAX   9
 
+// Blinking
+//
+#define BLINK_TICK_DURATION     100 //  in ms
+#define BLINK_TICKCOUNT         4   // "duration" of blinking in ticks
+
 // Files
 //
 #define VALUE_SEPARATOR ','     // Value separator in files
@@ -68,13 +73,13 @@ extern "C" {
 // Error codes
 //
 #define FILE_NO_ERROR           0
-#define FILE_INVALID_FILENAME   1       // File doesn't exist
+#define FILE_INVALID_FILENAME   1	// File doesn't exist
 #define FILE_INVALID_FILESIZE   2
 #define FILE_NO_FILENAME        3
 #define FILE_IO_ERROR           4
 #define FILE_INVALID_LINE       11
 #define FILE_INVALID_FORMAT     12
-#define FILE_VALUE_ERROR        13      // The value can't be set at this position
+#define FILE_VALUE_ERROR        13	// The value can't be set at this position
 
 // Display
 //
@@ -90,8 +95,8 @@ extern "C" {
 #define BORDER_COLOUR           C_RGB(10, 19, 23)
 #define BK_COLOUR               C_RGB(28, 28, 30)
 #define TXT_COLOUR              C_RGB(8, 8, 8)
-#define ORIGINAL_COLOUR         C_RGB(30, 15, 14)
-#define OBVIOUS_COLOUR          BORDER_COLOUR
+#define TXT_ORIGINAL_COLOUR     C_RGB(30, 15, 14)
+#define TXT_OBVIOUS_COLOUR      BORDER_COLOUR
 #define SEL_BK_COLOUR           C_RGB(6, 6, 31)
 #define SEL_TXT_COLOUR          C_WHITE
 #endif // #ifdef DEST_CASIO_CALC

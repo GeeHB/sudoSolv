@@ -11,7 +11,7 @@ set(SOURCES
 	src/shared/bFile.cpp
 	src/shared/keyboard.cpp
 	src/shared/menuBar.cpp
-	src/shared/scrCapture.cpp
+	#src/shared/scrCapture.cpp
 	src/position.cpp
 	src/element.cpp
 	src/tinySquare.cpp
@@ -30,7 +30,7 @@ set(ASSETS_cg
 fxconv_declare_assets(${ASSETS} ${ASSETS_cg} WITH_METADATA)
 
 add_executable(sudoSolver ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
-target_compile_options(sudoSolver PRIVATE -Wall -Wextra -Os -D=DEST_CASIO_CALC)
+target_compile_options(sudoSolver PRIVATE -Wall -Wextra -Os -D=DEST_CASIO_CALC -D=NO_CAPTURE)
 target_link_libraries(sudoSolver Gint::Gint)
 
 if("${FXSDK_PLATFORM_LONG}" STREQUAL fxCG50)

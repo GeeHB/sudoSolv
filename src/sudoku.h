@@ -2,8 +2,8 @@
 //--
 //--    sudoku.h
 //--
-//--        Definition of sudoku object - Edition and resolution of a
-//--        sudoku grid
+//--        Definition of sudoku object - Edition and resolution
+//--        of a sudoku grid
 //--
 //----------------------------------------------------------------------
 
@@ -122,7 +122,7 @@ private:
     //  @return : true if the given value is valid in the tinySquare
     //
     bool _checkTinySquare(position& pos, uint8_t value){
-        return (false == tSquares_[pos.squareID()].inMe(elements_, value)); // Is the value in the tinySquare ?
+        return (false == tSquares_[pos.squareID()].inMe(elements_, value));
     }
 
     // _checkAndSet() : Try to  put the value at the current position
@@ -132,16 +132,7 @@ private:
     //
     //  @return : true if value is set
     //
-    bool _checkAndSet(position& pos, uint8_t value){
-        if (_checkLine(pos, value) && _checkRow(pos, value) && 
-			_checkTinySquare(pos, value)){
-            // set
-            elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
-            return true;
-        }
-
-        return false;
-    }
+    bool _checkAndSet(position& pos, uint8_t value);
 
     //
     // Drawings
@@ -163,11 +154,12 @@ private:
     //  @bkColour : background colour
     //  @txtColour : text colour
     //
-    void _drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bkColour, int txtColour);
+    void _drawSingleElement(uint8_t row, uint8_t line, uint8_t value,
+							int bkColour, int txtColour);
 #endif // #ifdef DEST_CASIO_CALC
 
     //
-    //   Obvious values
+    //   Search for obvious values
     //
 
     // _findObviousValues() :
@@ -177,7 +169,8 @@ private:
     //
     uint8_t _findObviousValues();
 
-    // _checkObviousValue() : Is there an obvious value for the given position ?
+    // _checkObviousValue() : Is there an obvious value
+    //						  for the given position ?
     //
     //  pos : current position in the grid
     //
@@ -218,7 +211,8 @@ private:
     // _previousPos() : Returns to the previous position
     //
     //  Go backward in the grid to find a valid position.
-    //  If pisition index is -1, the method will return POS_INDEX_ERROR : no solution for this grid
+    //  If position index is -1, the method will return POS_INDEX_ERROR
+    //  ie. no solution for this grid
     //
     //  @current : current position
     //
@@ -226,12 +220,23 @@ private:
     //
     uint8_t _previousPos(position& current);
 
+#ifdef DEST_CASIO_CALC
+    // __callbackTick() : Call back function for timer
+    // This function is used during edition to make selected item blink
+    //
+    //  @pTick : pointer to blinking state indicator
+    //
+    //  @return : TIMER_CONTINUE if valid
+    // 
+    static int __callbackTick(volatile int *pTick);
+#endif // #ifdef DEST_CASIO_CALC
+
     // Members
 private:
-    element elements_[LINE_COUNT * ROW_COUNT];      // grid as a one dim. table
-    tinySquare  tSquares_[TINY_COUNT];              // Elements IDs in tinySquares
+    element elements_[LINE_COUNT * ROW_COUNT];	// grid as a one dim. table
+    tinySquare  tSquares_[TINY_COUNT];	// Elements IDs in tinySquares
 
-    RECT    grid_;                                  // Position and dimensions of the grid
+    RECT    grid_;		// Position and dimensions of the grid
 };
 
 #ifdef __cplusplus

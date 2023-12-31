@@ -2,8 +2,8 @@
 //--
 //--    sudoku.cpp
 //--
-//--        Implementation of sudoku object - Edition and
-//--		resolution of a sudoku grid
+//--        Implementation of sudoku object - Edition and resolution
+//--		of a sudoku grid
 //--
 //----------------------------------------------------------------------
 
@@ -13,6 +13,11 @@
 #include "shared/keyboard.h"
 
 #include <math.h>
+
+#ifdef DEST_CASIO_CALC
+#include <gint/timer.h>
+#include <gint/clock.h>
+#endif // #ifdef DEST_CASIO_CALC
 
 // Construction
 //
@@ -212,21 +217,38 @@ bool sudoku::edit(){
     menu.addItem(1, IDM_EDIT_OK, IDS_EDIT_OK);
     menu.update();
 
-    while (cont){
-        // if sel. changed, erase previously selected element
-        if (prevPos != currentPos){
-            _drawSingleElement(prevPos.row(), prevPos.line(),
-					elements_[prevPos].value(),
-					BK_COLOUR, ORIGINAL_COLOUR);
-        }
-
-        // Hilight the new value
-        _drawSingleElement(currentPos.row(), currentPos.line(),
+    // Initial draw
+	bool showSelected(true), reDraw(false);
+	_drawSingleElement(currentPos.row(), currentPos.line(),
 					elements_[currentPos].value(),
 					SEL_BK_COLOUR, SEL_TXT_COLOUR);
 
-        dupdate();
-        prevPos = currentPos;
+    // Timer for blinking effect
+    int tickCount(BLINK_TICKCOUNT);
+    static volatile int tick(1);
+    int timerID = timer_configure(TIMER_ANY, BLINK_TICK_DURATION*1000,
+					GINT_CALL(__callbackTick, &tick));
+    if (timerID >= 0){
+        timer_start(timerID);   // set the timer
+    }
+
+    // Edit grid
+    while (cont){
+
+        if (timerID >= 0){
+			while(!tick){
+				sleep();
+			}
+			tick = 0;
+
+			// Time to blink ?
+			if (!(tickCount--)){
+				// Blink
+				showSelected = !showSelected;
+				tickCount = BLINK_TICKCOUNT;
+				reDraw = true;
+			}
+		}
 
         // Wait for a keyboard event
         action = menu.handleKeyboard();
@@ -236,18 +258,22 @@ bool sudoku::edit(){
         //
         case KEY_CODE_LEFT:
             currentPos.decRow();    // one row left
+            reDraw = true;
             break;
 
         case KEY_CODE_RIGHT:
             currentPos.incRow();    // one row right
+            reDraw = true;
             break;
 
         case KEY_CODE_UP:
             currentPos.decLine();   // one line up
+            reDraw = true;
             break;
 
         case KEY_CODE_DOWN:
             currentPos.incLine();   // one line down
+            reDraw = true;
             break;
 
         // Change the current value
@@ -304,12 +330,42 @@ bool sudoku::edit(){
         default:
             break;
         } // switch (car)
+
+        if (reDraw || (prevPos != currentPos)){
+			// if sel. changed, erase previously selected element
+			if (prevPos != currentPos){
+				_drawSingleElement(prevPos.row(), prevPos.line(),
+						elements_[prevPos].value(),
+						BK_COLOUR, TXT_ORIGINAL_COLOUR);
+			}
+
+			// Hilight the new value (or have it blink)
+			if (showSelected){
+				_drawSingleElement(currentPos.row(), currentPos.line(),
+							elements_[currentPos].value(),
+							SEL_BK_COLOUR, SEL_TXT_COLOUR);
+			}
+			else{
+				_drawSingleElement(currentPos.row(), currentPos.line(),
+							elements_[currentPos].value(),
+							BK_COLOUR, TXT_ORIGINAL_COLOUR);
+			}
+
+			dupdate();
+			prevPos = currentPos;
+			reDraw = false;
+		}
+
     } // while (cont)
+
+    if (timerID >= 0){
+        timer_stop(timerID);    // stop the timer
+    }
 
     // unselect
     _drawSingleElement(currentPos.row(), currentPos.line(),
 			elements_[currentPos].value(),
-			BK_COLOUR, ORIGINAL_COLOUR);
+			BK_COLOUR, TXT_ORIGINAL_COLOUR);
 
     return modified;
 }
@@ -326,7 +382,7 @@ uint8_t sudoku::findObviousValues(){
     do{
         values = _findObviousValues();
         found += values;
-    } while(values);    // since we put values, we'll search new ones
+    } while(values);    // since we put value(s), we'll search new ones
 
     return found;
 }
@@ -435,11 +491,27 @@ bool sudoku::_checkRow(position& pos, uint8_t value){
 //  @return : true if the given value is valid at the given position
 //
 bool sudoku::_checkValue(position& pos, uint8_t value){
-    bool line = _checkLine(pos, value);
-    bool row = _checkRow(pos, value);
-    bool square= _checkTinySquare(pos, value);
+    return (_checkLine(pos, value) &&
+			_checkRow(pos, value) &&
+			_checkTinySquare(pos, value));
+}
 
-    return (line && row && square);
+ // _checkAndSet() : Try to  put the value at the current position
+//
+//  @pos : position
+//  @value : value to put
+//
+//  @return : true if value is set
+//
+bool sudoku::_checkAndSet(position& pos, uint8_t value){
+	if (_checkLine(pos, value) && _checkRow(pos, value) &&
+		_checkTinySquare(pos, value)){
+		// set
+		elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
+		return true;
+	}
+
+	return false;
 }
 
 //
@@ -485,7 +557,8 @@ void sudoku::_drawContent(){
             if (!pElement->isEmpty()){
                 _drawSingleElement(row, line,
 					pElement->value(), BK_COLOUR,
-					(pElement->isOriginal()?ORIGINAL_COLOUR:(pElement->isObvious()?OBVIOUS_COLOUR:TXT_COLOUR)));
+					(pElement->isOriginal()?TXT_ORIGINAL_COLOUR:
+					(pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR)));
             }
             pos+=1; // next element
         }
@@ -525,7 +598,7 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bk
 #endif // #ifdef DEST_CASIO_CALC
 
 //
-//   Obvious values
+//   Search for obvious values
 //
 
 // _findObviousValues() :
@@ -784,7 +857,8 @@ uint8_t sudoku::_findFirstEmptyPos(position &start){
 // _previousPos() : Returns to the previous position
 //
 //  Go backward in the grid to find a valid position.
-//  If pisition index is -1, the method will return POS_INDEX_ERROR : no solution for this grid
+//  If position index is -1, the method will return POS_INDEX_ERROR
+//  ie. no solution for this grid
 //
 //  @current : current position
 //
@@ -802,5 +876,19 @@ uint8_t sudoku::_previousPos(position& current){
 
     return current.status();
 }
+
+#ifdef DEST_CASIO_CALC
+// __callbackTick() : Call back function for timer
+// This function is used during edition to make selected item blink
+//
+//  @pTick : pointer to blinking state indicator
+//
+//  @return : TIMER_CONTINUE if valid
+//
+int sudoku::__callbackTick(volatile int *pTick){
+    *pTick = 1;
+    return TIMER_CONTINUE;
+}
+#endif // #ifdef DEST_CASIO_CALC
 
 // EOF
