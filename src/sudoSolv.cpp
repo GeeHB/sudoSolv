@@ -132,6 +132,9 @@ int main(void)
                     if (files.newFileName(fileName)){
                         if (game.save(fileName)){
                             files.addFileName(fileName);
+
+                            _setFileName(fileName, sFileName);
+                            _displayStats(sFileName, -1, -1);
                         }
                         menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, false);
                         menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
@@ -158,12 +161,6 @@ int main(void)
                         _displayStats(sFileName, -1, -1);
                     }
                     break;
-
-                /*
-                case IDM_FILE_ABOUT:
-                    _homeScreen();
-                    break;
-                */
 
 				// Modify current grid
                 case IDM_EDIT:{
@@ -267,7 +264,6 @@ void _createMenu(menuBar& menu){
     fileMenu.appendItem(IDM_FILE_NEXT, IDS_FILE_NEXT, ITEM_STATE_INACTIVE);
     fileMenu.appendItem(IDM_FILE_SAVE, IDS_FILE_SAVE, ITEM_STATE_INACTIVE);
     fileMenu.appendItem(IDM_FILE_DELETE, IDS_FILE_DELETE, ITEM_STATE_INACTIVE);
-    //fileMenu.appendItem(IDM_FILE_ABOUT, IDS_FILE_ABOUT);
     menu.appendSubMenu(&fileMenu, IDM_FILE_SUBMENU, IDS_FILE_SUBMENU);
 
     menu.appendItem(IDM_EDIT, IDS_EDIT);

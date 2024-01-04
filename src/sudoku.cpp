@@ -106,7 +106,7 @@ void sudoku::revert(){
 //
 //  @return : 0 on success or an error code
 //
-uint8_t sudoku::load(FONTCHARACTER fName){
+uint8_t sudoku::load(const FONTCHARACTER fName){
     if (!fName || !fName[0]){
         return FILE_NO_FILENAME;
     }
@@ -163,7 +163,7 @@ uint8_t sudoku::load(FONTCHARACTER fName){
 //
 //  @return : 0 on success or an error code
 //
-uint8_t sudoku::save(FONTCHARACTER fName){
+uint8_t sudoku::save(const FONTCHARACTER fName){
     if (!fName || !fName[0]){
         return FILE_NO_FILENAME;   // No valid file name
     }
@@ -555,7 +555,7 @@ bool sudoku::_checkAndSet(position& pos, uint8_t value){
 //
 void sudoku::_drawBackground(){
     // Erase background
-    drect(0, 0, screen_.w, screen_.h, BK_COLOUR);
+    drect(0, 0, screen_.w - 1, screen_.h - 1, BK_COLOUR);
 
     // Draw thin borders
     uint16_t posX, posY;

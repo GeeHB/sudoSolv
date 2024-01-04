@@ -96,6 +96,7 @@ bool grids::deleteFile(){
     if (index_ != -1 && index_ < count_){
 #ifdef DEST_CASIO_CALC
         uint16_t fName[BFILE_MAX_PATH + 1];
+        fName[0] = 0x0000;
 #else
         char fName[BFILE_MAX_PATH + 1];
 #endif // DEST_CASIO_CALC
@@ -188,7 +189,7 @@ void grids::_browse(){
 //
 //  @return : true if added
 //
-bool grids::_addFile(FONTCHARACTER fileName, bool addFolder){
+bool grids::_addFile(const FONTCHARACTER fileName, bool addFolder){
     PFNAME file = (PFNAME)malloc(sizeof(FNAME));
     if (NULL == file){
         return false;
@@ -354,7 +355,7 @@ int grids::_nextFileID(){
 //
 //  @return : numeric value or -1 on error
 //
-int grids::__fileName2i(FONTCHARACTER src){
+int grids::__fileName2i(const FONTCHARACTER src){
     int num(-1);
     if (src){
         char* buffer = (char*)src;

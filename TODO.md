@@ -30,7 +30,7 @@
 #### Corrections
 - [x] Affichage de la grille centrée verticalement
 - [ ] Code refactoring
-- [x] La ligne supérieure de la barre de menu disparait
+- [ ] La ligne supérieure de la barre de menu disparait
 - [ ] Nouvelle grille
     - [x] pas de nouvel ID si pas de sauvegarde
     - [ ] "compression" pour trouver le plus petit ID disponible possible

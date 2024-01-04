@@ -45,7 +45,7 @@ public:
     // Destruction
     ~tinySquare(){}
 
-    // copyy() : Copy a tinySquare
+    // copy() : Copy a tinySquare
     //
     //  other : tinySquate to copy
     //

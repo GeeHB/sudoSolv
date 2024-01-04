@@ -36,7 +36,7 @@ extern bopti_image_t g_menuImgs;
 menuBar::menuBar(){
     // Intializes members
     visible_ = &current_; // show current bar
-    rect_ = {0, CASIO_HEIGHT - MENUBAR_DEF_HEIGHT - 1, CASIO_WIDTH, MENUBAR_DEF_HEIGHT};
+    rect_ = {0, CASIO_HEIGHT - MENUBAR_DEF_HEIGHT, CASIO_WIDTH, MENUBAR_DEF_HEIGHT};
 
     _clearMenuBar(&current_);
 }
@@ -252,7 +252,7 @@ MENUACTION menuBar::handleKeyboard(){
 //
 //  @return : true if sub menu is added
 //
-bool menuBar::_addSubMenu(PMENUBAR container, uint8_t index, PMENUBAR subMenu, int id,
+bool menuBar::_addSubMenu(const PMENUBAR container, uint8_t index, PMENUBAR subMenu, int id,
                             const char* text, int itemState){
     size_t len(0);
     if (!container || !subMenu ||
@@ -310,7 +310,7 @@ void menuBar::_clearMenuBar(PMENUBAR bar){
 //
 //  @return : Pointer to the new copy
 //
-PMENUBAR menuBar::_copyMenuBar(PMENUBAR source, bool noBackButton){
+PMENUBAR menuBar::_copyMenuBar(const PMENUBAR source, bool noBackButton){
     PMENUBAR bar(NULL);
     if (source && (bar = (PMENUBAR)malloc(sizeof(MENUBAR)))){
         _clearMenuBar(bar);
@@ -363,7 +363,8 @@ void menuBar::_freeMenuBar(PMENUBAR bar, bool freeAll){
 //
 //  @return : true if the item has been added
 //
-bool menuBar::_addItem(PMENUBAR bar, uint8_t index, int id, const char* text, int state, int status){
+bool menuBar::_addItem(const PMENUBAR bar, uint8_t index, int id,
+                        const char* text, int state, int status){
     size_t len(0);
     if (!bar ||
         index >= MENU_MAX_ITEM_COUNT ||
@@ -429,7 +430,7 @@ PMENUITEM menuBar::_createItem(int id, const char* text, int state, int status){
 //
 //  @return : pointer to the copied item or NULL
 //
-PMENUITEM menuBar::_copyItem(PMENUBAR bar, PMENUITEM source){
+PMENUITEM menuBar::_copyItem(const PMENUBAR bar, PMENUITEM source){
     PMENUITEM item(NULL);
     if (source && (item = (PMENUITEM)malloc(sizeof(MENUITEM)))){
         item->id = source->id;
@@ -461,7 +462,7 @@ PMENUITEM menuBar::_copyItem(PMENUBAR bar, PMENUITEM source){
 //
 //  @return : pointer to the item if found or NULL
 //
-PMENUITEM menuBar::_findItem(PMENUBAR bar, int searchedID, int searchMode,
+PMENUITEM menuBar::_findItem(const PMENUBAR bar, int searchedID, int searchMode,
 				PMENUBAR* containerBar, uint8_t* pIndex){
     PMENUITEM item(NULL), sItem(NULL), foundItem(NULL);
     if (bar){
@@ -513,7 +514,7 @@ PMENUITEM menuBar::_findItem(PMENUBAR bar, int searchedID, int searchMode,
 //
 //  @return : true if the item has been successfully removed
 //
-bool menuBar::_removeItem(PMENUBAR bar, int searchedID, int searchMode){
+bool menuBar::_removeItem(const PMENUBAR bar, int searchedID, int searchMode){
     PMENUITEM item(NULL);
     if (bar){
         switch(searchMode){

@@ -54,7 +54,7 @@ public:
     //
     //  @return : 0 on success or an error code
     //
-    uint8_t load(FONTCHARACTER fName);
+    uint8_t load(const FONTCHARACTER fName);
 
    // save() : Save the grid on a file
     //
@@ -65,7 +65,7 @@ public:
     //
     //  @return : 0 on success or an error code
     //
-    uint8_t save(FONTCHARACTER fName);
+    uint8_t save(const FONTCHARACTER fName);
 
 #ifdef DEST_CASIO_CALC
     // edit() : Edit / modify the current grid

@@ -49,7 +49,7 @@ public:
     //
     //  @return : true if successfully added
     //
-    bool addFileName(FONTCHARACTER fName){
+    bool addFileName(const FONTCHARACTER fName){
         return _addFile(fName, false);
     }
 
@@ -97,7 +97,7 @@ private:
     //
     //  @return : true if added
     //
-    bool _addFile(FONTCHARACTER fileName, bool addFolder);
+    bool _addFile(const FONTCHARACTER fileName, bool addFolder);
 
     // Informations about a file
     //
@@ -152,7 +152,7 @@ private:
     //
     //  @return : numeric value or -1 on error
     //
-    int __fileName2i(FONTCHARACTER src);
+    int __fileName2i(const FONTCHARACTER src);
 
     // __itoa() : Transform a numeric value into a string
     //

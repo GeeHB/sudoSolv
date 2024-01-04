@@ -19,7 +19,7 @@ extern "C" {
 //
 #define IDS_FILE_SUBMENU    "File"
 
-#define IDS_EDIT            "Edit"
+#define IDS_EDIT            "Edit"      // "Edit" sub-menu
 #define IDS_EDIT_OK         "Ok"
 #define IDS_EDIT_CANCEL     "Cancel"
 
@@ -33,14 +33,13 @@ extern "C" {
 #define IDM_QUIT             400
 
 
-// "File" menu bar
+// "File" sub-menu bar
 //
 #define IDS_FILE_NEW        "New"
 #define IDS_FILE_PREV       "Prev."
 #define IDS_FILE_NEXT       "Next"
 #define IDS_FILE_SAVE       "Save"
 #define IDS_FILE_DELETE     "Delete"
-#define IDS_FILE_ABOUT      "About"
 
 #define IDM_FILE_SUBMENU    100
 #define IDM_FILE_NEW        101
@@ -48,9 +47,8 @@ extern "C" {
 #define IDM_FILE_NEXT       103
 #define IDM_FILE_SAVE       104
 #define IDM_FILE_DELETE     105
-#define IDM_FILE_ABOUT      111
 
-// "Solver" menu bar
+// "Solve" sub-menu bar
 //
 #define IDS_SOLVE_OBVIOUS   "Obvious"
 #define IDS_SOLVE_FIND      "Resolve"

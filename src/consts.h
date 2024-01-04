@@ -29,7 +29,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolv"
-#define APP_VERSION  "0.1.7"
+#define APP_VERSION  "0.1.8"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder

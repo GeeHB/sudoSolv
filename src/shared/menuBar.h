@@ -310,7 +310,7 @@ private:
     //
     //  @return : true if sub menu is added
     //
-    bool _addSubMenu(PMENUBAR container, uint8_t index,
+    bool _addSubMenu(const PMENUBAR container, uint8_t index,
 					PMENUBAR subMenu, int id, const char* text, int state);
 
     // _clearMenuBar() : Empty a menu bar
@@ -329,7 +329,7 @@ private:
     //
     //  @return : Pointer to the new copy or NULL on error
     //
-    PMENUBAR _copyMenuBar(PMENUBAR source, bool noBackButton);
+    PMENUBAR _copyMenuBar(const PMENUBAR source, bool noBackButton);
 
     //  _freeMenuBar() : Free memory used by a bar
     //
@@ -353,9 +353,9 @@ private:
     //
     //  @return : true if the item has been added
     //
-    bool _addItem(PMENUBAR bar, uint8_t index, int id,
-						const char* text, int state = ITEM_STATE_DEFAULT,
-						int status = ITEM_STATUS_DEFAULT);
+    bool _addItem(const PMENUBAR bar, uint8_t index, int id,
+                    const char* text, int state = ITEM_STATE_DEFAULT,
+                    int status = ITEM_STATUS_DEFAULT);
 
     //  _createItem() : creae a new menu item
     //
@@ -375,7 +375,7 @@ private:
     //
     //  @return : pointer to the copied item or NULL
     //
-    PMENUITEM _copyItem(PMENUBAR bar, PMENUITEM source);
+    PMENUITEM _copyItem(const PMENUBAR bar, PMENUITEM source);
 
     //  _findItem() : Find an item in the given bar
     //
@@ -390,7 +390,7 @@ private:
     //
     //  @return : pointer to the item if found or NULL
     //
-    PMENUITEM _findItem(PMENUBAR bar, int searchedID,
+    PMENUITEM _findItem(const PMENUBAR bar, int searchedID,
     			int searchMode, PMENUBAR* containerBar = NULL,
     			uint8_t* pIndex = NULL);
 
@@ -404,7 +404,7 @@ private:
     //
     //  @return : true if the item has been successfully removed
     //
-    bool _removeItem(PMENUBAR bar, int searchedID, int searchMode);
+    bool _removeItem(const PMENUBAR bar, int searchedID, int searchMode);
 
     //  _selectByIndex() : Select an item by index in the current bar
     //
