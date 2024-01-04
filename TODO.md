@@ -9,7 +9,7 @@
     - [x] MENU -> retour au menu (exit app)
     - [ ] callback pour le dessin d'un item
     - [ ] retaille du nom d'un item si trop long
-    - [ ] item de type checkbox
+    - [x] item de type checkbox
         - [ ] pour FX9680G ... ?
     - [ ] getItem / setItem
 - [x] _homeScreen()
@@ -17,21 +17,20 @@
 - [x] grids
 - [x] Copie d'écran - *fxlink*
 - [ ] Texte sur une grille
-    - [ ]nom court
-    - [ ] # obvious
-    - [ ] temps de résolution
-- [x] clignotement en mode Edition    
+    - [x] nom court
+    - [x] # obvious
+    - [x] Durée de résolution
+- [x] Clignotement en mode Edition    
 - [ ] Fichiers
     - [ ] Suppression du fichier courant
     - [ ] Sauvegarde (uniquement les éléments 'Originaux')
-- [ ] revert
+- [x] revert
 - [ ] mode "zoom"
 
-
 #### Corrections
-- [x] Affichage de la grille centrée
+- [x] Affichage de la grille centrée verticalement
 - [ ] Code refactoring
-- [ ] La ligne supérieure de la barre de menu disparait
+- [x] La ligne supérieure de la barre de menu disparait
 - [ ] Nouvelle grille
-    - [ ] pas de nouvel ID si pas de sauvegarde
+    - [x] pas de nouvel ID si pas de sauvegarde
     - [ ] "compression" pour trouver le plus petit ID disponible possible

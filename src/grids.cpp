@@ -64,11 +64,29 @@ bool grids::prevFile(FONTCHARACTER fName){
     return true;
 }
 
-/*
+// newFileName() : Generates a unique file name
+//
+//  @fName : new FQN
+//
+//  @return : true if name is valid
+//
+bool grids::newFileName(FONTCHARACTER fName){
+    if (fName){
+        int ID(_nextFileID());
+        if (-1 != ID){
+            char name[BFILE_MAX_PATH + 1];
+            strcpy(name, folder_);
+            __itoa(ID, name + strlen(name));    // Append ID
+            strcat(name, GRID_FILE_EXT);
 
-// File management
-bool newFileName(FONTCHARACTER folder);
-*/
+            bFile::FC_str2FC(name, fName);
+            return true;
+        }
+    }
+
+    // No filename or no possible ID
+    return false;
+}
 
 // deleteFile() : Delete current file
 //
@@ -85,8 +103,23 @@ bool grids::deleteFile(){
         // Get filename
         bFile::FC_cpy((FONTCHARACTER)fName, files_[index_]->fileName);
 
+        // remove from disk
         bFile current;
-        return current.remove(fName);
+        if (current.remove(fName)){
+            // remove from list
+            int ID = __fileName2i(fName);
+            PFNAME pFile(NULL);
+            bool done(false);
+            for (int index=0; !done && index < count_; index++){
+                if ((pFile = files_[index]) && ID == pFile->ID){
+                    _freeFileName(pFile);
+                    files_[index] = NULL;
+                    done = true;
+                }
+            }
+
+            return true;
+        }
     }
 
     return false;
@@ -140,7 +173,7 @@ void grids::_browse(){
         do{
             // a file ?
             if (BFile_Type_Archived == fileInfo.type){
-                _addFile(fName);
+                _addFile(fName, true);
             }
         } while(folder.findNext(shandle, fName, &fileInfo));
 
@@ -151,10 +184,11 @@ void grids::_browse(){
 // _addFile() - Add file to the list
 //
 //  @fileName : file to add
+//  @addFolder : add folder to the path
 //
 //  @return : true if added
 //
-bool grids::_addFile(FONTCHARACTER fileName){
+bool grids::_addFile(FONTCHARACTER fileName, bool addFolder){
     PFNAME file = (PFNAME)malloc(sizeof(FNAME));
     if (NULL == file){
         return false;
@@ -162,16 +196,23 @@ bool grids::_addFile(FONTCHARACTER fileName){
     memset(file, 0x00, sizeof(FNAME));  // empty struct.
 
     // Full name
+    FONTCHARACTER fqn(NULL);
 #ifdef DEST_CASIO_CALC
     uint16_t fName[BFILE_MAX_PATH + 1];
 #else
     char fName[BFILE_MAX_PATH + 1];
 #endif // DEST_CASIO_CALC
-    bFile::FC_str2FC(folder_, fName);   // convert folder to FONTCHARACTER
-    bFile::FC_cat(fName, fileName);     // add filename
+    if (addFolder){
+        bFile::FC_str2FC(folder_, fName);   // convert folder to FONTCHARACTER
+        bFile::FC_cat(fName, fileName);     // add filename
+        fqn = (FONTCHARACTER)fName;
+    }
+    else{
+        fqn = fileName;
+    }
 
     // fill struct. with file informations
-    if (NULL == (file->fileName = bFile::FC_dup(fName)) ||
+    if (NULL == (file->fileName = bFile::FC_dup(fqn)) ||
         -1 == (file->ID = __fileName2i(fileName))){
         if (file->fileName){
             free((void*)file->fileName);
@@ -184,6 +225,20 @@ bool grids::_addFile(FONTCHARACTER fileName){
     // Add
     __vector_append(file);
     return true;
+}
+
+// _freeFileName : free the menory used by the FNAME struct.
+//
+//  @pItem : pointer to item to be freed
+//
+void grids::_freeFileName(PFNAME pItem){
+    if (pItem){
+        if (pItem->fileName){
+                free((void*)pItem->fileName);  // Free the name
+            }
+
+        free(pItem);    // Free the struct.
+    }
 }
 
 //
@@ -257,11 +312,7 @@ void grids::__vector_clear(){
     PFNAME pFile(NULL);
     for (int index=0; index < count_; index++){
         if ((pFile = files_[index])){
-            if (pFile->fileName){
-                free((void*)pFile->fileName);  // Free the name
-            }
-
-            free(pFile);    // Free the struct.
+            _freeFileName(pFile);
         }
     }
 
@@ -275,6 +326,27 @@ void grids::__vector_clear(){
 //
 // Utils
 //
+
+// _nextFileID()- Get next ID for a new file
+//
+//  @return : numeric value or -1 on error
+//
+int grids::_nextFileID(){
+    if (!count_){
+        return 0;   // Empty folder
+    }
+
+    int ID(0xFFFF);
+    PFNAME pFile(NULL);
+    for (int index=0; index < count_; index++){
+        if ((pFile = files_[index]) &&
+            pFile->ID <= ID){
+                ID = pFile->ID + 1;
+        }
+    }
+
+    return ((0xFFFF == ID)?-1:ID);
+}
 
 // __fileName2i()- Convert a fully qualified filename to int
 //
@@ -297,8 +369,7 @@ int grids::__fileName2i(FONTCHARACTER src){
         num = 0;
         while (num >= 0
             && (car = buffer[index + 1])
-            && car != '.')      // no extension
-        {
+            && car != '.'){      // no extension
             if (car >= '0' && car <= '9'){
                 num = num * 10 + (car - '0');
             }

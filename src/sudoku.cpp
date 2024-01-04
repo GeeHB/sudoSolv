@@ -12,6 +12,7 @@
 #include "shared/bFile.h"
 #include "shared/keyboard.h"
 
+#include <time.h>
 #include <math.h>
 
 #ifdef DEST_CASIO_CALC
@@ -24,15 +25,15 @@
 sudoku::sudoku(RECT* scr){
     // Screen dimension
     if (scr){
-        memcpy(&grid_, scr, sizeof(RECT));
+        memcpy(&screen_, scr, sizeof(RECT));
     }
     else{
-        grid_ = {0, 0, CASIO_WIDTH, CASIO_HEIGHT};
+        screen_ = {0, 0, CASIO_WIDTH, CASIO_HEIGHT};
     }
 
-    // The grid is centered
-    grid_.x = (grid_.w - GRID_SIZE) / 2;
-    grid_.y = (grid_.h - GRID_SIZE) / 2;
+    //screen_.x = (screen_.w - GRID_SIZE) / 2;
+    screen_.x = GRID_HORZ_OFFSET;
+    screen_.y = (screen_.h - GRID_SIZE) / 2;    // centered vertically
 
     // Initializes tinySquares
     for (uint8_t index=0; index<TINY_COUNT; index++){
@@ -44,11 +45,15 @@ sudoku::sudoku(RECT* scr){
 
 // display() : Display the grid and it's content
 //
-void sudoku::display(){
+//  @update : update screen ?
+//
+void sudoku::display(bool update){
 #ifdef DEST_CASIO_CALC
     _drawBackground();
     _drawContent();
-    dupdate();
+    if (update){
+        dupdate();
+    }
 #else
     position pos(0, false);
     element* pElement(NULL);
@@ -151,7 +156,10 @@ uint8_t sudoku::load(FONTCHARACTER fName){
 
 // save() : Save the grid on a file
 //
-//  @fName : Name to use
+//  In the given grid, only "original" values
+//  will be saved
+//
+//  @fName : File name to use
 //
 //  @return : 0 on success or an error code
 //
@@ -171,7 +179,7 @@ uint8_t sudoku::save(FONTCHARACTER fName){
             pElement = &elements_[pos];
 
             // '0' means empty !
-            buffer[index++] = pElement->isEmpty()?'0':('0' + pElement->value());
+            buffer[index++] = pElement->isOriginal()?('0' + pElement->value()):'0';
             buffer[index++] = VALUE_SEPARATOR;
 
             pos+=1;  // next element
@@ -212,9 +220,12 @@ bool sudoku::edit(){
     position currentPos(0, false);
     position prevPos(0, false);
 
+    revert();   // Remove obious and found values (if any)
+
     menuBar menu;       // A simple menu bar
     MENUACTION action;
     menu.addItem(1, IDM_EDIT_OK, IDS_EDIT_OK);
+    menu.addItem(2, IDM_EDIT_CANCEL, IDS_EDIT_CANCEL);
     menu.update();
 
     // Initial draw
@@ -319,6 +330,12 @@ bool sudoku::edit(){
             modified = _checkAndSet(currentPos, 9);
             break;
 
+        // Cancel modifications
+        case IDM_EDIT_CANCEL:
+            revert();
+            cont = modified = false;
+            break;
+
         // Exit from "edit" mode
         case KEY_MENU:
         case KEY_EXIT:
@@ -355,7 +372,6 @@ bool sudoku::edit(){
 			prevPos = currentPos;
 			reDraw = false;
 		}
-
     } // while (cont)
 
     if (timerID >= 0){
@@ -389,12 +405,21 @@ uint8_t sudoku::findObviousValues(){
 
 // resolve() : Find a solution for the current grid
 //
+//  mDuration : points to an int that will receive duration
+//              of solving process in ms. Can be NULL
+//
 //  @return : true if a solution was found
 //
-bool sudoku::resolve(){
+bool sudoku::resolve(int* mDuration){
+    clock_t start(0);
     uint8_t candidate(0);
     position pos(0, true);
     uint8_t status = _findFirstEmptyPos(pos);      // Start from the first empty place
+
+    if (mDuration){
+        (*mDuration) = 0;
+        start = clock();
+    }
 
     // All the elements "before" the current position - pos -
     // are set with possible/allowed values
@@ -433,8 +458,15 @@ bool sudoku::resolve(){
         }
     } // while (!status)
 
-    // Found a solution ?
-    return (POS_END_OF_LIST == status);
+    if (POS_END_OF_LIST == status){
+        if (mDuration){
+            (*mDuration) = ((clock() - start) * 1000 / CLOCKS_PER_SEC);
+        }
+        return true;    // Found a solution
+    }
+
+    // No solution
+    return false;
 }
 
 //
@@ -523,25 +555,25 @@ bool sudoku::_checkAndSet(position& pos, uint8_t value){
 //
 void sudoku::_drawBackground(){
     // Erase background
-    drect(0, 0, grid_.w, grid_.h, BK_COLOUR);
+    drect(0, 0, screen_.w, screen_.h, BK_COLOUR);
 
-    // draw thin borders
+    // Draw thin borders
     uint16_t posX, posY;
     uint8_t id;
     for (id = 1; id < LINE_COUNT; id++){
-        posX = grid_.x + id * SQUARE_SIZE;
-        posY = grid_.y + id * SQUARE_SIZE;
-        dline(posX, grid_.y, posX, grid_.y + GRID_SIZE, BORDER_COLOUR);   // vert
-        dline (grid_.x, posY, grid_.x + GRID_SIZE, posY, BORDER_COLOUR);  // horz
+        posX = screen_.x + id * SQUARE_SIZE;
+        posY = screen_.y + id * SQUARE_SIZE;
+        dline(posX, screen_.y, posX, screen_.y + GRID_SIZE, BORDER_COLOUR);   // vert
+        dline (screen_.x, posY, screen_.x + GRID_SIZE, posY, BORDER_COLOUR);  // horz
     }
 
     // and large ext. borders
     uint16_t lSquare(SQUARE_SIZE * 3), thick(BORDER_THICK - 1);
     for (id = 0; id <= 3; id++){
-        posX = grid_.x + id * lSquare;
-        posY = grid_.y + id * lSquare;
-        drect(posX, grid_.y, posX + thick, grid_.y + GRID_SIZE, BORDER_COLOUR);   // vert
-        drect(grid_.x, posY, grid_.x + GRID_SIZE, posY + thick, BORDER_COLOUR);   // horz
+        posX = screen_.x + id * lSquare;
+        posY = screen_.y + id * lSquare;
+        drect(posX, screen_.y, posX + thick, screen_.y + GRID_SIZE, BORDER_COLOUR);   // vert
+        drect(screen_.x, posY, screen_.x + GRID_SIZE, posY + thick, BORDER_COLOUR);   // horz
     }
 }
 
@@ -573,8 +605,8 @@ void sudoku::_drawContent(){
 //  @txtColour : text colour
 //
 void sudoku::_drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bkColour, int txtColour){
-    uint16_t x(grid_.x + row * SQUARE_SIZE + BORDER_THICK);
-    uint16_t y(grid_.y + line * SQUARE_SIZE + BORDER_THICK);
+    uint16_t x(screen_.x + row * SQUARE_SIZE + BORDER_THICK);
+    uint16_t y(screen_.y + line * SQUARE_SIZE + BORDER_THICK);
 
     // Erase background
     drect(x, y, x + INT_SQUARE_SIZE, y + INT_SQUARE_SIZE, bkColour);

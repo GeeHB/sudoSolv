@@ -4,4 +4,4 @@ about.png:
 
 menu.png:
   type: bopti-image
-  name: g_menuImg
+  name: g_menuImgs

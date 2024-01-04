@@ -15,11 +15,6 @@
 #include "consts.h"
 #include "shared/bFile.h"
 
-/*
-#include <vector>
-using namespace std;
-*/
-
 #ifdef __cplusplus
 extern "C" {
 #endif // #ifdef __cplusplus
@@ -35,10 +30,9 @@ public:
         __vector_clear();
     }
 
-    // # files in folder
+    // # files in the folder
     int size(){
-        //return files_.size();
-        return count_;
+        return count_;  //return files_.size();
     }
 
     // pos() : Get current position index in list
@@ -47,6 +41,16 @@ public:
     //
     int pos(){
         return index_;
+    }
+
+    // addFileName() : Add a filename to the folder's content list
+    //
+    //  @fName : filename to add
+    //
+    //  @return : true if successfully added
+    //
+    bool addFileName(FONTCHARACTER fName){
+        return _addFile(fName, false);
     }
 
     // nextFile() : Get next file name
@@ -65,7 +69,12 @@ public:
     //
     bool prevFile(FONTCHARACTER fName);
 
-    // File management
+    // newFileName() : Generates a unique file name
+    //
+    //  @fName : new FQN
+    //
+    //  @return : true if name is valid
+    //
     bool newFileName(FONTCHARACTER fName);
 
     // deleteFile() : Delete current file
@@ -81,11 +90,14 @@ private:
     //
     void _browse();
 
-    // Add file
-    bool _addFile(FONTCHARACTER fileName);
-
-    // Generate a name associated with an ID
-    bool _ID2Name(uint16_t id, FONTCHARACTER folder);
+    // _addFile() - Add file to the list
+    //
+    //  @fileName : file to add
+    //  @addFolder : add folder to the path
+    //
+    //  @return : true if added
+    //
+    bool _addFile(FONTCHARACTER fileName, bool addFolder);
 
     // Informations about a file
     //
@@ -121,6 +133,18 @@ private:
     //
     // Utils
     //
+
+    // _nextFileID()- Get next ID for a new file
+    //
+    //  @return : numeric value or -1 on error
+    //
+    int _nextFileID();
+
+    // _freeFileName : free the menory used by the FNAME struct.
+    //
+    //  @pItem : pointer to item to be freed
+    //
+    void _freeFileName(PFNAME pItem);
 
     // __fileName2i()- Convert a fully qualified filename to int
     //

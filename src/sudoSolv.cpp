@@ -12,19 +12,19 @@
 #include "sudoku.h"
 #include "menu.h"
 
-#ifdef DEST_CASIO_CALC
 #include "shared/scrCapture.h"
 extern bopti_image_t g_homeScreen;  // Background image
 
-    #ifndef NO_CAPTURE
-    scrCapture  g_Capture;              // Screen capture object
-    #endif // #ifndef NO_CAPTURE
-#endif // #ifdef DEST_CASIO_CALC
+#ifndef NO_CAPTURE
+scrCapture  g_Capture;              // Screen capture object
+#endif // #ifndef NO_CAPTURE
 
 // Functions definitions
 //
 void _createMenu(menuBar& menu);
 void _homeScreen();
+void _setFileName(FONTCHARACTER fullName, char* shortName);
+void _displayStats(const char* fName, int8_t obvious, int elapse);
 
 // APP. entry-point
 //
@@ -49,7 +49,11 @@ int main(void)
         menu.update();
     }
 
+    // Stats.
     uint16_t fileName[BFILE_MAX_PATH + 1];
+    char sFileName[BFILE_MAX_PATH + 1];
+    int8_t obviousVals(-1);
+    int duration(-1);
 
     // App. main loop
     //
@@ -68,13 +72,15 @@ int main(void)
                 case IDM_FILE_NEW:
                     game.empty();
                     game.display();
+                    sFileName[0] = '\0';
+                    obviousVals = duration = -1;
                     break;
 
                 // Load previous file
                 case IDM_FILE_PREV:
                     if (files.prevFile(fileName)){
                         menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
-
+                        menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
                         if (!files.pos()){
                             menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, false);
                         }
@@ -82,10 +88,12 @@ int main(void)
 
                         // Update grid on screen
                         if (FILE_NO_ERROR == (error = game.load(fileName))){
-                            game.display();
+                            game.display(false);
+                            _setFileName(fileName, sFileName);
+                            _displayStats(sFileName, -1, -1);
                         }
                         else{
-                            dprint(5, 5, C_BLACK, "Error loading file : %d", (int)error);
+                            dprint(TEXT_X, TEXT_V_OFFSET, C_BLACK, "Error loading file : %d", (int)error);
                             dupdate();
                         }
                     } 
@@ -96,51 +104,113 @@ int main(void)
                     if (files.nextFile(fileName)){
                         // Menu changes
                         menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, true);
-                        if (files.pos() == files.size()){
+                        menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
+                        if (files.pos() >= (files.size() - 1)){
                             menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
                         }
                         menu.update();
 
                         // Update grid on screen
                         if (FILE_NO_ERROR == (error = game.load(fileName))){
-                            game.display();
+                            game.display(false);
+                            _setFileName(fileName, sFileName);
+                            _displayStats(sFileName, -1, -1);
                         }
                         else{
-                            dprint(5, 5, C_BLACK, "Error loading file : %d", (int)error);
+                            dprint(TEXT_X, TEXT_V_OFFSET, C_BLACK, "Error loading file : %d", (int)error);
                             dupdate();
                         }
                     }
+                    else{
+                        menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
+                        menu.update();
+                    }
                     break;
 
+                // Save the grid (using a new name)
+                case IDM_FILE_SAVE:
+                    if (files.newFileName(fileName)){
+                        if (game.save(fileName)){
+                            files.addFileName(fileName);
+                        }
+                        menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, false);
+                        menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
+                        menu.update();
+                    }
+                    break;
+                
+                // Remove current file
+                case IDM_FILE_DELETE:
+                    if (files.deleteFile()){
+                        bool file(true);
+                        if (!files.prevFile(fileName)){
+                            menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, false);
+                            if (!files.nextFile(fileName)){
+                                menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
+                                menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, false);
+                                game.empty();
+                                file = false;   // No filename
+                            }    
+                            menu.update();
+                        }
+
+                        _setFileName(file?fileName:NULL, sFileName);
+                        _displayStats(sFileName, -1, -1);
+                    }
+                    break;
+
+                /*
                 case IDM_FILE_ABOUT:
                     _homeScreen();
                     break;
+                */
 
 				// Modify current grid
                 case IDM_EDIT:{
                     game.display();
-                    bool modified = game.edit();
+                    if (game.edit()){
+                        menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, true);
 
-                    menu.selectIndex(-1);
+                        _displayStats(sFileName, -1, -1);
+                    }
+
+                    menu.selectByIndex(-1);
                     menu.update();  // redraw the whole menu bar
                     break;
                 }
 
                 // Search for obvious values
-                case IDM_SOLVE_OBVIOUS:
-                    game.findObviousValues();
-                    game.display();
+                case IDM_SOLVE_OBVIOUS:{
+                    obviousVals = game.findObviousValues();
+                    game.display(false);
+                    
+                    _displayStats(sFileName, obviousVals, -1);
                     break;
+                }
 
                 // Try to find a solution
                 case IDM_SOLVE_FIND:
                     game.display();
-                    if (!game.resolve()){
+                    if (game.resolve(&duration)){
+                        game.display(false);
+                        _displayStats(sFileName, obviousVals, duration);
+                        dupdate();
+                    }
+                    else {
                         // No soluce found ...
                         // ... return to original grid
                         game.revert();
+                        game.display();
                     }
-                    game.display();
+                    break;
+
+                // Return to "original" grid
+                case IDM_SOLVE_REVERT:
+                    game.revert();
+                    game.display(false);
+                    obviousVals = -1;
+                    _displayStats(sFileName, -1, -1);
+                    dupdate();
                     break;
 
                 // Quit the application
@@ -193,10 +263,11 @@ void _createMenu(menuBar& menu){
     // "File" sub menu
     menuBar fileMenu;
     fileMenu.appendItem(IDM_FILE_NEW, IDS_FILE_NEW);
-    fileMenu.appendItem(IDM_FILE_PREV, IDS_FILE_PREV, ITEM_INACTIVE);
-    fileMenu.appendItem(IDM_FILE_NEXT, IDS_FILE_NEXT, ITEM_INACTIVE);
-    fileMenu.appendItem(IDM_FILE_SAVE, IDS_FILE_SAVE, ITEM_INACTIVE);
-    fileMenu.appendItem(IDM_FILE_ABOUT, IDS_FILE_ABOUT);
+    fileMenu.appendItem(IDM_FILE_PREV, IDS_FILE_PREV, ITEM_STATE_INACTIVE);
+    fileMenu.appendItem(IDM_FILE_NEXT, IDS_FILE_NEXT, ITEM_STATE_INACTIVE);
+    fileMenu.appendItem(IDM_FILE_SAVE, IDS_FILE_SAVE, ITEM_STATE_INACTIVE);
+    fileMenu.appendItem(IDM_FILE_DELETE, IDS_FILE_DELETE, ITEM_STATE_INACTIVE);
+    //fileMenu.appendItem(IDM_FILE_ABOUT, IDS_FILE_ABOUT);
     menu.appendSubMenu(&fileMenu, IDM_FILE_SUBMENU, IDS_FILE_SUBMENU);
 
     menu.appendItem(IDM_EDIT, IDS_EDIT);
@@ -205,15 +276,15 @@ void _createMenu(menuBar& menu){
     menuBar sMenu;
     sMenu.appendItem(IDM_SOLVE_OBVIOUS, IDS_SOLVE_OBVIOUS);
     sMenu.appendItem(IDM_SOLVE_FIND, IDS_SOLVE_FIND);
+    sMenu.addItem(MENU_POS_RIGHT - 1, IDM_SOLVE_REVERT, IDS_SOLVE_REVERT);
     menu.appendSubMenu(&sMenu, IDM_SOLVE_SUBMENU, IDS_SOLVE_SUBMENU);
 
-    menu.addItem(ITEM_POS_RIGHT, IDM_QUIT, IDS_QUIT);
+    menu.addItem(MENU_POS_RIGHT, IDM_QUIT, IDS_QUIT);
 }
 
 // Display home screen
 //
 void _homeScreen(){
-#ifdef DEST_CASIO_CALC
     drect(0,0,CASIO_WIDTH, CASIO_HEIGHT - MENUBAR_DEF_HEIGHT, C_WHITE);
     dimage(0,0,&g_homeScreen);
 
@@ -231,7 +302,48 @@ void _homeScreen(){
 		copyright);
 
     dupdate();
-#endif // #ifdef DEST_CASIO_CALC
 }
 
+// A new filename => get short filename
+void _setFileName(FONTCHARACTER fullName, char* shortName){
+    if (bFile::FC_len(fullName)){
+        char fName[BFILE_MAX_PATH + 1];
+        bFile::FC_FC2str(fullName, fName);
+        char* name = strrchr(fName, CHAR_PATH_SEPARATOR);
+        strcpy(shortName, (name?++name:fName)); // No path ?
+    }
+    else{
+        shortName[0] = '\0';    // No filename
+    }
+}
+
+// Display grid's stats
+void _displayStats(const char* fName, int8_t obvious, int elapse){
+    if (fName && fName[0]){
+        dprint(TEXT_X, TEXT_Y, C_BLACK, "File : %s", fName);
+    }
+
+    if (obvious != -1){
+        if (obvious){
+            dprint(TEXT_X, TEXT_Y + TEXT_V_OFFSET, C_BLACK, "%d obvious values", obvious);
+
+        }else
+        {
+            dtext(TEXT_X, TEXT_Y + TEXT_V_OFFSET, C_BLACK, "No obvious value");
+        }
+    }
+
+    if (elapse != -1){
+        if (elapse){
+            dprint(TEXT_X, TEXT_Y + 2*TEXT_V_OFFSET, C_BLACK, "Solved in %d ms", elapse);
+
+        }else
+        {
+            dprint(TEXT_X, TEXT_Y + 2*TEXT_V_OFFSET, C_BLACK, "No solution found");
+        }
+    }
+
+    dupdate();
+}
+    
 // EOF

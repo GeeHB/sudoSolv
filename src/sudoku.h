@@ -31,8 +31,11 @@ public:
     sudoku(RECT* scr = NULL);
     ~sudoku(){}
 
-    // Display the grid and it's content
-    void display();
+    // display() : Display the grid and it's content
+    //
+    //  @update : update screen ?
+    //
+    void display(bool update = true);
 
     // empty() : Empties the grid
     //
@@ -53,9 +56,12 @@ public:
     //
     uint8_t load(FONTCHARACTER fName);
 
-    // save() : Save the grid on a file
+   // save() : Save the grid on a file
     //
-    //  @fName : Name to use
+    //  In the given grid, only "original" values
+    //  will be saved
+    //
+    //  @fName : File name to use
     //
     //  @return : 0 on success or an error code
     //
@@ -77,9 +83,12 @@ public:
 
     // resolve() : Find a solution for the current grid
     //
+    //  mDuration : points to an int that will receive duration
+    //              of solving process in ms. Can be NULL
+    //
     //  @return : true if a solution was found
     //
-    bool resolve();
+    bool resolve(int* mDuration = NULL);
 
 private:
 
@@ -227,7 +236,7 @@ private:
     //  @pTick : pointer to blinking state indicator
     //
     //  @return : TIMER_CONTINUE if valid
-    // 
+    //
     static int __callbackTick(volatile int *pTick);
 #endif // #ifdef DEST_CASIO_CALC
 
@@ -236,7 +245,7 @@ private:
     element elements_[LINE_COUNT * ROW_COUNT];	// grid as a one dim. table
     tinySquare  tSquares_[TINY_COUNT];	// Elements IDs in tinySquares
 
-    RECT    grid_;		// Position and dimensions of the grid
+    RECT screen_; // Position & dims of screen : {x Grid, yGrid, "screen" width , "screen" height}
 };
 
 #ifdef __cplusplus

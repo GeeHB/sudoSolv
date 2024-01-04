@@ -216,7 +216,7 @@ public:
     }
 
 	//
-    // Utilities
+    // Utilities - conversions from/to FC to/from char*
     //
 
     // FC_str2FC() : Convert a char* to FC format

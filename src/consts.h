@@ -29,7 +29,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolv"
-#define APP_VERSION  "0.1.6"
+#define APP_VERSION  "0.1.7"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -40,8 +40,8 @@ extern "C" {
 #define GRIDS_FOLDER    "\\\\fls0\\GRIDS"
 #endif // DEST_CASIO_CALC
 
+#define GRID_FILE_EXT               ".txt"
 #define GRID_FILE_SEARCH_PATTERN    "*.txt"
-
 
 // Informations about the grid
 //
@@ -85,10 +85,15 @@ extern "C" {
 //
 
 // Dimensions in pixels
+#define GRID_HORZ_OFFSET        20
 #define SQUARE_SIZE             20
 #define INT_SQUARE_SIZE         (SQUARE_SIZE - 2 * BORDER_THICK)
 #define GRID_SIZE               SQUARE_SIZE * ROW_COUNT
 #define BORDER_THICK            2   // Thickness of external border
+
+#define TEXT_X                  (2*GRID_HORZ_OFFSET + GRID_SIZE)
+#define TEXT_Y                  30
+#define TEXT_V_OFFSET           20
 
 // Colors
 #ifdef DEST_CASIO_CALC

@@ -566,9 +566,9 @@ FONTCHARACTER bFile::FC_dup(const FONTCHARACTER src){
 size_t bFile::FC_len(const FONTCHARACTER fName){
     if (fName){
 #ifdef DEST_CASIO_CALC
-        size_t len(0);
+        size_t len(0), lChar(sizeof(uint16_t));
         char* buffer = (char*)fName;
-        while(buffer[1+ len*sizeof(uint16_t)]){
+        while(buffer[1+ len*lChar]){
             len++;
         }
 

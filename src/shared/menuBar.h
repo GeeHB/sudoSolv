@@ -12,7 +12,7 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        0.3.3
+#define _GEEHB_MENU_VER_        0.3.4
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
@@ -24,26 +24,24 @@
 
 // Item pos is a menu bar
 //
-#define ITEM_POS_LEFT           0
-#define ITEM_POS_RIGHT          (MENU_MAX_ITEM_COUNT-1)
+#define MENU_POS_LEFT           0
+#define MENU_POS_RIGHT          (MENU_MAX_ITEM_COUNT-1)
 
 // Item state - any combination of ...
 //
-#define ITEM_DEFAULT            0
-#define ITEM_SELECTED           1
-#define ITEM_UNSELECTED         ITEM_DEFAULT
-#define ITEM_INACTIVE           2
-#define ITEM_CHECKED			4
-#define ITEM_UNCHECKED          ITEM_DEFAULT
-#define ITEM_NO_BACK_BUTTON     8
+#define ITEM_STATE_DEFAULT          0
+#define ITEM_STATE_SELECTED         1
+#define ITEM_STATE_INACTIVE         2
+#define ITEM_STATE_CHECKED          4
+#define ITEM_STATE_NO_BACK_BUTTON   8
 
 // Item status
 //
 #define ITEM_STATUS_DEFAULT     0
-#define ITEM_STATUS_TEXT        1		// item's text is valid
+#define ITEM_STATUS_TEXT        1
 #define ITEM_STATUS_SUBMENU     2       // Open a sub menu on "click"
 #define ITEM_STATUS_KEYCODE     4       // item's ID is a key code
-#define ITEM_STATUS_CKECKBOX	8
+#define ITEM_STATUS_CHECKBOX	8
 
 // Reserved menu item ID
 //
@@ -158,7 +156,7 @@ public:
     //  @return : true if sub menu is added
     //
     bool addSubMenu(uint8_t index, const menuBar* subMenu,
-					int id, const char* text, int state = ITEM_DEFAULT){
+					int id, const char* text, int state = ITEM_STATE_DEFAULT){
         return _addSubMenu(&current_, index,
 							(PMENUBAR)subMenu, id, text, state);
     }
@@ -172,8 +170,8 @@ public:
     //
     //  @return : true if sub menu is added
     //
-    bool appendSubMenu(const menuBar* subMenu,
-				int id, const char* text, int state = ITEM_DEFAULT){
+    bool appendSubMenu(const menuBar* subMenu, int id,
+                        const char* text, int state = ITEM_STATE_DEFAULT){
         return _addSubMenu(&current_, current_.itemCount,
 							(PMENUBAR)subMenu, id, text, state);
     }
@@ -184,12 +182,14 @@ public:
     //  @id : Item ID
     //  @text : Item text
     //  @state : Item's initial state
+    //  @status : Item's status
     //
     //  @return : true if the item has been added
     //
     bool addItem(uint8_t index, int id, const char* text,
-				int state = ITEM_DEFAULT){
-        return _addItem(&current_, index, id, text, state);
+				int state = ITEM_STATE_DEFAULT,
+				int status = ITEM_STATUS_DEFAULT){
+        return _addItem(&current_, index, id, text, state, status);
     }
 
     //  appendItem() : Append an item to the current menu bar
@@ -197,11 +197,13 @@ public:
     //  @id : Item ID
     //  @text : Item text
     //  @state : Item's initial state
+    //  @status : Item's status
     //
     //  @return : true if the item has been added
     //
-    bool appendItem(int id, const char* text, int state = ITEM_DEFAULT){
-        return _addItem(&current_, current_.itemCount, id, text, state);
+    bool appendItem(int id, const char* text,
+                int state = ITEM_STATE_DEFAULT, int status = ITEM_STATUS_DEFAULT){
+        return _addItem(&current_, current_.itemCount, id, text, state, status);
     }
 
     //  removeItem() : Remove an item from the current menu bar
@@ -221,7 +223,7 @@ public:
     // Selection & activation
     //
 
-    //  selectIndex() : Select an item by index in the current bar
+    //  selectByIndex() : Select an item by index in the current bar
     //
     //  @index : index of menu item to select or unselect
     //          if equal to -1, unselect the currently selected item
@@ -229,8 +231,8 @@ public:
     //
     //  @return : true if item is selected
     //
-    bool selectIndex(int8_t index, bool selected = true){
-        return _selectIndex(index, selected, true);    // Redraw items
+    bool selectByIndex(int8_t index, bool selected = true){
+        return _selectByIndex(index, selected, true);    // Redraw items
     }
 
     //  getSelectedIndex() : Index of selected item in the current bar
@@ -241,7 +243,16 @@ public:
         return (visible_?visible_->selIndex:current_.selIndex);
     }
 
-    //  activate() : Activate or deactivate an item
+    //  getItemState() : Get the state of an item
+    //
+    //  @searchedID : ID of searched item
+    //  @searchMode : type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+    //
+    //  @return : Item's state or -1 if error
+    //
+    int8_t getItemState(int searchedID, int searchMode);
+
+    //  activateItem() : Activate or deactivate an item
     //
     //  When an item is deactivated, it can't be called by the user
     //
@@ -251,14 +262,17 @@ public:
     //
     //  @return : true if activation state changed
     //
-    bool activate(int searchedID, int searchMode, bool activated = true);
+    bool activateItem(int searchedID, int searchMode, bool activated = true);
+    bool activate(int searchedID, int searchMode, bool activated = true){
+        return activateItem(searchedID, searchMode, activated);
+    }
 
     //
     // Item access and modifications
     //
 
     bool getItem(int searchID, int searchMode, PMENUITEM* pItem);
-    bool setItem(int searchID, int searchMode, PMENUITEM pItem);
+    bool setItem(int searchID, int searchMode, PMENUITEM pItem, int Mask);
 
     //  freeMenuItem() : Free memory used by a menu item
 	//
@@ -335,21 +349,24 @@ private:
     //  @id : Item ID
     //  @text : Item text
     //  @state : Item's initial state
+    //  @status : Item's status
     //
     //  @return : true if the item has been added
     //
     bool _addItem(PMENUBAR bar, uint8_t index, int id,
-						const char* text, int state = ITEM_DEFAULT);
+						const char* text, int state = ITEM_STATE_DEFAULT,
+						int status = ITEM_STATUS_DEFAULT);
 
     //  _createItem() : creae a new menu item
     //
     //  @id : Item's id
     //  @text : Menu item text
     //  @state : Item's initial state
+    //  @status : Item's status
     //
     //  @return : pointer to the new created if valid or NULL
     //
-    PMENUITEM _createItem(int id, const char* text, int state);
+    PMENUITEM _createItem(int id, const char* text, int state, int status);
 
     //  _copyItem() : Make a copy of an item
     //
@@ -389,7 +406,7 @@ private:
     //
     bool _removeItem(PMENUBAR bar, int searchedID, int searchMode);
 
-    //  _selectIndex() : Select an item by index in the current bar
+    //  _selectByIndex() : Select an item by index in the current bar
     //
     //  @index : index of menu item to select or unselect
     //  @selected : true if item is to be selected
@@ -398,13 +415,13 @@ private:
     //
     //  @return : true if item is selected
     //
-    bool _selectIndex(int8_t index, bool selected, bool redraw);
+    bool _selectByIndex(int8_t index, bool selected, bool redraw);
 
     //  _drawItem() : Draw an item
     //
     //  @anchor : Position of the item in screen coordinates
     //  @item : Pointer to a MENUITEM strcut containing informations
-    //			about item to draw
+    //			concerning the item to draw
     //
     void _drawItem(const RECT* anchor, const MENUITEM* item);
 
