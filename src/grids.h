@@ -51,6 +51,12 @@ public:
     //
     int setPos(int index);
 
+    // browse() : browse folder and fill list with file names
+    //
+    //  @return : count of elements read or -1 if error
+    //
+    int browse();
+
     // addFileName() : Add a filename to the folder's content list
     //
     //  @fName : filename to add
@@ -91,10 +97,6 @@ public:
 
     // Internal methods
 private:
-
-    // _browse() : browse folder and fill list with file names
-    //
-    void _browse();
 
     // _addFile() - Add file to the list
     //

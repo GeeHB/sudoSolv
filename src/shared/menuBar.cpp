@@ -65,12 +65,18 @@ void menuBar::update(){
         _drawItem(&anchor, item);
 #else
         if (item){
-            cout << "|" << ((item->state == ITEM_STATE_SELECTED)?">" : " ");
+            cout << "|" << (_isBitSet(item->state, ITEM_STATE_SELECTED)?">" : " ");
             if (_isBitSet(item->status, ITEM_STATUS_CHECKBOX)){
                 cout << (_isBitSet(item->state, ITEM_STATE_CHECKED)?"[x] ":"[ ] ");
             }
-            cout << item->text;
-            cout << ((item->state == ITEM_STATE_SELECTED)?"<" : " ");
+
+            if (_isBitSet(item->state,ITEM_STATE_INACTIVE)){
+                cout << "_" << (item->text+1);
+            }
+            else {
+                cout << item->text;
+            }
+            cout << (_isBitSet(item->state,ITEM_STATE_SELECTED)?"<" : " ");
             cout << "|";
         }
         else{
@@ -114,8 +120,8 @@ bool menuBar::activateItem(int searchedID, int searchMode, bool activated){
     PMENUITEM item(_findItem(&current_, searchedID, searchMode));
     if (item){
         // Found an item with this ID
-        bool inactive = _isBitSet(item->state, ITEM_STATE_INACTIVE);
-        if (inactive == activated){
+        bool active = !_isBitSet(item->state, ITEM_STATE_INACTIVE);
+        if (active != activated){
             // change item's state
 			if (activated){
 				_removeBit(item->state, ITEM_STATE_INACTIVE);

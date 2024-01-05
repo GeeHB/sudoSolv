@@ -26,8 +26,6 @@ grids::grids(){
     // this folder
     strcpy(folder_, GRIDS_FOLDER);
     strcat(folder_, PATH_SEPARATOR);
-
-    _browse();
 }
 
 // setPos() : Set current position index in list
@@ -42,6 +40,62 @@ int grids::setPos(int index){
    }
 
     return index_;
+}
+
+// browse() : browse folder and fill list with file names
+//
+//  @return : count of elements read or -1 if error
+//
+int grids::browse(){
+
+    bFile folder;
+    char szPattern[BFILE_MAX_PATH + 1];
+
+#ifdef DEST_CASIO_CALC
+    uint16_t fName[BFILE_MAX_PATH + 1];
+    uint16_t FCPattern[BFILE_MAX_PATH + 1];
+#else
+    char fName[BFILE_MAX_PATH + 1];
+    char FCPattern[BFILE_MAX_PATH + 1];
+#endif // DEST_CASIO_CALC
+
+    // Ensure folder exist
+    strcpy(szPattern, GRIDS_FOLDER);
+    folder.FC_str2FC(szPattern, fName);
+    if (!folder.exist(fName)){
+        // create the folder
+        if (!folder.create(fName, BFile_Folder, NULL)){
+            return -1;
+        }
+    }
+
+    // Empty the list
+    if (capacity_){
+        __vector_clear();
+    }
+
+    // Browse folder
+    SEARCHHANDLE shandle;
+    struct BFile_FileInfo fileInfo;
+
+#ifdef DEST_CASIO_CALC
+    strcat(szPattern, PATH_SEPARATOR);
+    strcat(szPattern, GRID_FILE_SEARCH_PATTERN);
+#endif // DEST_CASIO_PATTERN
+    folder.FC_str2FC(szPattern, FCPattern);
+
+    if (folder.findFirst(FCPattern, &shandle, fName, &fileInfo)){
+        do{
+            // a file ?
+            if (BFile_Type_Archived == fileInfo.type){
+                _addFile(fName);
+            }
+        } while(folder.findNext(shandle, fName, &fileInfo));
+
+        folder.findClose(shandle);
+    }
+
+    return count_;
 }
 
 // addFileName() : Add a filename to the folder's content list
@@ -163,58 +217,6 @@ bool grids::deleteFile(){
 
 // Internal methods
 //
-
-// _browse() : browse folder and fill list with file names
-//
-void grids::_browse(){
-
-    bFile folder;
-    char szPattern[BFILE_MAX_PATH + 1];
-
-#ifdef DEST_CASIO_CALC
-    uint16_t fName[BFILE_MAX_PATH + 1];
-    uint16_t FCPattern[BFILE_MAX_PATH + 1];
-#else
-    char fName[BFILE_MAX_PATH + 1];
-    char FCPattern[BFILE_MAX_PATH + 1];
-#endif // DEST_CASIO_CALC
-
-    // Ensure folder exist
-    strcpy(szPattern, GRIDS_FOLDER);
-    folder.FC_str2FC(szPattern, fName);
-    if (!folder.exist(fName)){
-        // create the folder
-        if (!folder.create(fName, BFile_Folder, NULL)){
-            return;
-        }
-    }
-
-    // Empty the list
-    if (capacity_){
-        __vector_clear();
-    }
-
-    // Browse folder
-    SEARCHHANDLE shandle;
-    struct BFile_FileInfo fileInfo;
-
-#ifdef DEST_CASIO_CALC
-    strcat(szPattern, PATH_SEPARATOR);
-    strcat(szPattern, GRID_FILE_SEARCH_PATTERN);
-#endif // DEST_CASIO_PATTERN
-    folder.FC_str2FC(szPattern, FCPattern);
-
-    if (folder.findFirst(FCPattern, &shandle, fName, &fileInfo)){
-        do{
-            // a file ?
-            if (BFile_Type_Archived == fileInfo.type){
-                _addFile(fName);
-            }
-        } while(folder.findNext(shandle, fName, &fileInfo));
-
-        folder.findClose(shandle);
-    }
-}
 
 // _addFile() - Add file to the list
 //

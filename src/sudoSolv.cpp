@@ -43,7 +43,7 @@ int main(void)
 
     // List of grid files
     grids files;
-    if (files.size()){
+    if (files.browse() > 0){
         menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
         menu.update();
     }
@@ -58,7 +58,7 @@ int main(void)
     //
     sudoku game(&mainRect);
     bool end(false);
-    uint8_t error(FILE_NO_ERROR);
+    int error(FILE_NO_ERROR);
     MENUACTION action;
     while (!end){
         // A menu action ?
@@ -129,7 +129,9 @@ int main(void)
                 // Save the grid (using a new name)
                 case IDM_FILE_SAVE:
                     if (files.newFileName(fileName)){
-                        if (game.save(fileName)){
+                        bFile::FC_FC2str(fileName, sFileName);
+                        dprint(TEXT_X, 1, C_RED, "File : %s", sFileName);
+                        if (FILE_NO_ERROR == (error = game.save(fileName))){
                             if (files.addFileName(fileName)){
                                 _setFileName(fileName, sFileName);
                                 _displayStats(sFileName, -1, -1);
@@ -141,7 +143,7 @@ int main(void)
                             }
                         }
                         else{
-                            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error saving file");
+                            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error saving file : %d", error);
                         }
                         menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, false);
                         menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);

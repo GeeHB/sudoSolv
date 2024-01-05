@@ -65,7 +65,7 @@ public:
     //
     //  @return : 0 on success or an error code
     //
-    uint8_t save(const FONTCHARACTER fName);
+    int save(const FONTCHARACTER fName);
 
 #ifdef DEST_CASIO_CALC
     // edit() : Edit / modify the current grid

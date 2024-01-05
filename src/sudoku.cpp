@@ -163,28 +163,25 @@ uint8_t sudoku::load(const FONTCHARACTER fName){
 //
 //  @return : 0 on success or an error code
 //
-uint8_t sudoku::save(const FONTCHARACTER fName){
+int sudoku::save(const FONTCHARACTER fName){
     if (!fName || !fName[0]){
         return FILE_NO_FILENAME;   // No valid file name
     }
 
     // Transfer content in a buffer
     char buffer[FILE_SIZE+1];
-    element* pElement(NULL);
-    position pos(INDEX_MIN, false);  // Begining of the matrix
+    memset(buffer, 0x00, FILE_SIZE);    // ???
+    int index(0);
     for (uint8_t lId(0); lId < LINE_COUNT; lId++){
         for (uint8_t cId(0); cId < ROW_COUNT; cId++){
-            pElement = &elements_[pos];
-
             // '0' means empty !
-            buffer[2*pos] = pElement->isOriginal()?('0' + pElement->value()):'0';
-            buffer[2*pos+1] = VALUE_SEPARATOR;
-
-            pos+=1;  // next element
+            buffer[2*index] = (elements_[index].isOriginal()?('0' + elements_[index].value()):'0');
+            buffer[2*index+1] = VALUE_SEPARATOR;
+            index++;
         }
 
         // Replace separator by LF
-        buffer[2*pos-1] = '\n';
+        buffer[2*index-1] = '\n';
     }
 
     buffer[FILE_SIZE] = '\0';   // for trace purpose
@@ -195,15 +192,16 @@ uint8_t sudoku::save(const FONTCHARACTER fName){
     oFile.remove(fName);    // Remove the file (if already exist)
 
     if (!oFile.create(fName, BFile_File, &fSize)){
-        return FILE_IO_ERROR;
+        return oFile.getLastError();
     }
 
     // copy the buffer to the file
     bool done = oFile.write(buffer, FILE_SIZE);
+    int error = oFile.getLastError();
     oFile.close();
 
     // Done ?
-    return (done?FILE_NO_ERROR:FILE_IO_ERROR);
+    return (done?FILE_NO_ERROR:error);
 }
 
 #ifdef DEST_CASIO_CALC
