@@ -135,7 +135,7 @@ uint8_t sudoku::load(const FONTCHARACTER fName){
         if (car >= '0' and car <= '9'){
             value = (uint8_t)(car - '0');
             if (value && _checkValue(pos, value)){
-				// This value is valid at this position and is ORIGINAL
+                // This value is valid at this position and is ORIGINAL
                 elements_[pos].setValue(value, STATUS_ORIGINAL);
             }
         }
@@ -171,22 +171,20 @@ uint8_t sudoku::save(const FONTCHARACTER fName){
     // Transfer content in a buffer
     char buffer[FILE_SIZE+1];
     element* pElement(NULL);
-    position pos(INDEX_MIN, false);  // Begining ot matrix
-    int index(0);
-    uint8_t lId, cId;
-    for (lId = 0; lId < LINE_COUNT; lId++){
-        for (cId = 0; cId < ROW_COUNT; cId++){
+    position pos(INDEX_MIN, false);  // Begining of the matrix
+    for (uint8_t lId(0); lId < LINE_COUNT; lId++){
+        for (uint8_t cId(0); cId < ROW_COUNT; cId++){
             pElement = &elements_[pos];
 
             // '0' means empty !
-            buffer[index++] = pElement->isOriginal()?('0' + pElement->value()):'0';
-            buffer[index++] = VALUE_SEPARATOR;
+            buffer[2*pos] = pElement->isOriginal()?('0' + pElement->value()):'0';
+            buffer[2*pos+1] = VALUE_SEPARATOR;
 
             pos+=1;  // next element
         }
 
         // Replace separator by LF
-        buffer[index-1] = '\n';
+        buffer[2*pos-1] = '\n';
     }
 
     buffer[FILE_SIZE] = '\0';   // for trace purpose
@@ -221,6 +219,7 @@ bool sudoku::edit(){
     position prevPos(0, false);
 
     revert();   // Remove obious and found values (if any)
+    display();
 
     menuBar menu;       // A simple menu bar
     MENUACTION action;
@@ -229,10 +228,10 @@ bool sudoku::edit(){
     menu.update();
 
     // Initial draw
-	bool showSelected(true), reDraw(false);
-	_drawSingleElement(currentPos.row(), currentPos.line(),
-					elements_[currentPos].value(),
-					SEL_BK_COLOUR, SEL_TXT_COLOUR);
+    bool showSelected(true), reDraw(false);
+    _drawSingleElement(currentPos.row(), currentPos.line(),
+                    elements_[currentPos].value(),
+                    SEL_BK_COLOUR, SEL_TXT_COLOUR);
 
     // Timer for blinking effect
     int tickCount(BLINK_TICKCOUNT);
@@ -247,19 +246,19 @@ bool sudoku::edit(){
     while (cont){
 
         if (timerID >= 0){
-			while(!tick){
-				sleep();
-			}
-			tick = 0;
+            while(!tick){
+                sleep();
+            }
+            tick = 0;
 
-			// Time to blink ?
-			if (!(tickCount--)){
-				// Blink
-				showSelected = !showSelected;
-				tickCount = BLINK_TICKCOUNT;
-				reDraw = true;
-			}
-		}
+            // Time to blink ?
+            if (!(tickCount--)){
+                // Blink
+                showSelected = !showSelected;
+                tickCount = BLINK_TICKCOUNT;
+                reDraw = true;
+            }
+        }
 
         // Wait for a keyboard event
         action = menu.handleKeyboard();
@@ -295,39 +294,57 @@ bool sudoku::edit(){
             break;
 
         case KEY_CODE_1:
-            modified = _checkAndSet(currentPos, 1);
+            if (_checkAndSet(currentPos, 1)){
+                modified = true;
+            }
             break;
 
         case KEY_CODE_2:
-            modified = _checkAndSet(currentPos, 2);
+            if (_checkAndSet(currentPos, 2)){
+                modified = true;
+            }
             break;
 
         case KEY_CODE_3:
-            modified = _checkAndSet(currentPos, 3);
+            if (_checkAndSet(currentPos, 3)){
+                modified = true;
+            }
             break;
 
         case KEY_CODE_4:
-            modified = _checkAndSet(currentPos, 4);
+            if (_checkAndSet(currentPos, 4)){
+                modified = true;
+            }
             break;
 
         case KEY_CODE_5:
-            modified = _checkAndSet(currentPos, 5);
+            if (_checkAndSet(currentPos, 5)){
+                modified = true;
+            }
             break;
 
         case KEY_CODE_6:
-            modified = _checkAndSet(currentPos, 6);
+            if (_checkAndSet(currentPos, 6)){
+                modified = true;
+            }
             break;
 
         case KEY_CODE_7:
-            modified = _checkAndSet(currentPos, 7);
+            if (_checkAndSet(currentPos, 7)){
+                modified = true;
+            }
             break;
 
         case KEY_CODE_8:
-            modified = _checkAndSet(currentPos, 8);
+            if (_checkAndSet(currentPos, 8)){
+                modified = true;
+            }
             break;
 
         case KEY_CODE_9:
-            modified = _checkAndSet(currentPos, 9);
+            if (_checkAndSet(currentPos, 9)){
+                modified = true;
+            }
             break;
 
         // Cancel modifications
@@ -349,29 +366,29 @@ bool sudoku::edit(){
         } // switch (car)
 
         if (reDraw || (prevPos != currentPos)){
-			// if sel. changed, erase previously selected element
-			if (prevPos != currentPos){
-				_drawSingleElement(prevPos.row(), prevPos.line(),
-						elements_[prevPos].value(),
-						BK_COLOUR, TXT_ORIGINAL_COLOUR);
-			}
+            // if sel. changed, erase previously selected element
+            if (prevPos != currentPos){
+                _drawSingleElement(prevPos.row(), prevPos.line(),
+                        elements_[prevPos].value(),
+                        BK_COLOUR, TXT_ORIGINAL_COLOUR);
+            }
 
-			// Hilight the new value (or have it blink)
-			if (showSelected){
-				_drawSingleElement(currentPos.row(), currentPos.line(),
-							elements_[currentPos].value(),
-							SEL_BK_COLOUR, SEL_TXT_COLOUR);
-			}
-			else{
-				_drawSingleElement(currentPos.row(), currentPos.line(),
-							elements_[currentPos].value(),
-							BK_COLOUR, TXT_ORIGINAL_COLOUR);
-			}
+            // Hilight the new value (or have it blink)
+            if (showSelected){
+                _drawSingleElement(currentPos.row(), currentPos.line(),
+                            elements_[currentPos].value(),
+                            SEL_BK_COLOUR, SEL_TXT_COLOUR);
+            }
+            else{
+                _drawSingleElement(currentPos.row(), currentPos.line(),
+                            elements_[currentPos].value(),
+                            BK_COLOUR, TXT_ORIGINAL_COLOUR);
+            }
 
-			dupdate();
-			prevPos = currentPos;
-			reDraw = false;
-		}
+            dupdate();
+            prevPos = currentPos;
+            reDraw = false;
+        }
     } // while (cont)
 
     if (timerID >= 0){
@@ -536,14 +553,14 @@ bool sudoku::_checkValue(position& pos, uint8_t value){
 //  @return : true if value is set
 //
 bool sudoku::_checkAndSet(position& pos, uint8_t value){
-	if (_checkLine(pos, value) && _checkRow(pos, value) &&
-		_checkTinySquare(pos, value)){
-		// set
-		elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
-		return true;
-	}
+    if (_checkLine(pos, value) && _checkRow(pos, value) &&
+        _checkTinySquare(pos, value)){
+        // set
+        elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 //
@@ -588,9 +605,9 @@ void sudoku::_drawContent(){
             pElement = &elements_[pos];
             if (!pElement->isEmpty()){
                 _drawSingleElement(row, line,
-					pElement->value(), BK_COLOUR,
-					(pElement->isOriginal()?TXT_ORIGINAL_COLOUR:
-					(pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR)));
+                    pElement->value(), BK_COLOUR,
+                    (pElement->isOriginal()?TXT_ORIGINAL_COLOUR:
+                    (pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR)));
             }
             pos+=1; // next element
         }

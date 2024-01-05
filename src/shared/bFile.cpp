@@ -110,8 +110,7 @@ int bFile::size(){
 bool bFile::open(FONTCHARACTER filename, int access){
     if (access && !isOpen()){
 #ifdef DEST_CASIO_CALC
-        fd_ = gint_world_switch(GINT_CALL(BFile_Open,
-								filename, access));
+        fd_ = gint_world_switch(GINT_CALL(BFile_Open, filename, access));
         if (fd_ < 0){
             error_ = fd_;
             fd_ = 0;
@@ -157,10 +156,9 @@ bool bFile::create(FONTCHARACTER filename, int type, int *size){
 									filename, BFile_File, size));
             return (error_ == 0);	// Created ?
 #else
-            // size if ignored
+            // size is ignored
             if (open(filename, BFile_WriteOnly)){
                 if (isOpen()){
-                    //close();
                     return true;
                 }
             }
@@ -192,11 +190,12 @@ bool bFile::write(void const *data, int even_size){
     bool done(false);
     int mySize(even_size);
 
-    if (data && isOpen()){
+    if (data && even_size && isOpen()){
 #ifdef DEST_CASIO_CALC
-		void* buffer;
-		if (even_size % 2){
-			if (NULL == (buffer = malloc(even_size + 1))){
+		char* buffer = (char*)data;
+#ifdef FX9860G
+		if (0 != (even_size % 2)){
+			if (NULL == (buffer = malloc(++mySize))){
 				// Unable to allocate memory
 				return false;
 			}
@@ -204,22 +203,18 @@ bool bFile::write(void const *data, int even_size){
 			// Copy the buffer
 			memcpy(buffer, data, even_size);
 
-			// ... add a null byte
-			memcpy((void*)(((const char*)buffer) + mySize++), 0x00, 1);
-
+			// ... add a byte
+			memcpy((void*)(buffer + even_size), 0x00, 1);
 		}
-		else{
-			buffer = (void*)data;
-		}
-
-        error_ = gint_world_switch(GINT_CALL(BFile_Write,
-										fd_, buffer, mySize));
-        done =  (error_ == 0);	// data written ?
-
+#endif // #ifdef FX9860G
+        error_ = gint_world_switch(GINT_CALL(BFile_Write, fd_, (void*)buffer, mySize));
+        done =  (0 == error_);	// data successfully written ?
+#ifdef FX9860G
         // Free the buffer ?
-		if (even_size % 2){
+		if (0 != (even_size % 2)){
 			free(buffer);
 		}
+#endif // #ifdef FX9860G
 #else
     file_.write((const char*)data, mySize);
 

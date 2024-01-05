@@ -19,9 +19,7 @@
 //
 grids::grids(){
     index_ = -1;    // No file is selected
-
-    //firstFreeID_ = 0;   // Folder is empty
-    files_ = NULL;
+    files_ = NULL;  // Folder is empty
     count_ = 0;
     capacity_ = 0;
 
@@ -30,6 +28,42 @@ grids::grids(){
     strcat(folder_, PATH_SEPARATOR);
 
     _browse();
+}
+
+// setPos() : Set current position index in list
+//
+//  @index: new position index
+//
+//  @return : index or -1 if list is empty
+//
+int grids::setPos(int index){
+   if (index>=0 && index < count_){
+        index_ = index;
+   }
+
+    return index_;
+}
+
+// addFileName() : Add a filename to the folder's content list
+//
+//  @fName : filename to add
+//
+//  @return : true if successfully added
+//
+bool grids::addFileName(const FONTCHARACTER fName){
+    size_t len(0);
+    if (!(len = bFile::FC_len(fName))){
+        return false;
+    }
+
+    // If filename is a FQN, remove path ...
+    char* buffer = (char*)fName;
+    while (len && CHAR_PATH_SEPARATOR != buffer[2*len-1]){
+        len--;
+    }
+
+    // Add file to the list
+    return _addFile((len?(fName+len+1):fName));
 }
 
 // nextFile() : Get next file name
@@ -174,7 +208,7 @@ void grids::_browse(){
         do{
             // a file ?
             if (BFile_Type_Archived == fileInfo.type){
-                _addFile(fName, true);
+                _addFile(fName);
             }
         } while(folder.findNext(shandle, fName, &fileInfo));
 
@@ -184,12 +218,11 @@ void grids::_browse(){
 
 // _addFile() - Add file to the list
 //
-//  @fileName : file to add
-//  @addFolder : add folder to the path
+//  @fileName : file to add (with no folder)
 //
 //  @return : true if added
 //
-bool grids::_addFile(const FONTCHARACTER fileName, bool addFolder){
+bool grids::_addFile(const FONTCHARACTER fileName){
     PFNAME file = (PFNAME)malloc(sizeof(FNAME));
     if (NULL == file){
         return false;
@@ -197,23 +230,16 @@ bool grids::_addFile(const FONTCHARACTER fileName, bool addFolder){
     memset(file, 0x00, sizeof(FNAME));  // empty struct.
 
     // Full name
-    FONTCHARACTER fqn(NULL);
 #ifdef DEST_CASIO_CALC
     uint16_t fName[BFILE_MAX_PATH + 1];
 #else
     char fName[BFILE_MAX_PATH + 1];
 #endif // DEST_CASIO_CALC
-    if (addFolder){
-        bFile::FC_str2FC(folder_, fName);   // convert folder to FONTCHARACTER
-        bFile::FC_cat(fName, fileName);     // add filename
-        fqn = (FONTCHARACTER)fName;
-    }
-    else{
-        fqn = fileName;
-    }
+    bFile::FC_str2FC(folder_, fName);   // convert folder to FONTCHARACTER
+    bFile::FC_cat(fName, fileName);     // add filename
 
     // fill struct. with file informations
-    if (NULL == (file->fileName = bFile::FC_dup(fqn)) ||
+    if (NULL == (file->fileName = bFile::FC_dup(fName)) ||
         -1 == (file->ID = __fileName2i(fileName))){
         if (file->fileName){
             free((void*)file->fileName);
@@ -337,11 +363,10 @@ int grids::_nextFileID(){
         return 0;   // Empty folder
     }
 
-    int ID(0xFFFF);
+    int ID(0xFFFF); // max.file ID
     PFNAME pFile(NULL);
-    for (int index=0; index < count_; index++){
-        if ((pFile = files_[index]) &&
-            pFile->ID <= ID){
+    for (int index(0); index < count_; index++){
+        if ((pFile = files_[index]) && pFile->ID <= ID){
                 ID = pFile->ID + 1;
         }
     }

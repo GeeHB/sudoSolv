@@ -37,11 +37,19 @@ public:
 
     // pos() : Get current position index in list
     //
-    // @return : index or -1 if list is empty
+    //  @return : index or -1 if list is empty
     //
     int pos(){
         return index_;
     }
+
+    // setPos() : Set current position index in list
+    //
+    //  @index: new position index
+    //
+    //  @return : index or -1 if list is empty
+    //
+    int setPos(int index);
 
     // addFileName() : Add a filename to the folder's content list
     //
@@ -49,9 +57,7 @@ public:
     //
     //  @return : true if successfully added
     //
-    bool addFileName(const FONTCHARACTER fName){
-        return _addFile(fName, false);
-    }
+    bool addFileName(const FONTCHARACTER fName);
 
     // nextFile() : Get next file name
     //
@@ -92,12 +98,11 @@ private:
 
     // _addFile() - Add file to the list
     //
-    //  @fileName : file to add
-    //  @addFolder : add folder to the path
+    //  @fileName : file to add (with no folder)
     //
     //  @return : true if added
     //
-    bool _addFile(const FONTCHARACTER fileName, bool addFolder);
+    bool _addFile(const FONTCHARACTER fileName);
 
     // Informations about a file
     //

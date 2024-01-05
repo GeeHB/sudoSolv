@@ -1,5 +1,6 @@
-# Personnal fils
+# Personnal files
 /src/locals.h
+/src/main.cpp
 /assets-cg/base
 
 # Outputs

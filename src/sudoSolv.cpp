@@ -30,10 +30,9 @@ void _displayStats(const char* fName, int8_t obvious, int elapse);
 //
 int main(void)
 {
-	// Launch the application
-	_homeScreen();
+    _homeScreen();
 
-	// App menus
+    // Create app. menus
     menuBar menu;
     _createMenu(menu);
     menu.update();
@@ -93,7 +92,7 @@ int main(void)
                             _displayStats(sFileName, -1, -1);
                         }
                         else{
-                            dprint(TEXT_X, TEXT_V_OFFSET, C_BLACK, "Error loading file : %d", (int)error);
+                            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error loading file : %d", (int)error);
                             dupdate();
                         }
                     } 
@@ -117,7 +116,7 @@ int main(void)
                             _displayStats(sFileName, -1, -1);
                         }
                         else{
-                            dprint(TEXT_X, TEXT_V_OFFSET, C_BLACK, "Error loading file : %d", (int)error);
+                            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error loading file : %d", (int)error);
                             dupdate();
                         }
                     }
@@ -131,10 +130,18 @@ int main(void)
                 case IDM_FILE_SAVE:
                     if (files.newFileName(fileName)){
                         if (game.save(fileName)){
-                            files.addFileName(fileName);
+                            if (files.addFileName(fileName)){
+                                _setFileName(fileName, sFileName);
+                                _displayStats(sFileName, -1, -1);
 
-                            _setFileName(fileName, sFileName);
-                            _displayStats(sFileName, -1, -1);
+                                // New filename was added at list's tail
+                                files.setPos(files.size() - 1);
+                                menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
+                                menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, files.size()>1);
+                            }
+                        }
+                        else{
+                            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error saving file");
                         }
                         menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, false);
                         menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
@@ -162,12 +169,11 @@ int main(void)
                     }
                     break;
 
-				// Modify current grid
+                // Modify current grid
                 case IDM_EDIT:{
                     game.display();
                     if (game.edit()){
                         menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, true);
-
                         _displayStats(sFileName, -1, -1);
                     }
 
@@ -188,17 +194,15 @@ int main(void)
                 // Try to find a solution
                 case IDM_SOLVE_FIND:
                     game.display();
-                    if (game.resolve(&duration)){
-                        game.display(false);
-                        _displayStats(sFileName, obviousVals, duration);
-                        dupdate();
-                    }
-                    else {
+                    if (!game.resolve(&duration)){
                         // No soluce found ...
                         // ... return to original grid
                         game.revert();
-                        game.display();
                     }
+
+                    game.display(false);
+                    _displayStats(sFileName, obviousVals, duration);
+                    
                     break;
 
                 // Return to "original" grid
@@ -207,7 +211,6 @@ int main(void)
                     game.display(false);
                     obviousVals = -1;
                     _displayStats(sFileName, -1, -1);
-                    dupdate();
                     break;
 
                 // Quit the application
@@ -248,8 +251,8 @@ int main(void)
         }
     }
 
-    //gint_setrestart(1);
-    gint_osmenu();
+    gint_setrestart(1);
+    //gint_osmenu();
 
 	return 1;
 }
@@ -323,8 +326,8 @@ void _displayStats(const char* fName, int8_t obvious, int elapse){
         if (obvious){
             dprint(TEXT_X, TEXT_Y + TEXT_V_OFFSET, C_BLACK, "%d obvious values", obvious);
 
-        }else
-        {
+        }
+        else{
             dtext(TEXT_X, TEXT_Y + TEXT_V_OFFSET, C_BLACK, "No obvious value");
         }
     }
@@ -333,8 +336,8 @@ void _displayStats(const char* fName, int8_t obvious, int elapse){
         if (elapse){
             dprint(TEXT_X, TEXT_Y + 2*TEXT_V_OFFSET, C_BLACK, "Solved in %d ms", elapse);
 
-        }else
-        {
+        }
+        else{
             dprint(TEXT_X, TEXT_Y + 2*TEXT_V_OFFSET, C_BLACK, "No solution found");
         }
     }
