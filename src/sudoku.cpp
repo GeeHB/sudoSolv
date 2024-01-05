@@ -192,12 +192,20 @@ int sudoku::save(const FONTCHARACTER fName){
     oFile.remove(fName);    // Remove the file (if already exist)
 
     if (!oFile.create(fName, BFile_File, &fSize)){
+#ifdef DEST_CASIO_CALC
+        dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Create : %d",oFile.getLastError() );
+        dupdate();
+#endif // #ifdef DEST_CASIO_CALC
         return oFile.getLastError();
     }
 
     // copy the buffer to the file
     bool done = oFile.write(buffer, FILE_SIZE);
     int error = oFile.getLastError();
+#ifdef DEST_CASIO_CALC
+        dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Write : %d",oFile.getLastError() );
+        dupdate();
+#endif // #ifdef DEST_CASIO_CALC
     oFile.close();
 
     // Done ?
@@ -230,6 +238,7 @@ bool sudoku::edit(){
     _drawSingleElement(currentPos.row(), currentPos.line(),
                     elements_[currentPos].value(),
                     SEL_BK_COLOUR, SEL_TXT_COLOUR);
+    dupdate();
 
     // Timer for blinking effect
     int tickCount(BLINK_TICKCOUNT);
@@ -375,7 +384,7 @@ bool sudoku::edit(){
             if (showSelected){
                 _drawSingleElement(currentPos.row(), currentPos.line(),
                             elements_[currentPos].value(),
-                            SEL_BK_COLOUR, SEL_TXT_COLOUR);
+                            SEL_BK_COLOUR, /*SEL_TXT_COLOUR*/TXT_ORIGINAL_COLOUR);
             }
             else{
                 _drawSingleElement(currentPos.row(), currentPos.line(),

@@ -16,7 +16,7 @@
 - [x] icones
 - [x] grids
 - [x] Copie d'écran - *fxlink*
-- [ ] Texte sur une grille
+- [x] Textes sur une grille
     - [x] nom court
     - [x] # obvious
     - [x] Durée de résolution
@@ -30,7 +30,9 @@
 #### Corrections
 - [x] Affichage de la grille centrée verticalement
 - [ ] Code refactoring
-- [ ] La ligne supérieure de la barre de menu disparait
+- [x] La ligne supérieure de la barre de menu disparait
 - [ ] Nouvelle grille
     - [x] pas de nouvel ID si pas de sauvegarde
+    - [ ] Nouvel ID si à partir d'un nouveau fichier ...
     - [ ] "compression" pour trouver le plus petit ID disponible possible
+- [ ] Sauvegarde d'un fichier

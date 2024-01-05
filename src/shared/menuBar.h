@@ -12,7 +12,7 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        0.3.4
+#define _GEEHB_MENU_VER_        0.3.5
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 

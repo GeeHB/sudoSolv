@@ -117,7 +117,8 @@ int8_t menuBar::getItemState(int searchedID, int searchMode){
 //  @return : true if activation state changed
 //
 bool menuBar::activateItem(int searchedID, int searchMode, bool activated){
-    PMENUITEM item(_findItem(&current_, searchedID, searchMode));
+    PMENUBAR container(NULL);
+    PMENUITEM item(_findItem(&current_, searchedID, searchMode, &container));
     if (item){
         // Found an item with this ID
         bool active = !_isBitSet(item->state, ITEM_STATE_INACTIVE);
@@ -128,6 +129,12 @@ bool menuBar::activateItem(int searchedID, int searchMode, bool activated){
 			}
 			else{
 				_setBit(item->state, ITEM_STATE_INACTIVE);
+
+				// an inactivate item can't be selected !
+                _removeBit(item->state, ITEM_STATE_SELECTED);
+                if (container){
+                    container->selIndex = -1;
+                }
 			}
 
             return true;
@@ -475,7 +482,7 @@ PMENUITEM menuBar::_findItem(const PMENUBAR bar, int searchedID, int searchMode,
         if (SEARCH_BY_ID == searchMode){
             for (uint8_t index = 0; !foundItem && index < MENU_MAX_ITEM_COUNT; index++){
                 if ((item = bar->items[index])){
-                    if (item->status & ITEM_STATUS_SUBMENU){
+                    if (_isBitSet(item->status, ITEM_STATUS_SUBMENU)){
                         // in a sub menu ?
                         if ((sItem = _findItem((PMENUBAR)item->subMenu, searchedID, searchMode, containerBar, pIndex))){
                             foundItem = sItem;   // Found in a sub menu
@@ -531,7 +538,7 @@ bool menuBar::_removeItem(const PMENUBAR bar, int searchedID, int searchMode){
                 bar->items[searchedID] = NULL;
 
                 // A sub menu ?
-                 if (item->status & ITEM_STATUS_SUBMENU){
+                 if (_isBitSet(item->status, ITEM_STATUS_SUBMENU)){
                     _freeMenuBar((PMENUBAR)item->subMenu, true);
                  }
 
@@ -640,7 +647,7 @@ void menuBar::_drawItem(const RECT* anchor, const MENUITEM* item){
     drect(anchor->x, anchor->y, anchor->x + anchor->w - 1, anchor->y + anchor->h - 1, COLOUR_WHITE);
 
     if (item){
-        selected = (ITEM_STATE_SELECTED == item->state);
+        selected = _isBitSet(item->state, ITEM_STATE_SELECTED);
         int imgID(-1);  // No image
 
         // Text
@@ -677,7 +684,13 @@ void menuBar::_drawItem(const RECT* anchor, const MENUITEM* item){
             // text too large ?
 
             // draw the text
-            dtext(x, y, selected?ITEM_COLOUR_SELECTED:((item->state == ITEM_STATE_INACTIVE)?ITEM_COLOUR_INACTIVE:ITEM_COLOUR_UNSELECTED), item->text);
+            dtext(x, y,
+                selected?
+                    ITEM_COLOUR_SELECTED:
+                    (_isBitSet(item->state, ITEM_STATE_INACTIVE)?
+                        ITEM_COLOUR_INACTIVE:
+                        ITEM_COLOUR_UNSELECTED)
+                , item->text);
         }
 
         // frame
