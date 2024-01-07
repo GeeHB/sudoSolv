@@ -1,5 +1,5 @@
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //--
 //--    grids.cpp
 //--
@@ -8,7 +8,7 @@
 //--        The object works as a rudimentary DB
 //--        where each file has a numeric ID
 //--
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "grids.h"
 #include <cstdlib>
@@ -26,6 +26,30 @@ grids::grids(){
     // this folder
     strcpy(folder_, GRIDS_FOLDER);
     strcat(folder_, PATH_SEPARATOR);
+}
+
+// Destruction
+//
+grids::~grids(){
+    __vector_clear(true);
+}
+
+// findPos() : Find the index (position) of a file in the internal list
+//
+//  @UID: File's ID
+//
+//  @return : index of file in liste or -1
+//
+int grids::findPos(int UID){
+    PFNAME pFile(NULL);
+    for (int index(0); index < count_; index++){
+        if ((pFile = files_[index]) && pFile->ID == UID){
+            return index;
+        }
+    }
+
+    // Not found
+    return -1;
 }
 
 // setPos() : Set current position index in list
@@ -47,7 +71,6 @@ int grids::setPos(int index){
 //  @return : count of elements read or -1 if error
 //
 int grids::browse(){
-
     bFile folder;
     char szPattern[BFILE_MAX_PATH + 1];
 
@@ -71,7 +94,7 @@ int grids::browse(){
 
     // Empty the list
     if (capacity_){
-        __vector_clear();
+        __vector_clear(false);
     }
 
     // Browse folder
@@ -155,10 +178,12 @@ bool grids::prevFile(FONTCHARACTER fName){
 // newFileName() : Generates a unique file name
 //
 //  @fName : new FQN
+//  @UID : pointer to int who will receive file's unique ID
+//          can be NULL
 //
 //  @return : true if name is valid
 //
-bool grids::newFileName(FONTCHARACTER fName){
+bool grids::getNewFileName(FONTCHARACTER fName, int* UID){
     if (fName){
         int ID(_nextFileID());
         if (-1 != ID){
@@ -168,6 +193,9 @@ bool grids::newFileName(FONTCHARACTER fName){
             strcat(name, GRID_FILE_EXT);
 
             bFile::FC_str2FC(name, fName);
+            if (UID){
+                (*UID) = ID;
+            }
             return true;
         }
     }
@@ -337,19 +365,23 @@ bool grids::__vector_resize(){
 
 // __vector_clear() : clear the list and its content
 //
-void grids::__vector_clear(){
+//  @freeList : free list as well ?
+//
+void grids::__vector_clear(bool freeList){
     PFNAME pFile(NULL);
-    for (int index=0; index < count_; index++){
+    for (int index(0); index < count_; index++){
         if ((pFile = files_[index])){
             _freeFileName(pFile);
         }
     }
 
-    // The list is empty
-    free(files_);
-    capacity_ = 0;
-    count_ = 0;
-    files_ = NULL;
+    count_ = 0; // List is empty
+
+    if (freeList){
+        free(files_);
+        capacity_ = 0;
+        files_ = NULL;
+    }
 }
 
 //

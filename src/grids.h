@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //--
 //--    grids.h
 //--
@@ -7,7 +7,7 @@
 //--        The object works as a rudimentary DB
 //--        where each file has a numeric ID
 //--
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #ifndef __S_SOLVER_GRIDS_h__
 #define __S_SOLVER_GRIDS_h__    1
@@ -26,9 +26,7 @@ public:
     grids();
 
     // Destruction
-    ~grids(){
-        __vector_clear();
-    }
+    ~grids();
 
     // # files in the folder
     int size(){
@@ -42,6 +40,14 @@ public:
     int pos(){
         return index_;
     }
+
+    // findPos() : Find the index (position) of a file in the internal list
+    //
+    //  @UID: File's ID
+    //
+    //  @return : index of file in liste or -1
+    //
+    int findPos(int UID);
 
     // setPos() : Set current position index in list
     //
@@ -84,10 +90,12 @@ public:
     // newFileName() : Generates a unique file name
     //
     //  @fName : new FQN
+    //  @UID : pointer to int who will receive file's unique ID
+    //          can be NULL
     //
     //  @return : true if name is valid
     //
-    bool newFileName(FONTCHARACTER fName);
+    bool getNewFileName(FONTCHARACTER fName, int* UID);
 
     // deleteFile() : Delete current file
     //
@@ -135,7 +143,9 @@ private:
 
     // __vector_clear() : clear the list and its content
     //
-    void __vector_clear();
+    //  @freeList : free list as well ?
+    //
+    void __vector_clear(bool freeList);
 
     //
     // Utils

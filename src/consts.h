@@ -29,7 +29,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolver"
-#define APP_VERSION  "0.1.12"
+#define APP_VERSION  "0.1.13"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -37,7 +37,7 @@ extern "C" {
 #ifdef DEST_CASIO_CALC
 #define CHAR_PATH_SEPARATOR  '\\'
 #define PATH_SEPARATOR  "\\"
-#define GRIDS_FOLDER    "\\\\fls0\\GRIDS"
+#define GRIDS_FOLDER    "\\\\fls0\\grids"
 #endif // DEST_CASIO_CALC
 
 #define GRID_FILE_EXT               ".txt"

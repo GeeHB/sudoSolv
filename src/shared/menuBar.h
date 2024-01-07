@@ -1,10 +1,10 @@
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //--
 //--    menuBar.h
 //--
 //--        Definition of menuBar object - A bar of menu (or a submenu)
 //--
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #ifndef __MENU_BAR_h__
 #define __MENU_BAR_h__    1
@@ -201,8 +201,8 @@ public:
     //
     //  @return : true if the item has been added
     //
-    bool appendItem(int id, const char* text,
-                int state = ITEM_STATE_DEFAULT, int status = ITEM_STATUS_DEFAULT){
+    bool appendItem(int id, const char* text, int state = ITEM_STATE_DEFAULT,
+					int status = ITEM_STATUS_DEFAULT){
         return _addItem(&current_, current_.itemCount, id, text, state, status);
     }
 
@@ -210,7 +210,7 @@ public:
     //      Remove the item menu or the submenu
     //
     //  @searchedID : Item's ID or index
-    //  @searchMode : if SEARCH_BY_ID, searchedID is the ID of item to be removed
+    //  @searchMode : if SEARCH_BY_ID, searchedID is the ID of item
     //                if SEARCH_BY_INDEX serachedID is the index in the menu bar
     //
     //  @return : true if the item has been successfully removed
@@ -399,7 +399,7 @@ private:
     //
     //  @bar : menu bar in wich the item is to be searched
     //  @searchedID : Item's ID or index
-    //  @searchMode : if SEARCH_BY_ID, searchedID is the ID of item to be removed
+    //  @searchMode : if SEARCH_BY_ID, searchedID is the ID of item
     //                if SEARCH_BY_INDEX serachedID is the index in the menu bar
     //
     //  @return : true if the item has been successfully removed

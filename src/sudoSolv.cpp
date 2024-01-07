@@ -126,30 +126,39 @@ int main(void)
                     }
                     break;
 
-                // Save the grid (using a new name)
+                // Save the grid
                 case IDM_FILE_SAVE:
-                    if (files.newFileName(fileName)){
-                        bFile::FC_FC2str(fileName, sFileName);
-                        dprint(TEXT_X, 1, C_RED, "File : %s", sFileName);
+                {
+					bool fileExists(sFileName[0]);
+                    int uid;
+
+                    // Use current name or new name if none
+                    if (fileExists || (!fileExists && files.getNewFileName(fileName, &uid))){
                         if (FILE_NO_ERROR == (error = game.save(fileName))){
-                            if (files.addFileName(fileName)){
+                            if (!fileExists){
                                 _setFileName(fileName, sFileName);
                                 _displayStats(sFileName, -1, -1);
 
-                                // New filename was added at list's tail
-                                files.setPos(files.size() - 1);
+                                // Update internal list
+                                files.browse();
+                                files.setPos(files.findPos(uid)); // select the file
+                                
                                 menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
                                 menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, files.size()>1);
+
                             }
-                        }
+                                    
+                            menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, false);
+                            menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
+                            menu.update();
+                        }   // save
                         else{
-                            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error saving file : %d", error);
+                            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error saving : %d", error);
+                            dupdate();
                         }
-                        menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, false);
-                        menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
-                        menu.update();
                     }
                     break;
+                }
                 
                 // Remove current file
                 case IDM_FILE_DELETE:

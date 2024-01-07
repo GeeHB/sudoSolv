@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //--
 //--	bFile.h
 //--
@@ -11,12 +11,12 @@
 //--					- BFile_Ext_Stat
 //--					- seek API
 //--
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define VERSION_B_FILE_OBJECT       0.3.4
+#define VERSION_B_FILE_OBJECT       0.4.1
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>
@@ -35,17 +35,18 @@ namespace fs = std::filesystem;
 typedef char* FONTCHARACTER;
 typedef DIR* SEARCHHANDLE;
 
+// Error codes
+#define BFile_IllegalParam  -1
+
 // Entry types
-//
 #define BFile_File    1
 #define BFile_Folder  5
 
 // Access modes
 #define BFile_ReadOnly      0x01
 #define BFile_WriteOnly     0x02
-#define BFile_ReadWrite     (BFile_ReadOnly|BFile_WriteOnly)
+#define BFile_ReadWrite     (BFile_ReadOnly | BFile_WriteOnly)
 #define BFile_Share         0x80
-
 
 struct BFile_FileInfo
 {
@@ -60,6 +61,7 @@ struct BFile_FileInfo
 	void *address;
 };
 
+// Enum. types
 #define BFile_Type_Directory  0x0000
 #define BFile_Type_File       0x0001
 #define BFile_Type_Addin      BFile_Type_File
@@ -123,14 +125,29 @@ public:
 
     // create() : Create a file or a folder
     //
-    // @filename : name of the file or folder to create (must not exist)
+    // @fname : name of the file or folder to create (must not exist)
     // @type : Entry type (BFile_File or BFile_Folder)
     // @size : Pointer to file size if type is BFile_File,
     //			use NULL otherwise
     //
-    // @return : file successfully created ?
+    // @return : file or folder successfully created ?
     //
-    bool create(FONTCHARACTER filename, int type, int *size);
+    bool create(FONTCHARACTER fname, int type, int *size);
+
+    // createEx() : Create a file or a folder
+    //
+    //  Create the folder or the file. For file (type BFile_File),
+    //  the method will try to open the file after creation
+    //
+    // @fname : name of the file or folder to create (must not exist)
+    // @type : Entry type (BFile_File or BFile_Folder)
+    // @size : Pointer to file size if type is BFile_File,
+    //			use NULL otherwise
+    // @access : Access mode for the file
+    //
+    // @return : file or folder successfully created (and openend for file) ?
+    //
+    bool createEx(FONTCHARACTER fname, int type, int *size, int access);
 
     // write() : Write data in the current file
     //
@@ -184,7 +201,7 @@ public:
     //
     bool findFirst(const FONTCHARACTER pattern,
 				SEARCHHANDLE*sHandle, FONTCHARACTER foundFile,
-        struct BFile_FileInfo *fileInfo);
+                struct BFile_FileInfo *fileInfo);
 
     // findNext(): Continue a search
     //
@@ -196,8 +213,8 @@ public:
     //
     //  @return : true if ok
     //
-    bool findNext(SEARCHHANDLE sHandle,
-			FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo);
+    bool findNext(SEARCHHANDLE sHandle, FONTCHARACTER foundFile, 
+                struct BFile_FileInfo *fileInfo);
 
     // findClose() :  Close a search handle
     //

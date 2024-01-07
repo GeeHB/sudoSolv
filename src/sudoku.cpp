@@ -169,8 +169,7 @@ int sudoku::save(const FONTCHARACTER fName){
     }
 
     // Transfer content in a buffer
-    char buffer[FILE_SIZE+1];
-    memset(buffer, 0x00, FILE_SIZE);    // ???
+    char buffer[FILE_SIZE];
     int index(0);
     for (uint8_t lId(0); lId < LINE_COUNT; lId++){
         for (uint8_t cId(0); cId < ROW_COUNT; cId++){
@@ -184,28 +183,20 @@ int sudoku::save(const FONTCHARACTER fName){
         buffer[2*index-1] = '\n';
     }
 
-    buffer[FILE_SIZE] = '\0';   // for trace purpose
+    //buffer[FILE_SIZE] = '\0';   // for trace purpose
 
     // Save the file
     bFile oFile;
     int fSize(FILE_SIZE);
     oFile.remove(fName);    // Remove the file (if already exist)
 
-    if (!oFile.create(fName, BFile_File, &fSize)){
-#ifdef DEST_CASIO_CALC
-        dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Create : %d",oFile.getLastError() );
-        dupdate();
-#endif // #ifdef DEST_CASIO_CALC
+    if (!oFile.createEx(fName, BFile_File, &fSize, BFile_WriteOnly)){
         return oFile.getLastError();
     }
 
     // copy the buffer to the file
-    bool done = oFile.write(buffer, FILE_SIZE);
-    int error = oFile.getLastError();
-#ifdef DEST_CASIO_CALC
-        dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Write : %d",oFile.getLastError() );
-        dupdate();
-#endif // #ifdef DEST_CASIO_CALC
+    bool done(oFile.write(buffer, FILE_SIZE));
+    int error(oFile.getLastError());
     oFile.close();
 
     // Done ?
