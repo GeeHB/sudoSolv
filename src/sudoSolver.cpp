@@ -1,68 +1,108 @@
 //----------------------------------------------------------------------
 //--
-//--    sudoSolv.cpp
+//--    sudoSolver.cpp
 //--
-//--        Create, edit, modify and find a solution of a sudoku grid
-//--
-//--        App. entry point
+//--        Implementation of sudoSolver object
 //--
 //----------------------------------------------------------------------
 
-#include "grids.h"
+#include "sudoSolver.h"
 #include "sudoku.h"
-#include "menu.h"
 
-#include "shared/scrCapture.h"
 extern bopti_image_t g_homeScreen;  // Background image
 
+// Construction
+//
+sudoSolver::sudoSolver(){
+    // Initialize members
+    _initStats();
+}
+
+// Destruction
+//
+sudoSolver::~sudoSolver(){
 #ifndef NO_CAPTURE
-scrCapture  g_Capture;              // Screen capture object
-#endif // #ifndef NO_CAPTURE
-
-// Functions definitions
-//
-void _createMenu(menuBar& menu);
-void _homeScreen();
-void _setFileName(FONTCHARACTER fullName, char* shortName);
-void _displayStats(const char* fName, int8_t obvious, int elapse);
-
-// APP. entry-point
-//
-int main(void)
-{
-    _homeScreen();
-
-    // Create app. menus
-    menuBar menu;
-    _createMenu(menu);
-    menu.update();
-
-    RECT mainRect;
-    menu.getRect(mainRect);     // menu bar position
-    mainRect = {0, 0, mainRect.w, CASIO_HEIGHT - mainRect.h};
-
-    // List of grid files
-    grids files;
-    if (files.browse() > 0){
-        menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
-        menu.update();
+    if (_capture.isSet()){
+        _capture.remove();  // stop "capture" on exit
     }
+#endif // #ifndef NO_CAPTURE
+}
 
-    // Stats.
-    uint16_t fileName[BFILE_MAX_PATH + 1];
-    char sFileName[BFILE_MAX_PATH + 1];
-    int8_t obviousVals(-1);
-    int duration(-1);
+// Create app. menu bar
+//
+void sudoSolver::createMenu(){
+    // "File" sub menu
+    menuBar fileMenu;
+    fileMenu.appendItem(IDM_FILE_NEW, IDS_FILE_NEW);
+    fileMenu.appendItem(IDM_FILE_PREV, IDS_FILE_PREV, ITEM_STATE_INACTIVE);
+    fileMenu.appendItem(IDM_FILE_NEXT, IDS_FILE_NEXT, ITEM_STATE_INACTIVE);
+    fileMenu.appendItem(IDM_FILE_SAVE, IDS_FILE_SAVE, ITEM_STATE_INACTIVE);
+    fileMenu.appendItem(IDM_FILE_DELETE, IDS_FILE_DELETE, ITEM_STATE_INACTIVE);
+    menu_.appendSubMenu(&fileMenu, IDM_FILE_SUBMENU, IDS_FILE_SUBMENU);
 
-    // App. main loop
-    //
+    menu_.appendItem(IDM_EDIT, IDS_EDIT);
+
+    // "Solve" sub menu
+    menuBar sMenu;
+    sMenu.appendItem(IDM_SOLVE_OBVIOUS, IDS_SOLVE_OBVIOUS);
+    sMenu.appendItem(IDM_SOLVE_FIND, IDS_SOLVE_FIND);
+    sMenu.addItem(MENU_POS_RIGHT - 1, IDM_SOLVE_REVERT, IDS_SOLVE_REVERT);
+    menu_.appendSubMenu(&sMenu, IDM_SOLVE_SUBMENU, IDS_SOLVE_SUBMENU);
+
+    menu_.addItem(MENU_POS_RIGHT, IDM_QUIT, IDS_QUIT);
+
+    menu_.update();
+}
+
+// showHomeScreen() : Display home screen
+//
+void sudoSolver::showHomeScreen(){
+    drect(0, 0, CASIO_WIDTH, CASIO_HEIGHT - menu_.getHeight(), C_WHITE);
+    dimage(0, 0, &g_homeScreen);
+
+    char copyright[255];
+    strcpy(copyright, APP_NAME);
+    strcat(copyright, " par ");
+    strcat(copyright, APP_AUTHOR);
+    strcat(copyright, " v");
+    strcat(copyright, APP_VERSION);
+
+    int w, h;
+    dsize(copyright, NULL, &w, &h);
+    dtext(CASIO_WIDTH - w - 5,
+		CASIO_HEIGHT - menu_.getHeight() - h - 10, C_BLACK,
+		copyright);
+
+    dupdate();
+}
+
+// browseGridFolder() : Browse the folder containing grid files
+//
+void sudoSolver::browseGridFolder(){
+    // List of grid files
+    if (files_.browse() > 0){
+        _updateFileItemsState();
+    }
+}
+
+// run() : Edit / solve sudoku(s)
+//
+void sudoSolver::run(void)
+{
+    // Start sudoku solver object
+    RECT mainRect;
+    menu_.getRect(mainRect);
+    mainRect = {0, 0, mainRect.w, CASIO_HEIGHT - mainRect.h};
+    
     sudoku game(&mainRect);
+
+    // Handle user's choices
     bool end(false);
     int error(FILE_NO_ERROR);
     MENUACTION action;
     while (!end){
         // A menu action ?
-        action = menu.handleKeyboard();
+        action = menu_.handleKeyboard();
 
         // push a menu key ?
         if (ACTION_MENU == action.type){
@@ -71,24 +111,18 @@ int main(void)
                 case IDM_FILE_NEW:
                     game.empty();
                     game.display();
-                    sFileName[0] = '\0';
-                    obviousVals = duration = -1;
+                    _initStats();
                     break;
 
                 // Load previous file
                 case IDM_FILE_PREV:
                     if (files.prevFile(fileName)){
-                        menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, true);
-                        menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
-                        if (!files.pos()){
-                            menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, false);
-                        }
-                        menu.update();
+                        _updateFileItemsState();
 
                         // Update grid on screen
                         if (FILE_NO_ERROR == (error = game.load(fileName))){
                             game.display(false);
-                            _setFileName(fileName, sFileName);
+                            _getShortFileName();
                             _displayStats(sFileName, -1, -1);
                         }
                         else{
@@ -101,28 +135,18 @@ int main(void)
                 // Load next file
                 case IDM_FILE_NEXT:
                     if (files.nextFile(fileName)){
-                        // Menu changes
-                        menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, true);
-                        menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
-                        if (files.pos() >= (files.size() - 1)){
-                            menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
-                        }
-                        menu.update();
+                        _updateFileItemsState();
 
                         // Update grid on screen
                         if (FILE_NO_ERROR == (error = game.load(fileName))){
                             game.display(false);
-                            _setFileName(fileName, sFileName);
+                            _getShortFileName();
                             _displayStats(sFileName, -1, -1);
                         }
                         else{
                             dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error loading file : %d", (int)error);
                             dupdate();
                         }
-                    }
-                    else{
-                        menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
-                        menu.update();
                     }
                     break;
 
@@ -245,11 +269,11 @@ int main(void)
 #ifndef NO_CAPTURE
                     case KEY_CODE_CAPTURE:
                         if (action.modifier == MOD_SHIFT){
-                            if (!g_Capture.isSet()){
-                                g_Capture.install();
+                            if (!_capture.isSet()){
+                                _capture.install();
                             }
                             else{
-                                g_Capture.remove();
+                                _capture.remove();
                             }
                         }
                         break;
@@ -261,74 +285,64 @@ int main(void)
             }
         }
     }
-
-    gint_setrestart(1);
-    //gint_osmenu();
-
-	return 1;
 }
 
-// Create menu bar
 //
-void _createMenu(menuBar& menu){
-    // "File" sub menu
-    menuBar fileMenu;
-    fileMenu.appendItem(IDM_FILE_NEW, IDS_FILE_NEW);
-    fileMenu.appendItem(IDM_FILE_PREV, IDS_FILE_PREV, ITEM_STATE_INACTIVE);
-    fileMenu.appendItem(IDM_FILE_NEXT, IDS_FILE_NEXT, ITEM_STATE_INACTIVE);
-    fileMenu.appendItem(IDM_FILE_SAVE, IDS_FILE_SAVE, ITEM_STATE_INACTIVE);
-    fileMenu.appendItem(IDM_FILE_DELETE, IDS_FILE_DELETE, ITEM_STATE_INACTIVE);
-    menu.appendSubMenu(&fileMenu, IDM_FILE_SUBMENU, IDS_FILE_SUBMENU);
-
-    menu.appendItem(IDM_EDIT, IDS_EDIT);
-
-    // "Solve" submenu
-    menuBar sMenu;
-    sMenu.appendItem(IDM_SOLVE_OBVIOUS, IDS_SOLVE_OBVIOUS);
-    sMenu.appendItem(IDM_SOLVE_FIND, IDS_SOLVE_FIND);
-    sMenu.addItem(MENU_POS_RIGHT - 1, IDM_SOLVE_REVERT, IDS_SOLVE_REVERT);
-    menu.appendSubMenu(&sMenu, IDM_SOLVE_SUBMENU, IDS_SOLVE_SUBMENU);
-
-    menu.addItem(MENU_POS_RIGHT, IDM_QUIT, IDS_QUIT);
-}
-
-// Display home screen
+// Internal methods
 //
-void _homeScreen(){
-    drect(0,0,CASIO_WIDTH, CASIO_HEIGHT - MENUBAR_DEF_HEIGHT, C_WHITE);
-    dimage(0,0,&g_homeScreen);
 
-    char copyright[255];
-    strcpy(copyright, APP_NAME);
-    strcat(copyright, " par ");
-    strcat(copyright, APP_AUTHOR);
-    strcat(copyright, " v");
-    strcat(copyright, APP_VERSION);
-
-    int w, h;
-    dsize(copyright, NULL, &w, &h);
-    dtext(CASIO_WIDTH - w - 5,
-		CASIO_HEIGHT - MENUBAR_DEF_HEIGHT - h - 10, COLOUR_BLACK,
-		copyright);
-
-    dupdate();
+// _initStats() : initialize grid stats
+//
+void sudoSolver::_initStats(){
+    fileName_[0] = 0x0000;
+    sFileName_[0] = '\0';
+    obviousVals_ = -1;
+    duration_ = -1;
 }
 
-// A new filename => get short filename
-void _setFileName(FONTCHARACTER fullName, char* shortName){
-    if (bFile::FC_len(fullName)){
-        char fName[BFILE_MAX_PATH + 1];
-        bFile::FC_FC2str(fullName, fName);
-        char* name = strrchr(fName, CHAR_PATH_SEPARATOR);
-        strcpy(shortName, (name?++name:fName)); // No path ?
+// _updateFileItemsState() : Item's state
+//
+//  @modified : Has the grid been edited (changed) ?
+//
+void sudoSolver::_updateFileItemsState(bool modified){
+    int count(files_.size());
+    int pos(files_.pos());
+    bool bPrev, bNext, bSave, bDelete;
+    if (!count){
+        bPrev = bNext = bSave = bDelete = false;
     }
     else{
-        shortName[0] = '\0';    // No filename
+        bPrev = (pos>0);    // Not the first in list ?
+        bNext = (pos < (count - 1)); // Not the last in list
+        bSave = modified;
+        bDelete = (sFileName_[0]);
+    }
+    
+    menu_.activate(IDM_FILE_PREV, SEARCH_BY_ID, bPrev);
+    menu_.activate(IDM_FILE_NEXT, SEARCH_BY_ID, bNext);
+    menu_.activate(IDM_FILE_SAVE, SEARCH_BY_ID, bSave);
+    menu_.activate(IDM_FILE_DELETE, SEARCH_BY_ID, bDelete); 
+
+    menu_.update();
+}
+
+// _getShortFileName() : Get short filename from FQN
+//
+void sudoSolver::_getShortFileName(){
+    if (bFile::FC_len(fileName_)){
+        char fName[BFILE_MAX_PATH + 1];
+        bFile::FC_FC2str(fileName_, fName);
+        char* name = strrchr(fName, CHAR_PATH_SEPARATOR);
+        strcpy(sFileName_, (name?++name:fName)); // No path ?
+    }
+    else{
+        sFileName_[0] = '\0';    // No filename
     }
 }
 
-// Display grid's stats
-void _displayStats(const char* fName, int8_t obvious, int elapse){
+// _displayStats() : Display grid's stats
+//
+void sudoSolver::_displayStats(const char* fName, int8_t obvious, int elapse){
     if (fName && fName[0]){
         dprint(TEXT_X, TEXT_Y, C_BLACK, "File : %s", fName);
     }

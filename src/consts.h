@@ -17,7 +17,7 @@
 #else
 #include <iostream>
 #include <cstdint>
-using namespace std;
+//using namespace std;
 #endif // DEST_CASIO_CALC
 
 #include <cstring>
@@ -64,22 +64,11 @@ extern "C" {
 #define VALUE_SEPARATOR ','     // Value separator in files
 
 #ifndef GRIDS_FOLDER
-#define GRIDS_FOLDER            u"\\\\fls0\\GRIDS"
+#define GRIDS_FOLDER            u"\\\\fls0\\grids"
 #endif // #ifdef GRIDS_FOLDER
 
 #define FILE_LINE_SIZE  ROW_COUNT * 2   // (value & separator) * ROW_COUNT
 #define FILE_SIZE       LINE_COUNT * FILE_LINE_SIZE
-
-// Error codes
-//
-#define FILE_NO_ERROR           0
-#define FILE_INVALID_FILENAME   1	// File doesn't exist
-#define FILE_INVALID_FILESIZE   2
-#define FILE_NO_FILENAME        3
-#define FILE_IO_ERROR           4
-#define FILE_INVALID_LINE       11
-#define FILE_INVALID_FORMAT     12
-#define FILE_VALUE_ERROR        13	// The value can't be set at this position
 
 // Display
 //

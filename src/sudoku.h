@@ -18,6 +18,18 @@
 
 #include "shared/bFile.h"
 
+// Error codes
+//
+#define FILE_NO_ERROR           BFILE_NO_ERROR
+#define FILE_INVALID_FILENAME   (BFILE_LAST_ERROR_CODE + 1)	// File doesn't exist
+#define FILE_INVALID_FILESIZE   (BFILE_LAST_ERROR_CODE + 2)
+#define FILE_NO_FILENAME        (BFILE_LAST_ERROR_CODE + 3)
+#define FILE_IO_ERROR           (BFILE_LAST_ERROR_CODE + 4)
+#define FILE_INVALID_LINE       (BFILE_LAST_ERROR_CODE + 11)
+#define FILE_INVALID_FORMAT     (BFILE_LAST_ERROR_CODE + 12)
+// The value can't be set at this position
+#define FILE_VALUE_ERROR        (BFILE_LAST_ERROR_CODE + 13)
+
 #ifdef __cplusplus
 extern "C" {
 #endif // #ifdef __cplusplus

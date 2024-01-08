@@ -12,7 +12,7 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        0.3.5
+#define _GEEHB_MENU_VER_        "0.3.6"
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
@@ -111,6 +111,18 @@ public:
     // Destruction
     ~menuBar(){
         _freeMenuBar(&current_, false);
+    }
+
+    //
+    // Dimensions
+    //
+
+    //  getHeight() : Get menu bar height
+    //
+    //  @return : Height of menu bar in pixels
+    //
+    uint16_t getHeight(){
+        return rect_.h;
     }
 
     //  setHeight() : change menu bar height

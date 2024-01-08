@@ -31,7 +31,7 @@ bFile::bFile(){
     fileName_ = "";
 #endif // #ifdef DEST_CASIO_CALC
 
-    error_ = 0; // no error
+    error_ = BFILE_NO_ERROR;
 }
 
 // Destruction
@@ -40,12 +40,13 @@ bFile::~bFile(){
     close();
 }
 
-// exist() : Check wether the file or folder exists
+// exist() : Check wether the file or the folder exists
 //
 // @return : true if the file or folder exists
 //
 bool bFile::exist(FONTCHARACTER fName){
     if (!FC_len(fName)){
+        error_ = BFILE_ERROR_INVALID_PARAMETERS;
         return false;
     }
 
@@ -60,8 +61,9 @@ bool bFile::exist(FONTCHARACTER fName){
     foundFile[0] = 0;
 
     if (findFirst(fName, &handle, foundFile, &fileInfo)){
-        exist = true;   // The file or foilder exists
         findClose(handle);
+        exist = true;   // The file or folder exists
+        error_ = BFILE_NO_ERROR;
     }
 
     return exist;
@@ -84,20 +86,27 @@ bool bFile::isOpen(){
 
 // size() : Get file size
 //
-// @return : size of current opened file or an error code
+// @return : size of current opened file or -1 on error
 //
 int bFile::size(){
     if (isOpen()){
 #ifdef DEST_CASIO_CALC
-        return gint_world_switch(GINT_CALL(BFile_Size, fd_));
+        int ret = gint_world_switch(GINT_CALL(BFile_Size, fd_));
+        if (ret < 0){
+            error_ = ret;
+            return -1;
+        }
+
+        error_ = BFILE_NO_ERROR;
+        return ret;
 #else
         file_.seekg (0, file_.end);
         return file_.tellg();
 #endif // #ifdef DEST_CASIO_CALC
     }
 
-    // The file is not opened
-    return 0;
+    error_ = BFILE_ERROR_FILE_NOT_OPENED;
+    return -1;
 }
 
 // open() : Open an existing file
@@ -114,9 +123,11 @@ bool bFile::open(FONTCHARACTER filename, int access){
         if (fd_ < 0){
             error_ = fd_;
             fd_ = 0;
+            return false;
         }
         else{
-            error_ = 0;     // File is open
+            error_ = BFILE_NO_ERROR;
+            return true;
         }
 #else
         std::ios_base::openmode mode;
@@ -129,14 +140,15 @@ bool bFile::open(FONTCHARACTER filename, int access){
 
         file_.open(filename, mode);
         fileName_ = filename;
-#endif // #ifdef DEST_CASIO_CALC
 
         // Done ?
         return isOpen();
+#endif // #ifdef DEST_CASIO_CALC
     }
 
-	// Already opened
-	error_ = BFile_IllegalParam;
+
+    error_ = (!access)?BFILE_ERROR_INVALID_PARAMETERS
+                :BFILE_ERROR_FILE_OPENED;   // ... and should be close
     return false;
 }
 
@@ -156,7 +168,7 @@ bool bFile::create(FONTCHARACTER fname, int type, int *size){
 #ifdef DEST_CASIO_CALC
             error_ = gint_world_switch(GINT_CALL(BFile_Create,
 									fname, BFile_File, size));
-            return (error_ == 0);	// Created ?
+            return (BFILE_NO_ERROR == error_);
 #else
             // size is ignored
             if (open(fname, BFile_WriteOnly)){
@@ -172,14 +184,14 @@ bool bFile::create(FONTCHARACTER fname, int type, int *size){
 #ifdef DEST_CASIO_CALC
             error_ = gint_world_switch(GINT_CALL(BFile_Create, fname,
 									BFile_Folder, size));
-            return (error_ == 0);	// Created ?
+            return (BFILE_NO_ERROR == error_);
 #else
             return fs::create_directory(fname);
 #endif // BFile_File
     }
 
     // Unknown type
-    error_ = BFile_IllegalParam;
+    error_ = BFILE_ERROR_INVALID_PARAMETERS;
     return false;
 }
 
@@ -218,35 +230,44 @@ bool bFile::createEx(FONTCHARACTER fname, int type, int *size, int access){
 // @return : data written ?
 //
 bool bFile::write(void const *data, int even_size){
-    bool done(false);
+
+    if (!data || !even_size){
+        error_ = BFILE_ERROR_INVALID_PARAMETERS;
+        return false;
+    }
+
+    if (!isOpen()){
+        error_ = BFILE_ERROR_FILE_NOT_OPENED;
+        return false;
+    }
+
+    bool done(true);
     int mySize(even_size);
 
-    error_ = BFile_IllegalParam;
-    if (data && even_size && isOpen()){
 #ifdef DEST_CASIO_CALC
-		char* buffer = (char*)data;
+	char* buffer = (char*)data;
 #ifdef FX9860G
-		if (0 != (even_size % 2)){
-			if (NULL == (buffer = malloc(++mySize))){
-				// Unable to allocate memory
-				return false;
-			}
+    if (0 != (even_size % 2)){
+        if (NULL == (buffer = malloc(++mySize))){
+            error_ = BFILE_ERROR_MEMORY;
+            return false;
+        }
 
-			// Copy the buffer
-			memcpy(buffer, data, even_size);
+        // Copy the buffer
+        memcpy(buffer, data, even_size);
 
-			// ... add a byte
-			memcpy((void*)(buffer + even_size), 0x00, 1);
-		}
+        // ... add a byte
+        memcpy((void*)(buffer + even_size), 0x00, 1);
+    }
 #endif // #ifdef FX9860G
-        error_ = gint_world_switch(GINT_CALL(BFile_Write, fd_,
-                                    (void*)buffer, mySize));
-        done =  (0 == error_);	// data successfully written ?
+    error_ = gint_world_switch(GINT_CALL(BFile_Write, fd_,
+                                (void*)buffer, mySize));
+    done =  (BFILE_NO_ERROR == error_);
 #ifdef FX9860G
-        // Free the buffer ?
-		if (0 != (even_size % 2)){
-			free(buffer);
-		}
+    // Free the buffer ?
+    if (0 != (even_size % 2)){
+        free(buffer);
+    }
 #endif // #ifdef FX9860G
 #else
     file_.write((const char*)data, mySize);
@@ -254,7 +275,6 @@ bool bFile::write(void const *data, int even_size){
 	// done ?
 	done = file_.good();
 #endif // #ifdef DEST_CASIO_CALC
-    }
 
     return done;
 }
@@ -268,17 +288,28 @@ bool bFile::write(void const *data, int even_size){
 // @return : # bytes read
 //
 int bFile::read(void *data, int lg, int whence){
-    if (data && lg && isOpen()){
-#ifdef DEST_CASIO_CALC
-        int read = gint_world_switch(GINT_CALL(BFile_Read, fd_, data,
-                                    lg, whence));
-        if (read < 0){
-        	error_ = read;
-        	return 0;
-        }
 
-        error_ = 0;
-        return read;	// #bytes read
+    if (!data || !lg){
+        error_ = BFILE_ERROR_INVALID_PARAMETERS;
+        return 0;
+    }
+
+    if (!isOpen()){
+        error_ = BFILE_ERROR_FILE_NOT_OPENED;
+        return 0;
+    }
+
+
+#ifdef DEST_CASIO_CALC
+    int read = gint_world_switch(GINT_CALL(BFile_Read, fd_, data,
+                                lg, whence));
+    if (read < 0){
+        error_ = read;  // Error while reading
+        return 0;
+    }
+
+    error_ = BFILE_NO_ERROR;
+    return read;	// #bytes read
 #else
     file_.read((char*)data, lg);
     int red(file_.gcount());
@@ -286,11 +317,6 @@ int bFile::read(void *data, int lg, int whence){
     // # bytes read
     return red;
 #endif // #ifdef DEST_CASIO_CALC
-    }
-
-    // Invalid params
-    error_ = BFile_IllegalParam;
-    return 0;   // read nothing
 }
 
 // rename() : Rename or move a file
@@ -315,7 +341,7 @@ bool bFile::rename(FONTCHARACTER oldPath, FONTCHARACTER newPath){
                     if (buffer &&  read(buffer, size, 0)){
                         // Create a new file with oldPath content
                         bFile newFile();
-                        if (newFile.create(newPath, BFile_File, &size)){
+                        if (newFile.createEx(newPath, BFile_File, &size, BFile_WriteOnly)){
 							newFile.write(buffer, size);
 							newFile.close();
 						}
@@ -328,24 +354,29 @@ bool bFile::rename(FONTCHARACTER oldPath, FONTCHARACTER newPath){
                 close();
                 if (done){
                     remove(oldPath);
+                    error_ = BFILE_ERROR_INVALID_PARAMETERS;
                 }
-                return done;
-            }
-        }
+                else{
+                    error_ = BFILE_NO_ERROR;
+                }
 
+                return done;
+            } // if open
+        } // if exist
+
+        error_ = BFILE_ERROR_INVALID_FILENAME;
         return false;
 #else
         error_ = gint_world_switch(GINT_CALL(BFile_Rename,
 												oldPath, newPath));
-        return (error_ == 0);	// Renamed ?
+        return (BFILE_NO_ERROR == error_);
 #endif // #ifdef FX9860G
 #else
 	return (0 == std::rename(oldPath, newPath));
 #endif // #ifdef DEST_CASIO_CALC
     }
 
-    // File already opened
-    error_ = BFile_IllegalParam;
+    error_ = BFILE_ERROR_FILE_OPENED;
     return false;
 }
 
@@ -360,14 +391,14 @@ bool bFile::remove(FONTCHARACTER filename){
     if (!isOpen()){
 #ifdef DEST_CASIO_CALC
         error_ = gint_world_switch(GINT_CALL(BFile_Remove, filename));
-        return (error_ == 0);	// Removed ?
+        return (BFILE_NO_ERROR == error_);
 #else
 	return (0 == std::remove(filename));
 #endif // #ifdef DEST_CASIO_CALC
     }
 
 	// File already opened
-    error_ = BFile_IllegalParam;
+    error_ = BFILE_ERROR_FILE_OPENED;
     return false;
 }
 
@@ -378,15 +409,18 @@ void bFile::close(){
     if (fd_){
         error_ = gint_world_switch(GINT_CALL(BFile_Close, fd_));
         fd_ = 0;
+        return;
     }
 #else
     if (file_.is_open()){
         file_.close();
+        error_ = BFILE_NO_ERROR;
     }
 
-	error_ = 0;
     fileName_ = "";
 #endif // #ifdef DEST_CASIO_CALC
+
+    error_ = BFILE_ERROR_FILE_NOT_OPENED;
 }
 
 // findFirst(): Search the storage memory for paths matching a pattern
@@ -398,23 +432,25 @@ void bFile::close(){
 //
 //  @return :  True on success
 //
-bool bFile::findFirst(const FONTCHARACTER pattern,SEARCHHANDLE *sHandle,
+bool bFile::findFirst(const FONTCHARACTER pattern, SEARCHHANDLE *sHandle,
 		FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo){
+    if (sHandle && fileInfo){
 #ifdef DEST_CASIO_CALC
-    error_ = gint_world_switch(GINT_CALL(BFile_FindFirst,
-            pattern, sHandle, foundFile, fileInfo));
-    return (error_ == 0);
+        error_ = gint_world_switch(GINT_CALL(BFile_FindFirst,
+                pattern, sHandle, foundFile, fileInfo));
+        return (BFILE_NO_ERROR == error_);
 #else
-    (*sHandle) = opendir(pattern);
-    if (NULL != (*sHandle)){
-        // Read first value
-        return findNext(*sHandle, foundFile, fileInfo);
+        (*sHandle) = opendir(pattern);
+        if (NULL != (*sHandle)){
+            // Read first value
+            return findNext(*sHandle, foundFile, fileInfo);
+        }
+#endif // DEST_CASIO_CALC
     }
 
     // Error
-    error_ = BFile_IllegalParam;
+    error_ = BFILE_ERROR_INVALID_PARAMETERS;
     return false;
-#endif // DEST_CASIO_CALC
 }
 
 // findNext(): Continue a search
@@ -433,7 +469,7 @@ bool bFile::findNext(SEARCHHANDLE sHandle, FONTCHARACTER foundFile,
 #ifdef DEST_CASIO_CALC
         error_ = gint_world_switch(GINT_CALL(BFile_FindNext,
 				sHandle, foundFile, fileInfo));
-        return (error_ == 0);
+        return (BFILE_NO_ERROR == error_);
 #else
         struct dirent *de;
         if (NULL != (de = readdir(sHandle))){
@@ -446,7 +482,7 @@ bool bFile::findNext(SEARCHHANDLE sHandle, FONTCHARACTER foundFile,
 	}
 
     // Invalid handle
-    error_ = BFile_IllegalParam;
+    error_ = BFILE_ERROR_INVALID_PARAMETERS;
     return false;
 }
 
@@ -460,7 +496,7 @@ bool bFile::findClose(SEARCHHANDLE sHandle){
 	if (sHandle){
 #ifdef DEST_CASIO_CALC
         error_ = gint_world_switch(GINT_CALL(BFile_FindClose, sHandle));
-        return (error_ == 0);
+        return (BFILE_NO_ERROR == error_);
 #else
         closedir(sHandle);
         return true;
@@ -468,7 +504,7 @@ bool bFile::findClose(SEARCHHANDLE sHandle){
 	}
 
     // Invalid handle
-    error_ = BFile_IllegalParam;
+    error_ = BFILE_ERROR_INVALID_PARAMETERS;
     return false;
 }
 

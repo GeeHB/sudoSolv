@@ -42,7 +42,15 @@ menuBar::menuBar(){
     _clearMenuBar(&current_);
 }
 
+//
 // Dimensions
+//
+
+//  setHeight() : change menu bar height
+//
+//  @barHeight : New height in pixels
+//
+//  @return : true if hieght has changed
 //
 bool menuBar::setHeight(uint16_t barHeight){
     rect_ = {0, CASIO_HEIGHT - barHeight, CASIO_WIDTH, barHeight};

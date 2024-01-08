@@ -16,7 +16,7 @@
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define VERSION_B_FILE_OBJECT       0.4.1
+#define VERSION_B_FILE_OBJECT       "0.4.3"
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>
@@ -74,11 +74,23 @@ struct BFile_FileInfo
 #define BFile_Type_DotDot     0x0009
 #define BFile_Type_Volume     0x000a
 #define BFile_Type_Archived   BFile_Type_File
+
 #endif // #ifndef DEST_CASIO_CALC
 
-// Max length in char of a path
+// Max lengthof a path  in "FONTCHARACTER" 
 //
-#define BFILE_MAX_PATH          127
+#define BFILE_MAX_PATH                  127
+
+// Error codes specific to this class
+//
+#define BFILE_NO_ERROR                  0
+#define BFILE_ERROR_INVALID_PARAMETERS  1   // BFile_IllegalParam ?
+#define BFILE_ERROR_FILE_NOT_OPENED     2
+#define BFILE_ERROR_FILE_OPENED         3
+#define BFILE_ERROR_INVALID_FILENAME    4
+#define BFILE_ERROR_MEMORY              5
+
+#define BFILE_LAST_ERROR_CODE           BFILE_ERROR_MEMORY
 
 #ifdef __cplusplus
 extern "C" {
@@ -95,7 +107,7 @@ public:
     // Destruction
     ~bFile();
 
-    // exist() : Check wether the file or folder exists
+    // exist() : Check wether the file or the folder exists
     //
     // @return : true if the file or folder exists
     //
@@ -110,7 +122,7 @@ public:
 
     // size() : Get file size
     //
-    // @return : size of current opened file or an error code
+    // @return : size of current opened file or -1 on error
     //
     int size();
 
