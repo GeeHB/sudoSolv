@@ -44,7 +44,7 @@ private:
 
     // _initStats() : initialize grid stats
     //
-    void _initStats();
+    void _initStats(bool whole = true);
 
     // _updateFileItemsState() : Item's state
     //
@@ -53,11 +53,10 @@ private:
     void _updateFileItemsState(bool modified = false);
 
 
-    // _updateShortFileName() : Get short filename from FQN
+    // _newFileName() : Notifies FQN has changed
     //
-    void _updateShortFileName();
-    
-    void _displayStats(const char* fName, int8_t obvious, int elapse);
+    void _newFileName();
+    void _displayStats();
 
 private:
     menuBar     menu_;      // Application menu

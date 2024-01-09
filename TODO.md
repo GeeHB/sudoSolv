@@ -13,6 +13,7 @@
         - [ ] pour FX9680G ... ?
     - [ ] getItem / setItem
 - [x] _homeScreen()
+    - [ ] "Fermeture" après x sec.
 - [x] icones
 - [x] grids
 - [x] Copie d'écran - *fxlink*

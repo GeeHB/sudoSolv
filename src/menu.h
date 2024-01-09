@@ -51,12 +51,12 @@ extern "C" {
 // "Solve" sub-menu bar
 //
 #define IDS_SOLVE_OBVIOUS   "Obvious"
-#define IDS_SOLVE_FIND      "Resolve"
+#define IDS_SOLVE_RESOLVE   "Resolve"
 #define IDS_SOLVE_REVERT    "Revert"
 
 #define IDM_SOLVE_SUBMENU   300
 #define IDM_SOLVE_OBVIOUS   301
-#define IDM_SOLVE_FIND      302
+#define IDM_SOLVE_RESOLVE   302
 #define IDM_SOLVE_REVERT    303
 
 #ifdef __cplusplus

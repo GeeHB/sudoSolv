@@ -45,7 +45,7 @@ void sudoSolver::createMenu(){
     // "Solve" sub menu
     menuBar sMenu;
     sMenu.appendItem(IDM_SOLVE_OBVIOUS, IDS_SOLVE_OBVIOUS);
-    sMenu.appendItem(IDM_SOLVE_FIND, IDS_SOLVE_FIND);
+    sMenu.appendItem(IDM_SOLVE_RESOLVE, IDS_SOLVE_RESOLVE);
     sMenu.addItem(MENU_POS_RIGHT - 1, IDM_SOLVE_REVERT, IDS_SOLVE_REVERT);
     menu_.appendSubMenu(&sMenu, IDM_SOLVE_SUBMENU, IDS_SOLVE_SUBMENU);
 
@@ -116,14 +116,13 @@ void sudoSolver::run(void)
 
                 // Load previous file
                 case IDM_FILE_PREV:
-                    if (files.prevFile(fileName)){
+                    if (files_.prevFile(fileName_)){
                         _updateFileItemsState();
 
                         // Update grid on screen
-                        if (FILE_NO_ERROR == (error = game.load(fileName))){
+                        if (FILE_NO_ERROR == (error = game.load(fileName_))){
                             game.display(false);
-                            _getShortFileName();
-                            _displayStats(sFileName, -1, -1);
+                            _newFileName();                        
                         }
                         else{
                             dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error loading file : %d", (int)error);
@@ -134,14 +133,13 @@ void sudoSolver::run(void)
 
                 // Load next file
                 case IDM_FILE_NEXT:
-                    if (files.nextFile(fileName)){
+                    if (files_.nextFile(fileName_)){
                         _updateFileItemsState();
 
                         // Update grid on screen
-                        if (FILE_NO_ERROR == (error = game.load(fileName))){
+                        if (FILE_NO_ERROR == (error = game.load(fileName_))){
                             game.display(false);
-                            _getShortFileName();
-                            _displayStats(sFileName, -1, -1);
+                            _newFileName();                            
                         }
                         else{
                             dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error loading file : %d", (int)error);
@@ -153,28 +151,22 @@ void sudoSolver::run(void)
                 // Save the grid
                 case IDM_FILE_SAVE:
                 {
-					bool fileExists(sFileName[0]);
+					bool fileExists(sFileName_[0]);
                     int uid;
 
                     // Use current name or new name if none
-                    if (fileExists || (!fileExists && files.getNewFileName(fileName, &uid))){
-                        if (FILE_NO_ERROR == (error = game.save(fileName))){
+                    if (fileExists || (!fileExists && files_.getNewFileName(fileName_, &uid))){
+                        if (FILE_NO_ERROR == (error = game.save(fileName_))){
                             if (!fileExists){
-                                _setFileName(fileName, sFileName);
-                                _displayStats(sFileName, -1, -1);
+                                // It's a new file
+                                _newFileName();
 
                                 // Update internal list
-                                files.browse();
-                                files.setPos(files.findPos(uid)); // select the file
-                                
-                                menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
-                                menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, files.size()>1);
-
+                                files_.browse();
+                                files_.setPos(files_.findPos(uid)); // select the file                                
                             }
                                     
-                            menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, false);
-                            menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, true);
-                            menu.update();
+                            _updateFileItemsState();
                         }   // save
                         else{
                             dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error saving : %d", error);
@@ -186,21 +178,22 @@ void sudoSolver::run(void)
                 
                 // Remove current file
                 case IDM_FILE_DELETE:
-                    if (files.deleteFile()){
+                    if (files_.deleteFile()){
                         bool file(true);
-                        if (!files.prevFile(fileName)){
-                            menu.activate(IDM_FILE_PREV, SEARCH_BY_ID, false);
-                            if (!files.nextFile(fileName)){
-                                menu.activate(IDM_FILE_NEXT, SEARCH_BY_ID, false);
-                                menu.activate(IDM_FILE_DELETE, SEARCH_BY_ID, false);
+                        if (!files_.prevFile(fileName_)){
+                            menu_.activate(IDM_FILE_PREV, SEARCH_BY_ID, false);
+                            if (!files_.nextFile(fileName_)){
+                                _updateFileItemsState();
                                 game.empty();
                                 file = false;   // No filename
-                            }    
-                            menu.update();
+                            }                            
                         }
 
-                        _setFileName(file?fileName:NULL, sFileName);
-                        _displayStats(sFileName, -1, -1);
+                        if (!file){
+                            fileName_[0] = 0x0000;
+                        }
+
+                        _newFileName();
                     }
                     break;
 
@@ -208,35 +201,38 @@ void sudoSolver::run(void)
                 case IDM_EDIT:{
                     game.display();
                     if (game.edit()){
-                        menu.activate(IDM_FILE_SAVE, SEARCH_BY_ID, true);
-                        _displayStats(sFileName, -1, -1);
+                        _displayStats();
+                    }
+                    else{
+                        game.revert();
                     }
 
-                    menu.selectByIndex(-1);
-                    menu.update();  // redraw the whole menu bar
+                    menu_.selectByIndex(-1);
+                    _updateFileItemsState();
+
                     break;
                 }
 
                 // Search for obvious values
                 case IDM_SOLVE_OBVIOUS:{
-                    obviousVals = game.findObviousValues();
-                    game.display(false);
-                    
-                    _displayStats(sFileName, obviousVals, -1);
+                    obviousVals_ = game.findObviousValues();
+                    duration_ = -1;
+                    game.display(false);                    
+                    _displayStats();
                     break;
                 }
 
                 // Try to find a solution
-                case IDM_SOLVE_FIND:
+                case IDM_SOLVE_RESOLVE:
                     game.display();
-                    if (!game.resolve(&duration)){
+                    if (!game.resolve(&duration_)){
                         // No soluce found ...
                         // ... return to original grid
                         game.revert();
                     }
 
                     game.display(false);
-                    _displayStats(sFileName, obviousVals, duration);
+                    _displayStats();
                     
                     break;
 
@@ -244,8 +240,9 @@ void sudoSolver::run(void)
                 case IDM_SOLVE_REVERT:
                     game.revert();
                     game.display(false);
-                    obviousVals = -1;
-                    _displayStats(sFileName, -1, -1);
+                    obviousVals_ = -1;
+                    duration_ = -1;
+                    _displayStats();
                     break;
 
                 // Quit the application
@@ -293,8 +290,11 @@ void sudoSolver::run(void)
 
 // _initStats() : initialize grid stats
 //
-void sudoSolver::_initStats(){
-    fileName_[0] = 0x0000;
+void sudoSolver::_initStats(bool whole){
+    if (whole){
+        fileName_[0] = 0x0000;
+    }
+
     sFileName_[0] = '\0';
     obviousVals_ = -1;
     duration_ = -1;
@@ -326,30 +326,30 @@ void sudoSolver::_updateFileItemsState(bool modified){
     menu_.update();
 }
 
-// _getShortFileName() : Get short filename from FQN
+// _newFileName() : Notifies FQN has changed
 //
-void sudoSolver::_getShortFileName(){
+void sudoSolver::_newFileName(){
+    _initStats(false);
     if (bFile::FC_len(fileName_)){
         char fName[BFILE_MAX_PATH + 1];
         bFile::FC_FC2str(fileName_, fName);
         char* name = strrchr(fName, CHAR_PATH_SEPARATOR);
         strcpy(sFileName_, (name?++name:fName)); // No path ?
     }
-    else{
-        sFileName_[0] = '\0';    // No filename
-    }
+
+    _displayStats();
 }
 
 // _displayStats() : Display grid's stats
 //
-void sudoSolver::_displayStats(const char* fName, int8_t obvious, int elapse){
-    if (fName && fName[0]){
-        dprint(TEXT_X, TEXT_Y, C_BLACK, "File : %s", fName);
+void sudoSolver::_displayStats(){
+    if (sFileName_[0]){
+        dprint(TEXT_X, TEXT_Y, C_BLACK, "File : %s", sFileName_);
     }
 
-    if (obvious != -1){
-        if (obvious){
-            dprint(TEXT_X, TEXT_Y + TEXT_V_OFFSET, C_BLACK, "%d obvious values", obvious);
+    if (obviousVals_ != -1){
+        if (obviousVals_){
+            dprint(TEXT_X, TEXT_Y + TEXT_V_OFFSET, C_BLACK, "%d obvious values", obviousVals_);
 
         }
         else{
@@ -357,9 +357,9 @@ void sudoSolver::_displayStats(const char* fName, int8_t obvious, int elapse){
         }
     }
 
-    if (elapse != -1){
-        if (elapse){
-            dprint(TEXT_X, TEXT_Y + 2*TEXT_V_OFFSET, C_BLACK, "Solved in %d ms", elapse);
+    if (duration_ != -1){
+        if (duration_){
+            dprint(TEXT_X, TEXT_Y + 2*TEXT_V_OFFSET, C_BLACK, "Solved in %d ms", duration_);
 
         }
         else{
