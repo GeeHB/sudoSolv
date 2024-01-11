@@ -3,7 +3,7 @@
 //--    sudoku.cpp
 //--
 //--        Implementation of sudoku object - Edition and resolution
-//--		of a sudoku grid
+//--        of a sudoku grid
 //--
 //----------------------------------------------------------------------
 
@@ -182,7 +182,8 @@ int sudoku::save(const FONTCHARACTER fName){
     for (uint8_t lId(0); lId < LINE_COUNT; lId++){
         for (uint8_t cId(0); cId < ROW_COUNT; cId++){
             // '0' means empty !
-            buffer[2*index] = (elements_[index].isOriginal()?('0' + elements_[index].value()):'0');
+            buffer[2*index] = (elements_[index].isOriginal()?
+                        ('0' + elements_[index].value()):'0');
             buffer[2*index+1] = VALUE_SEPARATOR;
             index++;
         }
@@ -243,7 +244,7 @@ bool sudoku::edit(){
     int tickCount(BLINK_TICKCOUNT);
     static volatile int tick(1);
     int timerID = timer_configure(TIMER_ANY, BLINK_TICK_DURATION*1000,
-					GINT_CALL(__callbackTick, &tick));
+                    GINT_CALL(__callbackTick, &tick));
     if (timerID >= 0){
         timer_start(timerID);   // set the timer
     }
@@ -383,7 +384,7 @@ bool sudoku::edit(){
             if (showSelected){
                 _drawSingleElement(currentPos.row(), currentPos.line(),
                             elements_[currentPos].value(),
-                            SEL_BK_COLOUR, /*SEL_TXT_COLOUR*/TXT_ORIGINAL_COLOUR);
+                            SEL_BK_COLOUR, SEL_TXT_COLOUR);
             }
             else{
                 _drawSingleElement(currentPos.row(), currentPos.line(),
@@ -403,8 +404,8 @@ bool sudoku::edit(){
 
     // unselect
     _drawSingleElement(currentPos.row(), currentPos.line(),
-			elements_[currentPos].value(),
-			BK_COLOUR, TXT_ORIGINAL_COLOUR);
+            elements_[currentPos].value(),
+            BK_COLOUR, TXT_ORIGINAL_COLOUR);
 
     return modified;
 }
@@ -437,7 +438,7 @@ bool sudoku::resolve(int* mDuration){
     clock_t start(0);
     uint8_t candidate(0);
     position pos(0, true);
-    uint8_t status = _findFirstEmptyPos(pos);      // Start from the first empty place
+    uint8_t status(_findFirstEmptyPos(pos));
 
     if (mDuration){
         (*mDuration) = 0;
@@ -547,8 +548,8 @@ bool sudoku::_checkRow(position& pos, uint8_t value){
 //
 bool sudoku::_checkValue(position& pos, uint8_t value){
     return (_checkLine(pos, value) &&
-			_checkRow(pos, value) &&
-			_checkTinySquare(pos, value));
+            _checkRow(pos, value) &&
+            _checkTinySquare(pos, value));
 }
 
  // _checkAndSet() : Try to  put the value at the current position

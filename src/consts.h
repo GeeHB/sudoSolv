@@ -92,7 +92,8 @@ extern "C" {
 #define TXT_ORIGINAL_COLOUR     C_RGB(30, 15, 14)
 #define TXT_OBVIOUS_COLOUR      BORDER_COLOUR
 #define SEL_BK_COLOUR           C_RGB(6, 6, 31)
-#define SEL_TXT_COLOUR          C_WHITE
+//#define SEL_TXT_COLOUR          C_WHITE
+#define SEL_TXT_COLOUR          TXT_ORIGINAL_COLOUR
 #endif // #ifdef DEST_CASIO_CALC
 
 // Keyboard
