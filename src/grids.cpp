@@ -1,14 +1,14 @@
 
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    grids.cpp
 //--
-//--        Implementation of grids object - List of grid files stored on "disk"
+//--        Implementation of grids object - List of grid files in a folder
 //--
 //--        The object works as a rudimentary DB
 //--        where each file has a numeric ID
 //--
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #include "grids.h"
 #include <cstdlib>

@@ -1,13 +1,13 @@
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    grids.h
 //--
-//--        Definition of grids object - List of grid files stored on "disk"
+//--        Definition of grids object - List of grid files in a folder
 //--
 //--        The object works as a rudimentary DB
 //--        where each file has a numeric ID
 //--
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #ifndef __S_SOLVER_GRIDS_h__
 #define __S_SOLVER_GRIDS_h__    1

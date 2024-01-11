@@ -1,11 +1,10 @@
-
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    element.cpp
 //--
 //--		Implementation of element object : A single sudoku element
 //--
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #include "element.h"
 
@@ -13,7 +12,7 @@
 //
 //  @value : new value for the object
 //  @ status : new status
-//  @editMode : true if the grid is currentlin edit mode
+//  @editMode : true if the grid is currently in edit mode
 //
 void element::setValue(uint8_t value, uint8_t status, bool editMode){
     if (!editMode){
@@ -33,7 +32,8 @@ void element::setValue(uint8_t value, uint8_t status, bool editMode){
     }
     else{
         value_ = value;
-        status_ = (value <= 0 || STATUS_EMPTY == status )?STATUS_EMPTY : STATUS_SET | STATUS_ORIGINAL;
+        status_ = (value <= 0 || STATUS_EMPTY == status )?
+                    STATUS_EMPTY : STATUS_SET | STATUS_ORIGINAL;
     }
 }
 

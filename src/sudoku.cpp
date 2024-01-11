@@ -18,19 +18,14 @@
 #ifdef DEST_CASIO_CALC
 #include <gint/timer.h>
 #include <gint/clock.h>
+#else
+using namespace std;
 #endif // #ifdef DEST_CASIO_CALC
 
 // Construction
 //
-sudoku::sudoku(RECT* scr){
-    // Screen dimension
-    if (scr){
-        memcpy(&screen_, scr, sizeof(RECT));
-    }
-    else{
-        screen_ = {0, 0, CASIO_WIDTH, CASIO_HEIGHT};
-    }
-
+sudoku::sudoku(){
+    
     //screen_.x = (screen_.w - GRID_SIZE) / 2;
     screen_.x = GRID_HORZ_OFFSET;
     screen_.y = (screen_.h - GRID_SIZE) / 2;    // centered vertically
@@ -43,6 +38,19 @@ sudoku::sudoku(RECT* scr){
     empty();    // Start with an empty grid
 }
 
+// setScreenRect() : Screen dimensions
+//
+//  rect : pointer to rect containing new dimensions
+//
+void sudoku::setScreenRect(const RECT* rect){
+    if (rect){
+        memcpy(&screen_, rect, sizeof(RECT));
+    }
+    else{
+        screen_ = {0, 0, CASIO_WIDTH, CASIO_HEIGHT};
+    }
+}
+    
 // display() : Display the grid and it's content
 //
 //  @update : update screen ?

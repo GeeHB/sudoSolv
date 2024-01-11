@@ -1,17 +1,17 @@
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
-//--	bFile.h
+//--    bFile.h
 //--
-//--		Definition of bFile object
+//--        Definition of bFile object
 //--
-//--		This release isn't fully tested
+//--        This release isn't fully tested
 //--
-//--		Missing :
-//--                    - whence in read ops
-//--					- BFile_Ext_Stat
-//--					- seek API
+//--    Missing :
+//--        - whence in read ops
+//--        - BFile_Ext_Stat
+//--        - seek API
 //--
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
@@ -50,15 +50,15 @@ typedef DIR* SEARCHHANDLE;
 
 struct BFile_FileInfo
 {
-	uint16_t index;
-	uint16_t type;
-	uint32_t file_size;
-	/* Data size (file size minus the header) */
-	uint32_t data_size;
-	/* Is 0 if the file is complete */
-	uint32_t property;
-	/* Address of first fragment (do not use directly) */
-	void *address;
+    uint16_t index;
+    uint16_t type;
+    uint32_t file_size;
+    /* Data size (file size minus the header) */
+    uint32_t data_size;
+    /* Is 0 if the file is complete */
+    uint32_t property;
+    /* Address of first fragment (do not use directly) */
+    void *address;
 };
 
 // Enum. types
@@ -111,7 +111,7 @@ public:
     //
     // @return : true if the file or folder exists
     //
-    bool exist(FONTCHARACTER fName);
+    bool exist(const FONTCHARACTER fName);
 
     // isOpen() : Is the file already open ?
     //
@@ -133,18 +133,18 @@ public:
     //
     // @return : file opened ?
     //
-    bool open(FONTCHARACTER filename, int access);
+    bool open(const FONTCHARACTER filename, int access);
 
     // create() : Create a file or a folder
     //
     // @fname : name of the file or folder to create (must not exist)
     // @type : Entry type (BFile_File or BFile_Folder)
     // @size : Pointer to file size if type is BFile_File,
-    //			use NULL otherwise
+    //          use NULL otherwise
     //
     // @return : file or folder successfully created ?
     //
-    bool create(FONTCHARACTER fname, int type, int *size);
+    bool create(const FONTCHARACTER fname, int type, int *size);
 
     // createEx() : Create a file or a folder
     //
@@ -154,12 +154,13 @@ public:
     // @fname : name of the file or folder to create (must not exist)
     // @type : Entry type (BFile_File or BFile_Folder)
     // @size : Pointer to file size if type is BFile_File,
-    //			use NULL otherwise
+    //          use NULL otherwise
     // @access : Access mode for the file
     //
     // @return : file or folder successfully created (and openend for file) ?
     //
-    bool createEx(FONTCHARACTER fname, int type, int *size, int access);
+    bool createEx(const FONTCHARACTER fname, int type, 
+                    int *size, int access);
 
     // write() : Write data in the current file
     //
@@ -187,7 +188,8 @@ public:
     //
     //  @return : file successfully renamed ?
     //
-    bool rename(FONTCHARACTER oldPath, FONTCHARACTER newPath);
+    bool rename(const FONTCHARACTER oldPath, 
+                const FONTCHARACTER newPath);
 
     // remove() : Remove a file
     //
@@ -195,14 +197,14 @@ public:
     //
     // @return : file successfully removed ?
     //
-    bool remove(FONTCHARACTER filename);
+    bool remove(const FONTCHARACTER filename);
 
     // close() : Close the file
     //
     void close();
 
     // findFirst(): Search the storage memory for paths
-    //	matching a pattern
+    //  matching a pattern
     //
     //  @pattern    FONTCHARACTER glob pattern
     //  @sHandle    Will receive search handle
@@ -212,7 +214,7 @@ public:
     //  @return :  True on success
     //
     bool findFirst(const FONTCHARACTER pattern,
-				SEARCHHANDLE*sHandle, FONTCHARACTER foundFile,
+                SEARCHHANDLE*sHandle, FONTCHARACTER foundFile,
                 struct BFile_FileInfo *fileInfo);
 
     // findNext(): Continue a search
@@ -244,7 +246,7 @@ public:
         return error_;
     }
 
-	//
+    //
     // Utilities - conversions from/to FC to/from char*
     //
 

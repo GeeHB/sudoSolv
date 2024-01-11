@@ -1,10 +1,10 @@
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    element.h
 //--
 //--		Definition of element object : A single sudoku element
 //--
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #ifndef __S_SOLVER_ELEMENT_h__
 #define __S_SOLVER_ELEMENT_h__    1
@@ -19,8 +19,8 @@ extern "C" {
 //
 #define STATUS_EMPTY    0
 #define STATUS_SET      1
-#define STATUS_OBVIOUS  2       // An obvious value found at runtime
-#define STATUS_ORIGINAL 4       // Can't be changed (except in edition mode)
+#define STATUS_OBVIOUS  2   // An obvious value found at runtime
+#define STATUS_ORIGINAL 4   // Can't be changed (except in edition mode)
 
 // An empty element value
 #define EMPTY_VALUE     0
@@ -33,7 +33,8 @@ public:
 
     // Construction
     element(int value = EMPTY_VALUE){
-        status_ = (EMPTY_VALUE == value)?STATUS_EMPTY:STATUS_ORIGINAL | STATUS_SET;
+        status_ = (EMPTY_VALUE == value)?
+                        STATUS_EMPTY:STATUS_ORIGINAL | STATUS_SET;
         value_ = value;
     }
 
@@ -44,9 +45,10 @@ public:
     //
     //  @value : new value for the object
     //  @ status : new status
-    //  @editMode : true if the grid is currentlin edit mode
+    //  @editMode : true if the grid is currently in edit mode
     //
-    void setValue(uint8_t value, uint8_t status = STATUS_EMPTY, bool editMode = false);
+    void setValue(uint8_t value, uint8_t status = STATUS_EMPTY, 
+                    bool editMode = false);
 
     // Access
     //

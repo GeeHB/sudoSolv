@@ -40,8 +40,14 @@ class sudoku{
 public:
 
     // Construction & destruction
-    sudoku(RECT* scr = NULL);
+    sudoku();
     ~sudoku(){}
+    
+    // setScreenRect() : Screen dimensions
+    //
+    //  rect : pointer to rect containing new dimensions
+    //
+    void setScreenRect(const RECT* rect);
 
     // display() : Display the grid and it's content
     //

@@ -1,17 +1,17 @@
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
-//--	bFile.cpp
+//--    bFile.cpp
 //--
-//--		Implementation of bFile object
+//-     Implementation of bFile object
 //--
-//--		This release isn't fully tested
+//--        This release isn't fully tested
 //--
-//--		Missing :
-//--                    - whence in read ops
-//--					- BFile_Ext_Stat
-//--					- seek API
+//--    Missing :
+//--        - whence in read ops
+//--        - BFile_Ext_Stat
+//--        - seek API
 //--
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #include "bFile.h"
 
@@ -44,7 +44,7 @@ bFile::~bFile(){
 //
 // @return : true if the file or folder exists
 //
-bool bFile::exist(FONTCHARACTER fName){
+bool bFile::exist(const FONTCHARACTER fName){
     if (!FC_len(fName)){
         error_ = BFILE_ERROR_INVALID_PARAMETERS;
         return false;
@@ -116,7 +116,7 @@ int bFile::size(){
 //
 // @return : file opened ?
 //
-bool bFile::open(FONTCHARACTER filename, int access){
+bool bFile::open(const FONTCHARACTER filename, int access){
     if (access && !isOpen()){
 #ifdef DEST_CASIO_CALC
         fd_ = gint_world_switch(GINT_CALL(BFile_Open, filename, access));
@@ -157,17 +157,17 @@ bool bFile::open(FONTCHARACTER filename, int access){
 // @fname : name of the file or folder to create (must not exist)
 // @type : Entry type (BFile_File or BFile_Folder)
 // @size : Pointer to file size if type is BFile_File,
-//			use NULL otherwise
+//          use NULL otherwise
 //
 // @return : file successfully created ?
 //
-bool bFile::create(FONTCHARACTER fname, int type, int *size){
+bool bFile::create(const FONTCHARACTER fname, int type, int *size){
     if (type == BFile_File){
         // File can't be open
         if (!isOpen()){
 #ifdef DEST_CASIO_CALC
             error_ = gint_world_switch(GINT_CALL(BFile_Create,
-									fname, BFile_File, size));
+                                fname, BFile_File, size));
             return (BFILE_NO_ERROR == error_);
 #else
             // size is ignored
@@ -183,7 +183,7 @@ bool bFile::create(FONTCHARACTER fname, int type, int *size){
         // Create a folder
 #ifdef DEST_CASIO_CALC
             error_ = gint_world_switch(GINT_CALL(BFile_Create, fname,
-									BFile_Folder, size));
+                        BFile_Folder, size));
             return (BFILE_NO_ERROR == error_);
 #else
             return fs::create_directory(fname);
@@ -203,12 +203,13 @@ bool bFile::create(FONTCHARACTER fname, int type, int *size){
 // @fname : name of the file or folder to create (must not exist)
 // @type : Entry type (BFile_File or BFile_Folder)
 // @size : Pointer to file size if type is BFile_File,
-//			use NULL otherwise
+//          use NULL otherwise
 // @access : Access mode for the file
 //
 // @return : file or folder successfully created (and openend for file) ?
 //
-bool bFile::createEx(FONTCHARACTER fname, int type, int *size, int access){
+bool bFile::createEx(const FONTCHARACTER fname, int type, 
+                    int *size, int access){
     if (BFile_Folder == type){
         return create(fname, BFile_Folder, size);
     }
@@ -245,7 +246,7 @@ bool bFile::write(void const *data, int even_size){
     int mySize(even_size);
 
 #ifdef DEST_CASIO_CALC
-	char* buffer = (char*)data;
+    char* buffer = (char*)data;
 #ifdef FX9860G
     if (0 != (even_size % 2)){
         if (NULL == (buffer = malloc(++mySize))){
@@ -272,8 +273,8 @@ bool bFile::write(void const *data, int even_size){
 #else
     file_.write((const char*)data, mySize);
 
-	// done ?
-	done = file_.good();
+    // done ?
+    done = file_.good();
 #endif // #ifdef DEST_CASIO_CALC
 
     return done;
@@ -326,7 +327,7 @@ int bFile::read(void *data, int lg, int whence){
 //
 //  @return : file successfully renamed ?
 //
-bool bFile::rename(FONTCHARACTER oldPath, FONTCHARACTER newPath){
+bool bFile::rename(const FONTCHARACTER oldPath, const FONTCHARACTER newPath){
     // File can't be open
     if (!isOpen()){
 #ifdef DEST_CASIO_CALC
@@ -341,10 +342,11 @@ bool bFile::rename(FONTCHARACTER oldPath, FONTCHARACTER newPath){
                     if (buffer &&  read(buffer, size, 0)){
                         // Create a new file with oldPath content
                         bFile newFile();
-                        if (newFile.createEx(newPath, BFile_File, &size, BFile_WriteOnly)){
-							newFile.write(buffer, size);
-							newFile.close();
-						}
+                        if (newFile.createEx(newPath, BFile_File, 
+                                &size, BFile_WriteOnly)){
+                            newFile.write(buffer, size);
+                            newFile.close();
+                        }
 
                         free(buffer);
                         done = true;
@@ -368,7 +370,7 @@ bool bFile::rename(FONTCHARACTER oldPath, FONTCHARACTER newPath){
         return false;
 #else
         error_ = gint_world_switch(GINT_CALL(BFile_Rename,
-												oldPath, newPath));
+                                        oldPath, newPath));
         return (BFILE_NO_ERROR == error_);
 #endif // #ifdef FX9860G
 #else
@@ -386,7 +388,7 @@ bool bFile::rename(FONTCHARACTER oldPath, FONTCHARACTER newPath){
 //
 // @return : file successfully removed ?
 //
-bool bFile::remove(FONTCHARACTER filename){
+bool bFile::remove(const FONTCHARACTER filename){
     // File can't be open
     if (!isOpen()){
 #ifdef DEST_CASIO_CALC
@@ -433,7 +435,7 @@ void bFile::close(){
 //  @return :  True on success
 //
 bool bFile::findFirst(const FONTCHARACTER pattern, SEARCHHANDLE *sHandle,
-		FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo){
+        FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo){
     if (sHandle && fileInfo){
 #ifdef DEST_CASIO_CALC
         error_ = gint_world_switch(GINT_CALL(BFile_FindFirst,
@@ -464,22 +466,22 @@ bool bFile::findFirst(const FONTCHARACTER pattern, SEARCHHANDLE *sHandle,
 //  @return ;  true if ok
 //
 bool bFile::findNext(SEARCHHANDLE sHandle, FONTCHARACTER foundFile,
-			struct BFile_FileInfo *fileInfo){
-	if (sHandle){
+        struct BFile_FileInfo *fileInfo){
+    if (sHandle){
 #ifdef DEST_CASIO_CALC
         error_ = gint_world_switch(GINT_CALL(BFile_FindNext,
-				sHandle, foundFile, fileInfo));
+                            sHandle, foundFile, fileInfo));
         return (BFILE_NO_ERROR == error_);
 #else
         struct dirent *de;
         if (NULL != (de = readdir(sHandle))){
             fileInfo->type = (DT_DIR == de->d_type?
-								BFile_Type_Directory:BFile_Type_File);
-            FC_str2FC(de->d_name, foundFile);
+                BFile_Type_Directory:BFile_Type_File);
+                FC_str2FC(de->d_name, foundFile);
             return true;
         }
 #endif // #ifdef DEST_CASIO_CALC
-	}
+    }
 
     // Invalid handle
     error_ = BFILE_ERROR_INVALID_PARAMETERS;
