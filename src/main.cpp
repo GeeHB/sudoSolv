@@ -12,8 +12,7 @@
 
 // APP. entry-point
 //
-int main(void)
-{
+int main(void){
     sudoSolver sSolver;
 
     sSolver.showHomeScreen();

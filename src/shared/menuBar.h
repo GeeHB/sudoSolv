@@ -1,10 +1,10 @@
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    menuBar.h
 //--
 //--        Definition of menuBar object - A bar of menu (or a submenu)
 //--
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #ifndef __MENU_BAR_h__
 #define __MENU_BAR_h__    1
@@ -12,7 +12,7 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        "0.3.6"
+#define _GEEHB_MENU_VER_        "0.3.7"
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
@@ -125,6 +125,10 @@ public:
         return rect_.h;
     }
 
+    //  getRect() : Get bounding rect of current menu bar
+    //
+    void getRect(RECT& barRect);
+
     //  setHeight() : change menu bar height
     //
     //  @barHeight : New height in pixels
@@ -132,12 +136,6 @@ public:
     //  @return : true if hieght has changed
     //
     bool setHeight(uint16_t barHeight);
-
-    //  getRect() : Get bounding rect of current menu bar
-    //
-    void getRect(RECT& barRect){
-        barRect = {rect_.x, rect_.y, rect_.w, rect_.h};
-    }
 
     //  update() : Update the menu bar
     //
@@ -168,9 +166,9 @@ public:
     //  @return : true if sub menu is added
     //
     bool addSubMenu(uint8_t index, const menuBar* subMenu,
-					int id, const char* text, int state = ITEM_STATE_DEFAULT){
+            int id, const char* text, int state = ITEM_STATE_DEFAULT){
         return _addSubMenu(&current_, index,
-							(PMENUBAR)subMenu, id, text, state);
+                        (PMENUBAR)subMenu, id, text, state);
     }
 
     //  appendSubMenu() : Append a sub menu
@@ -185,7 +183,7 @@ public:
     bool appendSubMenu(const menuBar* subMenu, int id,
                         const char* text, int state = ITEM_STATE_DEFAULT){
         return _addSubMenu(&current_, current_.itemCount,
-							(PMENUBAR)subMenu, id, text, state);
+                            (PMENUBAR)subMenu, id, text, state);
     }
 
     //  addItem() : Add an item to the current menu bar
@@ -199,8 +197,8 @@ public:
     //  @return : true if the item has been added
     //
     bool addItem(uint8_t index, int id, const char* text,
-				int state = ITEM_STATE_DEFAULT,
-				int status = ITEM_STATUS_DEFAULT){
+                int state = ITEM_STATE_DEFAULT,
+                int status = ITEM_STATUS_DEFAULT){
         return _addItem(&current_, index, id, text, state, status);
     }
 
@@ -214,7 +212,7 @@ public:
     //  @return : true if the item has been added
     //
     bool appendItem(int id, const char* text, int state = ITEM_STATE_DEFAULT,
-					int status = ITEM_STATUS_DEFAULT){
+                    int status = ITEM_STATUS_DEFAULT){
         return _addItem(&current_, current_.itemCount, id, text, state, status);
     }
 
@@ -287,10 +285,10 @@ public:
     bool setItem(int searchID, int searchMode, PMENUITEM pItem, int Mask);
 
     //  freeMenuItem() : Free memory used by a menu item
-	//
-	//  @item : Pointer to the menu item to be released
-	//
-	void freeMenuItem(PMENUITEM item);
+    //
+    //  @item : Pointer to the menu item to be released
+    //
+    void freeMenuItem(PMENUITEM item);
 
     // Conversion
     operator PMENUBAR() const{
@@ -300,7 +298,7 @@ public:
     // handleKeyboard() : Handle the keyboard events
     //
     // @return : MENUACTION struct containing info
-    //			 about item selected b user
+    //          about item selected b user
     //
     MENUACTION handleKeyboard();
 
@@ -323,7 +321,7 @@ private:
     //  @return : true if sub menu is added
     //
     bool _addSubMenu(const PMENUBAR container, uint8_t index,
-					PMENUBAR subMenu, int id, const char* text, int state);
+                PMENUBAR subMenu, int id, const char* text, int state);
 
     // _clearMenuBar() : Empty a menu bar
     //
@@ -396,15 +394,15 @@ private:
     //  @searchMode : Type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
     //
     //  @containerBar : pointer to a PMENUBAR. when not NULL,
-	//			if item is found, containerBar will point to the bar
-	//			containing the item
+    //          if item is found, containerBar will point to the bar
+    //          containing the item
     //  @pIndex : when not NULL, will point to the Item'ID in its menu
     //
     //  @return : pointer to the item if found or NULL
     //
     PMENUITEM _findItem(const PMENUBAR bar, int searchedID,
-    			int searchMode, PMENUBAR* containerBar = NULL,
-    			uint8_t* pIndex = NULL);
+                int searchMode, PMENUBAR* containerBar = NULL,
+                uint8_t* pIndex = NULL);
 
     //  _removeItem() : Remove an item from the current menu bar
     //      Remove the item menu or the submenu
@@ -412,7 +410,7 @@ private:
     //  @bar : menu bar in wich the item is to be searched
     //  @searchedID : Item's ID or index
     //  @searchMode : if SEARCH_BY_ID, searchedID is the ID of item
-    //                if SEARCH_BY_INDEX serachedID is the index in the menu bar
+    //                if SEARCH_BY_INDEX searchedID is the index in the menu bar
     //
     //  @return : true if the item has been successfully removed
     //
@@ -423,7 +421,7 @@ private:
     //  @index : index of menu item to select or unselect
     //  @selected : true if item is to be selected
     //  @redraw : when true, item and previously (un)selected
-	//				item are drawn in their new states
+    //              item are drawn in their new states
     //
     //  @return : true if item is selected
     //
@@ -433,23 +431,23 @@ private:
     //
     //  @anchor : Position of the item in screen coordinates
     //  @item : Pointer to a MENUITEM strcut containing informations
-    //			concerning the item to draw
+    //          concerning the item to draw
     //
     void _drawItem(const RECT* anchor, const MENUITEM* item);
 
     // State & status
     //
     bool _isBitSet(int value, int bit){
-		return (bit == (value & bit));
-	}
-	int _setBit(int& value, int bit){
-		value |= bit;
-		return value;
-	}
+        return (bit == (value & bit));
+    }
+    int _setBit(int& value, int bit){
+        value |= bit;
+        return value;
+    }
     int _removeBit(int& value, int bit){
-		value = value & ~bit;
-		return value;
-	}
+        value = value & ~bit;
+        return value;
+    }
 
     // Members
 private:
