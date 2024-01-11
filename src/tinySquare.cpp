@@ -49,6 +49,20 @@ bool tinySquare::setIndex(uint8_t index){
     return true;
 }
 
+// inMe() : Is the given value "in" the square ?
+//
+//   Check wether the value is already present in the current tiny-square
+//
+//  @elements : values
+//  @value : value to check
+//
+//  @return true if found
+//
+bool tinySquare::inMe(element* elements, uint8_t value){
+    CPOINT pos = findValue(elements, value);
+    return (pos.line >=0 && pos.row>=0);
+}
+
 // findValue() : Search for the position of the value "in" the square
 //
 //  @elements : Game matrix

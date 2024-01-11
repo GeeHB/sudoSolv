@@ -41,7 +41,7 @@
 #define ITEM_STATUS_TEXT        1
 #define ITEM_STATUS_SUBMENU     2       // Open a sub menu on "click"
 #define ITEM_STATUS_KEYCODE     4       // item's ID is a key code
-#define ITEM_STATUS_CHECKBOX	8
+#define ITEM_STATUS_CHECKBOX    8
 
 // Reserved menu item ID
 //
@@ -66,7 +66,7 @@ typedef struct _menuItem{
     int state;
     int status;
     char text[ITEM_NAME_LEN + 1];
-    void* subMenu;      // if item is a submenu, points to the sub menubar
+    void* subMenu;      // if item is a submenu, points to the submenu
 } MENUITEM,* PMENUITEM;
 
 // A menu bar
@@ -93,8 +93,8 @@ typedef struct _menuAction{
 
 // Types of search modes
 //
-#define SEARCH_BY_ID		0
-#define SEARCH_BY_INDEX		1
+#define SEARCH_BY_ID        0
+#define SEARCH_BY_INDEX     1
 
 #ifdef __cplusplus
 extern "C" {

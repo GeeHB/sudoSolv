@@ -212,7 +212,7 @@ bool grids::deleteFile(){
     if (index_ != -1 && index_ < count_){
 #ifdef DEST_CASIO_CALC
         uint16_t fName[BFILE_MAX_PATH + 1];
-        fName[0] = 0x0000;
+        fName[0] = BFILE_CHAR_NULL;
 #else
         char fName[BFILE_MAX_PATH + 1];
 #endif // DEST_CASIO_CALC

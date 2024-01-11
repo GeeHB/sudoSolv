@@ -24,6 +24,8 @@
 
 typedef uint16_t const * FONTCHARACTER;
 typedef int SEARCHHANDLE;
+#define BFILE_CHAR_NULL 0x0000
+
 #else
 #include <cstdio>
 #include <fstream>
@@ -34,6 +36,8 @@ namespace fs = std::filesystem;
 
 typedef char* FONTCHARACTER;
 typedef DIR* SEARCHHANDLE;
+
+#define BFILE_CHAR_NULL 0x00
 
 // Error codes
 #define BFile_IllegalParam  -1

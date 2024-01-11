@@ -93,11 +93,8 @@ public:
     //
     //  @return true if found
     //
-    bool inMe(element* elements, uint8_t value){
-        CPOINT pos = findValue(elements, value);
-        return (pos.line >=0 && pos.row>=0);
-    }
-
+    bool inMe(element* elements, uint8_t value);
+    
 private:
 
     // _indexes() : Get elements's indexes

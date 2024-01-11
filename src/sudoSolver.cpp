@@ -285,7 +285,7 @@ void sudoSolver::_onFileDelete(){
         }
 
         if (!file){
-            fileName_[0] = 0x0000;
+            fileName_[0] = BFILE_CHAR_NULL;
         }
 
         _newFileName();
@@ -361,7 +361,7 @@ void sudoSolver::_onCapture(){
 //
 void sudoSolver::_initStats(bool whole){
     if (whole){
-        fileName_[0] = 0x0000;
+        fileName_[0] = BFILE_CHAR_NULL;
     }
 
     sFileName_[0] = '\0';
