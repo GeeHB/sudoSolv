@@ -182,7 +182,7 @@ private:
     //  @txtColour : text colour
     //
     void _drawSingleElement(uint8_t row, uint8_t line, uint8_t value,
-							int bkColour, int txtColour);
+                        int bkColour, int txtColour);
 #endif // #ifdef DEST_CASIO_CALC
 
     //
@@ -197,7 +197,7 @@ private:
     uint8_t _findObviousValues();
 
     // _checkObviousValue() : Is there an obvious value
-    //						  for the given position ?
+    //  for the given position ?
     //
     //  pos : current position in the grid
     //
@@ -263,7 +263,9 @@ private:
     element elements_[LINE_COUNT * ROW_COUNT];	// grid as a one dim. table
     tinySquare  tSquares_[TINY_COUNT];	// Elements IDs in tinySquares
 
-    RECT screen_; // Position & dims of screen : {x Grid, yGrid, "screen" width , "screen" height}
+    // Position & dims of screen
+    // {x Grid, yGrid, "screen" width , "screen" height}
+    RECT screen_;
 };
 
 #ifdef __cplusplus

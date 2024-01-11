@@ -1,11 +1,11 @@
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    tinySquare.h
 //--
-//--        Definition of tinySquare object
-//--          A tiny-square is one of the 9 3x3 matrix composing the whole grid
+//--    Definition of tinySquare object
+//--    A tiny-square is one of the 9 3x3 matrix composing the whole grid
 //--
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #ifndef __S_SOLVER_TSQUARES_h__
 #define __S_SOLVER_TSQUARES_h__    1

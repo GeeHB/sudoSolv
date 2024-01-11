@@ -1,11 +1,11 @@
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //--
 //--    tinySquare.cpp
 //--
-//--        Implementation of tinySquare object
-//--          A tiny-square is one of the 9 3x3 matrix composing the whole grid
+//--    Implementation of tinySquare object
+//--    A tiny-square is one of the 9 3x3 matrix composing the whole grid
 //--
-//---------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 #include "tinySquare.h"
 #include "position.h"
