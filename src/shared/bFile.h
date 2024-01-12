@@ -16,7 +16,7 @@
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define VERSION_B_FILE_OBJECT       "0.4.3"
+#define VERSION_B_FILE_OBJECT       "0.4.5"
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>
@@ -24,7 +24,7 @@
 
 typedef uint16_t const * FONTCHARACTER;
 typedef int SEARCHHANDLE;
-#define BFILE_CHAR_NULL 0x0000
+#define BFILE_CHAR_ZERO 0x0000
 
 #else
 #include <cstdio>
@@ -37,7 +37,7 @@ namespace fs = std::filesystem;
 typedef char* FONTCHARACTER;
 typedef DIR* SEARCHHANDLE;
 
-#define BFILE_CHAR_NULL 0x00
+#define BFILE_CHAR_ZERO 0x00
 
 // Error codes
 #define BFile_IllegalParam  -1
@@ -95,6 +95,9 @@ struct BFile_FileInfo
 #define BFILE_ERROR_MEMORY              5
 
 #define BFILE_LAST_ERROR_CODE           BFILE_ERROR_MEMORY
+
+// Clear an existing string
+#define FC_EMPTY(fc) {fc[0] = BFILE_CHAR_ZERO;}
 
 #ifdef __cplusplus
 extern "C" {
@@ -305,6 +308,14 @@ public:
     //  @return : size of fName (O on error)
     //
     static size_t FC_len(const FONTCHARACTER fName);
+
+    // FC_isEmpty() : Is the "string" empty
+    //
+    //  @fName : FONTCHARACTER to check
+    //
+    //  @return : true if string is empty or NULL
+    //
+    static bool FC_isEmpty(const FONTCHARACTER fName);
 
 private:
 #ifdef DEST_CASIO_CALC

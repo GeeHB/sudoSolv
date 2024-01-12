@@ -93,7 +93,7 @@ void sudoSolver::run(void)
     menu_.getRect(mainRect);
     mainRect = {0, 0, mainRect.w, CASIO_HEIGHT - mainRect.h};
     
-    game_.setScreenRect(&mainRect); // "screen" dim fir sudoku grid
+    game_.setScreenRect(&mainRect); // "screen" dim for sudoku grid
 
     // Handle user's choices
     bool end(false);
@@ -205,40 +205,20 @@ void sudoSolver::_onFileNew(){
 // _onFilePrevious() : Open previous file in the grid folder
 //
 void sudoSolver::_onFilePrevious(){
-    int error(FILE_NO_ERROR);
-    if (files_.prevFile(fileName_)){
-        _updateFileItemsState();
-
-        // Update grid on screen
-        if (FILE_NO_ERROR == (error = game_.load(fileName_))){
-            game_.display(false);
-            _newFileName();                        
-        }
-        else{
-            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, 
-                    "Error loading file : %d", (int)error);
-            dupdate();
-        }
-    } 
+    uint16_t fName[BFILE_MAX_PATH + 1]; 
+    FC_EMPTY(fName);
+    if (files_.prevFile(fName)){
+        _loadFile(fName);
+    }
 }
 
 // _onFileNext() : Open next file in the grid folder
 //
 void sudoSolver::_onFileNext(){
-    int error(FILE_NO_ERROR);
-    if (files_.nextFile(fileName_)){
-        _updateFileItemsState();
-
-        // Update grid on screen
-        if (FILE_NO_ERROR == (error = game_.load(fileName_))){
-            game_.display(false);
-            _newFileName();                            
-        }
-        else{
-            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, 
-                        "Error loading file : %d", (int)error);
-            dupdate();
-        }
+    uint16_t fName[BFILE_MAX_PATH + 1]; 
+    FC_EMPTY(fName);
+    if (files_.nextFile(fName)){
+        _loadFile(fName);
     }    
 }
 
@@ -250,11 +230,13 @@ void sudoSolver::_onFileSave(){
     int error(FILE_NO_ERROR);
     
     // Use current name or new name if none
-    if (fileExists || (!fileExists && files_.getNewFileName(fileName_, &uid))){
-        if (FILE_NO_ERROR == (error = game_.save(fileName_))){
+    uint16_t fName[BFILE_MAX_PATH + 1]; 
+    FC_EMPTY(fName);
+    if (fileExists || (!fileExists && files_.getNewFileName(fName, &uid))){
+        if (FILE_NO_ERROR == (error = game_.save(fName))){
             if (!fileExists){
                 // It's a new file
-                _newFileName();
+                _newFileName(fName);
 
                 // Update internal list
                 files_.browse();
@@ -274,29 +256,26 @@ void sudoSolver::_onFileSave(){
 //
 void sudoSolver::_onFileDelete(){
     if (files_.deleteFile()){
-        bool file(true);
-        if (!files_.prevFile(fileName_)){
-            menu_.activate(IDM_FILE_PREV, SEARCH_BY_ID, false);
-            if (!files_.nextFile(fileName_)){
-                _updateFileItemsState();
-                game_.empty();
-                file = false;   // No filename
-            }                            
+        // Update the list
+        if (files_.browse()){
+            files_.setPos(0);
+            uint16_t fileName[BFILE_MAX_PATH + 1]; 
+            if (files_.currentFileName(fileName)){
+                _loadFile(fileName);
+            }
         }
-
-        if (!file){
-            fileName_[0] = BFILE_CHAR_NULL;
+        else{
+            _onFileNew();
         }
-
-        _newFileName();
     }
 }
 
 // _onEdit() : Edit current grid
 //
 void sudoSolver::_onEdit(){
+    bool modified;
     game_.display();
-    if (game_.edit()){
+    if ((modified = game_.edit())){
         _displayStats();
     }
     else{
@@ -304,7 +283,7 @@ void sudoSolver::_onEdit(){
     }
 
     menu_.selectByIndex(-1);
-    _updateFileItemsState();
+    _updateFileItemsState(modified);
 }
 
 // _onSolveFindObvious() : Search for obvious values
@@ -353,6 +332,33 @@ void sudoSolver::_onCapture(){
 }
 #endif // #ifndef NO_CAPTURE
 
+// _loadFile() : Load and display a grid
+//
+//  @fName : File to load
+//
+//  @return : true if successfullu loaded
+//
+bool sudoSolver::_loadFile(FONTCHARACTER fName){
+    if (bFile::FC_isEmpty(fName)){
+        return false;
+    }
+
+    int error(FILE_NO_ERROR);
+
+    // Update grid on screen
+    if (FILE_NO_ERROR == (error = game_.load(fName))){
+        game_.display(false);
+        _newFileName(fName);
+        _updateFileItemsState();
+        return true;
+    }
+    
+    dprint(TEXT_X, TEXT_V_OFFSET, C_RED,  "Error loading file : %d",
+        (int)error);
+    dupdate();
+    return false; 
+}
+
 
 // _initStats() : initialize grid stats
 //  Initailizes data related to grid file and resolution
@@ -361,7 +367,7 @@ void sudoSolver::_onCapture(){
 //
 void sudoSolver::_initStats(bool whole){
     if (whole){
-        fileName_[0] = BFILE_CHAR_NULL;
+        FC_EMPTY(fileName_);
     }
 
     sFileName_[0] = '\0';
@@ -397,9 +403,12 @@ void sudoSolver::_updateFileItemsState(bool modified){
 
 // _newFileName() : Notifies FQN has changed
 //
-void sudoSolver::_newFileName(){
+///  @fName : New FQN of grid
+//
+void sudoSolver::_newFileName(FONTCHARACTER fName){
     _initStats(false);
-    if (bFile::FC_len(fileName_)){
+    if (!bFile::FC_isEmpty(fName)){
+        bFile::FC_cpy(fileName_, fName);
         char fName[BFILE_MAX_PATH + 1];
         bFile::FC_FC2str(fileName_, fName);
         char* name = strrchr(fName, CHAR_PATH_SEPARATOR);

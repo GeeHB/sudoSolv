@@ -49,6 +49,10 @@ void sudoku::setScreenRect(const RECT* rect){
     else{
         screen_ = {0, 0, CASIO_WIDTH, CASIO_HEIGHT};
     }
+
+    //screen_.x = (screen_.w - GRID_SIZE) / 2;
+    screen_.x = GRID_HORZ_OFFSET;
+    screen_.y = (screen_.h - GRID_SIZE) / 2;    // centered vertically
 }
     
 // display() : Display the grid and it's content

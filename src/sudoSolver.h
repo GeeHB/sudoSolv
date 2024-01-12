@@ -84,6 +84,14 @@ private:
 #ifndef NO_CAPTURE
     void _onCapture();
 #endif // #ifndef NO_CAPTURE
+
+    // _loadFile() : Load and display a grid
+    //
+    //  @fName : File to load
+    //
+    //  @return : true if successfullu loaded
+    //
+    bool _loadFile(FONTCHARACTER fName);
     
     // _initStats() : initialize grid stats
     //  Initailizes data related to grid file and resolution
@@ -101,7 +109,9 @@ private:
 
     // _newFileName() : Notifies FQN has changed
     //
-    void _newFileName();
+    //  @fName : New FQN of grid
+    //
+    void _newFileName(FONTCHARACTER fName);
     
     // _displayStats() : Display information about the grid and
     //                   the solution if found any

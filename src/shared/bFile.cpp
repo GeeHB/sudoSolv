@@ -263,7 +263,7 @@ bool bFile::write(void const *data, int even_size){
 #endif // #ifdef FX9860G
     error_ = gint_world_switch(GINT_CALL(BFile_Write, fd_,
                                 (void*)buffer, mySize));
-    done =  (BFILE_NO_ERROR == error_);
+    done =  (error_ > 0);   // should have write something !
 #ifdef FX9860G
     // Free the buffer ?
     if (0 != (even_size % 2)){
@@ -310,7 +310,7 @@ int bFile::read(void *data, int lg, int whence){
     }
 
     error_ = BFILE_NO_ERROR;
-    return read;	// #bytes read
+    return read;    // #bytes read
 #else
     file_.read((char*)data, lg);
     int red(file_.gcount());
@@ -655,6 +655,16 @@ size_t bFile::FC_len(const FONTCHARACTER fName){
     }
 
     return 0;
+}
+
+// FC_isEmpty() : Is the "string" empty
+//
+//  @fName : FONTCHARACTER to check
+//
+//  @return : true if string is empty or NULL
+//
+bool bFile::FC_isEmpty(const FONTCHARACTER fName){
+    return (!fName || BFILE_CHAR_ZERO == fName[0] || 0 == FC_len(fName))?true:false;
 }
 
 // EOF

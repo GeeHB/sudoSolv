@@ -63,6 +63,14 @@ public:
     //
     int browse();
 
+    // currentFileName() : Get surrent filename
+    //
+    //  @fName : current filename
+    //
+    //  @return : true if valid 
+    //
+    bool currentFileName(FONTCHARACTER fName);
+
     // addFileName() : Add a filename to the folder's content list
     //
     //  @fName : filename to add

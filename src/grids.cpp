@@ -34,6 +34,22 @@ grids::~grids(){
     __vector_clear(true);
 }
 
+// currentFileName() : Get surrent filename
+//
+//  @fName : current filename
+//
+//  @return : true if valid 
+//
+bool grids::currentFileName(FONTCHARACTER fName){
+    if (-1 == index_ || 0 == count_ || bFile::FC_isEmpty(fName)){
+        return false;
+    }
+
+    // Copy the file name
+    bFile::FC_cpy(fName, files_[index_]->fileName);
+    return true;
+}
+
 // findPos() : Find the index (position) of a file in the internal list
 //
 //  @UID: File's ID
@@ -110,7 +126,8 @@ int grids::browse(){
     if (folder.findFirst(FCPattern, &shandle, fName, &fileInfo)){
         do{
             // a file ?
-            if (BFile_Type_Archived == fileInfo.type){
+            if (BFile_Type_Archived == fileInfo.type ||
+                BFile_Type_File == fileInfo.type ){
                 _addFile(fName);
             }
         } while(folder.findNext(shandle, fName, &fileInfo));
@@ -118,6 +135,7 @@ int grids::browse(){
         folder.findClose(shandle);
     }
 
+    index_ = -1;
     return count_;
 }
 
@@ -212,7 +230,7 @@ bool grids::deleteFile(){
     if (index_ != -1 && index_ < count_){
 #ifdef DEST_CASIO_CALC
         uint16_t fName[BFILE_MAX_PATH + 1];
-        fName[0] = BFILE_CHAR_NULL;
+        fName[0] = BFILE_CHAR_ZERO;
 #else
         char fName[BFILE_MAX_PATH + 1];
 #endif // DEST_CASIO_CALC
