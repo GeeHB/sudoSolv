@@ -13,6 +13,10 @@
 #include "grids.h"
 #include <cstdlib>
 
+#ifndef DEST_CASIO_CALC
+using namespace std;
+#endif // DEST_CASIO_CALC
+
 #define VECTOR_INCREMENT        10      // # of items addded
 
 // Construction
@@ -38,7 +42,7 @@ grids::~grids(){
 //
 //  @fName : current filename
 //
-//  @return : true if valid 
+//  @return : true if valid
 //
 bool grids::currentFileName(FONTCHARACTER fName){
     if (-1 == index_ || 0 == count_ || bFile::FC_isEmpty(fName)){
@@ -260,6 +264,31 @@ bool grids::deleteFile(){
     return false;
 }
 
+#ifndef DEST_CASIO_CALC
+// content() : display list content
+//
+void grids::content(){
+    cout << endl << "__________________________" << endl;
+    cout << "Taille : "<< count_ << endl;
+    cout << "Capacité : "<< capacity_ << endl;
+
+    PFNAME fname;
+    for (int index = 0; index < count_; index++){
+        fname = files_[index];
+        cout << "\t" << index << " - ";
+
+        if (fname){
+            cout << fname->ID;
+        }
+        else{
+            cout << "<vide>";
+        }
+
+        cout << endl;
+    }
+}
+#endif // DEST_CASIO_CALC
+
 
 // Internal methods
 //
@@ -298,7 +327,7 @@ bool grids::_addFile(const FONTCHARACTER fileName){
     }
 
     // Add
-    __vector_append(file);
+    __vector_add(file);
     return true;
 }
 
@@ -319,6 +348,59 @@ void grids::_freeFileName(PFNAME pItem){
 //
 //  "vector" management
 //
+
+// __vector_add() : append an file item pointer to the list
+//
+//  The file item is inserted ordered based on the uid member of
+//  FNAME struct
+//
+//  This method automaticaly resizes the list
+//
+//  @file : pointer to the struct to add to the list
+//
+//  @return : true if succesfully added
+//
+bool grids::__vector_add(PFNAME file){
+    // Empty list => add
+    if (!count_){
+        return __vector_append(file);
+    }
+
+    if (NULL == file){
+        return false;   // Nothing to add !
+    }
+
+    if (count_ >= capacity_){
+        if (!__vector_resize()){
+            return false;
+        }
+    }
+
+    // find item's position
+    int pos(0);
+    while(pos < count_ && file->ID >= files_[pos]->ID ){
+        pos++;
+    }
+
+    if (pos < count_){
+        size_t tail((count_ - pos) * sizeof(PFNAME));
+        char* buffer = (char*)malloc(tail);
+        if (!buffer){
+            return false;
+        }
+        memcpy(buffer, &files_[pos], tail);
+        memcpy(&files_[pos + 1],
+                buffer, tail);
+        free(buffer);
+    }
+
+    // Insert (or append) file
+    files_[pos] = file;
+    count_++;
+
+    return true;    // done
+}
+
 
 // __vector_append() : append an file item pointer to the list
 //
@@ -440,13 +522,14 @@ int grids::__fileName2i(const FONTCHARACTER src){
         char car;
 #ifdef DEST_CASIO_CALC
         uint8_t sCar(sizeof(uint16_t));
+        index++;
 #else
         uint8_t sCar(1);
 #endif // DEST_CASIO_CALC
 
         num = 0;
         while (num >= 0
-            && (car = buffer[index + 1])
+            && (car = buffer[index])
             && car != '.'){      // no extension
             if (car >= '0' && car <= '9'){
                 num = num * 10 + (car - '0');

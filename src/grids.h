@@ -67,7 +67,7 @@ public:
     //
     //  @fName : current filename
     //
-    //  @return : true if valid 
+    //  @return : true if valid
     //
     bool currentFileName(FONTCHARACTER fName);
 
@@ -111,6 +111,12 @@ public:
     //
     bool deleteFile();
 
+#ifndef DEST_CASIO_CALC
+    // content() : display list content
+    //
+    void content();
+#endif // DEST_CASIO_CALC
+
     // Internal methods
 private:
 
@@ -133,13 +139,26 @@ private:
     //  "vector" management
     //
 
-    // __vector_append() : append an file item pointer to the list
+    // __vector_add() : append an file item pointer to the list
+    //
+    //  The file item is inserted ordered based on the uid member of
+    //  FNAME struct
     //
     //  This method automaticaly resizes the list
     //
     //  @file : pointer to the struct to add to the list
     //
     //  @return : true if succesfully added
+    //
+    bool __vector_add(PFNAME file);
+
+    // __vector_append() : append an file item pointer to the list
+    //
+    //  This method automaticaly resizes the list
+    //
+    //  @file : pointer to the struct to append at the end of to the list
+    //
+    //  @return : true if succesfully appended
     //
     bool __vector_append(PFNAME file);
 
