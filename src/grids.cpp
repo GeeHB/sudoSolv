@@ -17,7 +17,9 @@
 using namespace std;
 #endif // DEST_CASIO_CALC
 
-#define VECTOR_INCREMENT        10      // # of items addded
+#define VECTOR_INCREMENT        10      // # of items added
+
+#define MAX_FILE_ID             0xFFFF
 
 // Construction
 //
@@ -45,7 +47,7 @@ grids::~grids(){
 //  @return : true if valid
 //
 bool grids::currentFileName(FONTCHARACTER fName){
-    if (-1 == index_ || 0 == count_ || bFile::FC_isEmpty(fName)){
+    if (-1 == index_ || 0 == count_ || FC_ISEMPTY(fName)){
         return false;
     }
 
@@ -54,13 +56,13 @@ bool grids::currentFileName(FONTCHARACTER fName){
     return true;
 }
 
-// findPos() : Find the index (position) of a file in the internal list
+// findByID() : Find a file by its ID
 //
 //  @UID: File's ID
 //
-//  @return : index of file in liste or -1
+//  @return : index of file in list or -1
 //
-int grids::findPos(int UID){
+int grids::findByID(int UID){
     PFNAME pFile(NULL);
     for (int index(0); index < count_; index++){
         if ((pFile = files_[index]) && pFile->ID == UID){
@@ -86,7 +88,7 @@ int grids::setPos(int index){
     return index_;
 }
 
-// browse() : browse folder and fill list with file names
+// browse() : browse folder and fill list with file names and IDs
 //
 //  @return : count of elements read or -1 if error
 //
@@ -110,6 +112,9 @@ int grids::browse(){
         if (!folder.create(fName, BFile_Folder, NULL)){
             return -1;
         }
+
+        index_ = -1;
+        return 0;
     }
 
     // Empty the list
@@ -304,7 +309,7 @@ bool grids::_addFile(const FONTCHARACTER fileName){
     if (NULL == file){
         return false;
     }
-    memset(file, 0x00, sizeof(FNAME));  // empty struct.
+    memset(file, 0x00, sizeof(FNAME));  // empty the struct.
 
     // Full name
 #ifdef DEST_CASIO_CALC
@@ -312,7 +317,7 @@ bool grids::_addFile(const FONTCHARACTER fileName){
 #else
     char fName[BFILE_MAX_PATH + 1];
 #endif // DEST_CASIO_CALC
-    bFile::FC_str2FC(folder_, fName);   // convert folder to FONTCHARACTER
+    bFile::FC_str2FC(folder_, fName);   // convert folder
     bFile::FC_cat(fName, fileName);     // add filename
 
     // fill struct. with file informations
@@ -327,8 +332,7 @@ bool grids::_addFile(const FONTCHARACTER fileName){
     }
 
     // Add
-    __vector_add(file);
-    return true;
+    return __vector_add(file);
 }
 
 // _freeFileName : free the menory used by the FNAME struct.
@@ -338,8 +342,8 @@ bool grids::_addFile(const FONTCHARACTER fileName){
 void grids::_freeFileName(PFNAME pItem){
     if (pItem){
         if (pItem->fileName){
-                free((void*)pItem->fileName);  // Free the name
-            }
+            free((void*)pItem->fileName);  // Free the name
+        }
 
         free(pItem);    // Free the struct.
     }
@@ -370,10 +374,8 @@ bool grids::__vector_add(PFNAME file){
         return false;   // Nothing to add !
     }
 
-    if (count_ >= capacity_){
-        if (!__vector_resize()){
-            return false;
-        }
+    if (count_ >= capacity_ && !__vector_resize()){
+        return false;
     }
 
     // find item's position
@@ -388,19 +390,18 @@ bool grids::__vector_add(PFNAME file){
         if (!buffer){
             return false;
         }
+
+        // Leave a space for a new item
         memcpy(buffer, &files_[pos], tail);
-        memcpy(&files_[pos + 1],
-                buffer, tail);
+        memcpy(&files_[pos + 1], buffer, tail);
         free(buffer);
     }
 
     // Insert (or append) file
     files_[pos] = file;
     count_++;
-
     return true;    // done
 }
-
 
 // __vector_append() : append an file item pointer to the list
 //
@@ -412,13 +413,11 @@ bool grids::__vector_add(PFNAME file){
 //
 bool grids::__vector_append(PFNAME file){
     if (NULL == file){
-        return false;   // Nothing to add !
+        return false;   // Nothing to append !
     }
 
-    if (count_ >= capacity_){
-        if (!__vector_resize()){
-            return false;
-        }
+    if (count_ >= capacity_ && !__vector_resize()){
+        return false;
     }
 
     // Append to the list
@@ -468,19 +467,21 @@ bool grids::__vector_resize(){
 //  @freeList : free list as well ?
 //
 void grids::__vector_clear(bool freeList){
-    PFNAME pFile(NULL);
-    for (int index(0); index < count_; index++){
-        if ((pFile = files_[index])){
-            _freeFileName(pFile);
+    if (files_){
+        PFNAME pFile(NULL);
+        for (int index(0); index < count_; index++){
+            if ((pFile = files_[index])){
+                _freeFileName(pFile);
+            }
         }
-    }
 
-    count_ = 0; // List is empty
+        count_ = 0; // List is empty
 
-    if (freeList){
-        free(files_);
-        capacity_ = 0;
-        files_ = NULL;
+        if (freeList){
+            free(files_);
+            capacity_ = 0;
+            files_ = NULL;
+        }
     }
 }
 
@@ -497,7 +498,7 @@ int grids::_nextFileID(){
         return 0;   // Empty folder
     }
 
-    int ID(0xFFFF); // max.file ID
+    int ID(MAX_FILE_ID); // max.file ID
     PFNAME pFile(NULL);
     for (int index(0); index < count_; index++){
         if ((pFile = files_[index]) && pFile->ID <= ID){
@@ -505,7 +506,7 @@ int grids::_nextFileID(){
         }
     }
 
-    return ((0xFFFF == ID)?-1:ID);
+    return ((MAX_FILE_ID == ID)?-1:ID);
 }
 
 // __fileName2i()- Convert a fully qualified filename to int
@@ -522,7 +523,7 @@ int grids::__fileName2i(const FONTCHARACTER src){
         char car;
 #ifdef DEST_CASIO_CALC
         uint8_t sCar(sizeof(uint16_t));
-        index++;
+        index++;    // shift first NULL char
 #else
         uint8_t sCar(1);
 #endif // DEST_CASIO_CALC
@@ -543,8 +544,8 @@ int grids::__fileName2i(const FONTCHARACTER src){
         }
     }
 
-    // Done or error
-    return num;
+    // Value or -1
+    return (num>=MAX_FILE_ID?-1:num);
 }
 
 // __itoa() : Transform a numeric value into a string
@@ -558,18 +559,18 @@ char* grids::__itoa(int num, char* str){
     char* strVal(str);
 
     int sum ((num < 0)?-1*num:num);
-	uint8_t i(0), digit;
+    uint8_t i(0), digit;
 
-	// buid the string in reverse order
-	do{
-		digit = sum % 10;
-		strVal[i++] = '0' + digit;
-		sum /= 10;
-	}while (sum);
+    // buid the string in reverse order
+    do{
+        digit = sum % 10;
+        strVal[i++] = '0' + digit;
+        sum /= 10;
+    }while (sum);
 
-	strVal[i] = '\0';
-	__strrev(strVal);   // reverse the string
-	return str;
+    strVal[i] = '\0';
+    __strrev(strVal);   // reverse the string
+    return str;
 }
 
 // __strrev() : Reverse a string
@@ -577,14 +578,14 @@ char* grids::__itoa(int num, char* str){
 //  @str : String to reverse
 //
 void grids::__strrev(char *str){
-	int i, j;
-	unsigned char a;
-	size_t len = strlen((const char *)str);
-	for (i = 0, j = len - 1; i < j; i++, j--){
-		a = str[i];
-		str[i] = str[j];
-		str[j] = a;
-	}
+    int i, j;
+    unsigned char a;
+    size_t len = strlen((const char *)str);
+    for (i = 0, j = len - 1; i < j; i++, j--){
+        a = str[i];
+        str[i] = str[j];
+        str[j] = a;
+    }
 }
 
 // EOF

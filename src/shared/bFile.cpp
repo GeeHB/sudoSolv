@@ -657,14 +657,4 @@ size_t bFile::FC_len(const FONTCHARACTER fName){
     return 0;
 }
 
-// FC_isEmpty() : Is the "string" empty
-//
-//  @fName : FONTCHARACTER to check
-//
-//  @return : true if string is empty or NULL
-//
-bool bFile::FC_isEmpty(const FONTCHARACTER fName){
-    return (!fName || BFILE_CHAR_ZERO == fName[0] || 0 == FC_len(fName))?true:false;
-}
-
 // EOF

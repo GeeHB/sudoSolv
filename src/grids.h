@@ -41,13 +41,13 @@ public:
         return index_;
     }
 
-    // findPos() : Find the index (position) of a file in the internal list
+    // findByID() : Find a file by its ID
     //
     //  @UID: File's ID
     //
-    //  @return : index of file in liste or -1
+    //  @return : index of file in list or -1
     //
-    int findPos(int UID);
+    int findByID(int UID);
 
     // setPos() : Set current position index in list
     //
@@ -57,7 +57,7 @@ public:
     //
     int setPos(int index);
 
-    // browse() : browse folder and fill list with file names
+    // browse() : browse folder and fill list with file names and IDs
     //
     //  @return : count of elements read or -1 if error
     //

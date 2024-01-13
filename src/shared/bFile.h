@@ -16,7 +16,7 @@
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define VERSION_B_FILE_OBJECT       "0.4.5"
+#define VERSION_B_FILE_OBJECT       "0.5.1"
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>
@@ -96,8 +96,15 @@ struct BFile_FileInfo
 
 #define BFILE_LAST_ERROR_CODE           BFILE_ERROR_MEMORY
 
-// Clear an existing string
+//
+// FONTCHARACTER macos
+//
+
+// Clear an existing "string"
 #define FC_EMPTY(fc) {fc[0] = BFILE_CHAR_ZERO;}
+
+// Is the "string" empty ?
+#define FC_ISEMPTY(fc) (!fc || BFILE_CHAR_ZERO == fc[0])
 
 #ifdef __cplusplus
 extern "C" {
@@ -308,14 +315,6 @@ public:
     //  @return : size of fName (O on error)
     //
     static size_t FC_len(const FONTCHARACTER fName);
-
-    // FC_isEmpty() : Is the "string" empty
-    //
-    //  @fName : FONTCHARACTER to check
-    //
-    //  @return : true if string is empty or NULL
-    //
-    static bool FC_isEmpty(const FONTCHARACTER fName);
 
 private:
 #ifdef DEST_CASIO_CALC

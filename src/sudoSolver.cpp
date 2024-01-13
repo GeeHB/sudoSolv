@@ -240,7 +240,7 @@ void sudoSolver::_onFileSave(){
 
                 // Update internal list
                 files_.browse();
-                files_.setPos(files_.findPos(uid)); // select the file                                
+                files_.setPos(files_.findByID(uid)); // select the file                                
             }
                     
             _updateFileItemsState();
@@ -339,7 +339,7 @@ void sudoSolver::_onCapture(){
 //  @return : true if successfullu loaded
 //
 bool sudoSolver::_loadFile(FONTCHARACTER fName){
-    if (bFile::FC_isEmpty(fName)){
+    if (FC_ISEMPTY(fName)){
         return false;
     }
 
@@ -407,7 +407,7 @@ void sudoSolver::_updateFileItemsState(bool modified){
 //
 void sudoSolver::_newFileName(FONTCHARACTER fName){
     _initStats(false);
-    if (!bFile::FC_isEmpty(fName)){
+    if (!FC_ISEMPTY(fName)){
         bFile::FC_cpy(fileName_, fName);
         char fName[BFILE_MAX_PATH + 1];
         bFile::FC_FC2str(fileName_, fName);
