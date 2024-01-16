@@ -78,7 +78,7 @@ int grids::findByID(int UID){
 //
 //  @index: new position index
 //
-//  @return : index or -1 if list is empty
+//  @return : index or -1 if list is empty or on error
 //
 int grids::setPos(int index){
    if (index>=0 && index < count_){
@@ -202,7 +202,7 @@ bool grids::prevFile(FONTCHARACTER fName){
     return true;
 }
 
-// newFileName() : Generates a unique file name
+// getNewFileName() : Generates a unique file name
 //
 //  @fName : new FQN
 //  @UID : pointer to int who will receive file's unique ID
@@ -365,13 +365,13 @@ void grids::_freeFileName(PFNAME pItem){
 //  @return : true if succesfully added
 //
 bool grids::__vector_add(PFNAME file){
-    // Empty list => add
-    if (!count_){
-        return __vector_append(file);
-    }
-
     if (NULL == file){
         return false;   // Nothing to add !
+    }
+
+    // Empty list => append
+    if (!count_){
+        return __vector_append(file);
     }
 
     if (count_ >= capacity_ && !__vector_resize()){
@@ -454,6 +454,7 @@ bool grids::__vector_resize(){
         capacity_ += VECTOR_INCREMENT;
         files_ = (PFNAME*)realloc(files_, capacity_ * sizeof(PFNAME));
         if (NULL == files_) {
+            capacity_ = count_ = 0;
             return false;
         }
     }

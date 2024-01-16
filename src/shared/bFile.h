@@ -16,7 +16,7 @@
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define VERSION_B_FILE_OBJECT       "0.5.1"
+#define VERSION_B_FILE_OBJECT       "0.5.2"
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>
@@ -130,7 +130,7 @@ public:
     // isOpen() : Is the file already open ?
     //
     //
-    // @return : true if the object is valid
+    // @return : true if the object is open
     //
     bool isOpen();
 
@@ -171,7 +171,8 @@ public:
     //          use NULL otherwise
     // @access : Access mode for the file
     //
-    // @return : file or folder successfully created (and openend for file) ?
+    // @return : file or folder successfully created
+    //          - and openend for file ?
     //
     bool createEx(const FONTCHARACTER fname, int type, 
                     int *size, int access);

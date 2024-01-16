@@ -32,7 +32,6 @@ extern "C" {
 
 #define IDM_QUIT             400
 
-
 // "File" sub-menu bar
 //
 #define IDS_FILE_NEW        "New"

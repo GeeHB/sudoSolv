@@ -94,7 +94,7 @@ public:
     //  @return true if found
     //
     bool inMe(element* elements, uint8_t value);
-    
+
 private:
 
     // _indexes() : Get elements's indexes
@@ -118,4 +118,3 @@ private:
 #endif // __S_SOLVER_TSQUARES_h__
 
 // EOF
-

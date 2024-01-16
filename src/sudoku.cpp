@@ -25,11 +25,6 @@ using namespace std;
 // Construction
 //
 sudoku::sudoku(){
-    
-    //screen_.x = (screen_.w - GRID_SIZE) / 2;
-    screen_.x = GRID_HORZ_OFFSET;
-    screen_.y = (screen_.h - GRID_SIZE) / 2;    // centered vertically
-
     // Initializes tinySquares
     for (uint8_t index=0; index<TINY_COUNT; index++){
         tSquares_[index].setIndex(index);
@@ -50,11 +45,12 @@ void sudoku::setScreenRect(const RECT* rect){
         screen_ = {0, 0, CASIO_WIDTH, CASIO_HEIGHT};
     }
 
+    // Center the grid vertically
     //screen_.x = (screen_.w - GRID_SIZE) / 2;
     screen_.x = GRID_HORZ_OFFSET;
-    screen_.y = (screen_.h - GRID_SIZE) / 2;    // centered vertically
+    screen_.y = (screen_.h - GRID_SIZE) / 2;
 }
-    
+
 // display() : Display the grid and it's content
 //
 //  @update : update screen ?
@@ -123,7 +119,7 @@ uint8_t sudoku::load(const FONTCHARACTER fName){
         return FILE_NO_FILENAME;
     }
 
-    // Load the grid
+    // Load the grid inn a memory buffer
     bFile iFile;
     char buffer[FILE_SIZE+1];
 
@@ -207,7 +203,7 @@ int sudoku::save(const FONTCHARACTER fName){
         return oFile.getLastError();
     }
 
-    // copy the buffer to the file
+    // write the buffer in the file
     bool done(oFile.write(buffer, FILE_SIZE));
     int error(oFile.getLastError());
     oFile.close();
@@ -225,6 +221,9 @@ int sudoku::save(const FONTCHARACTER fName){
 bool sudoku::edit(){
     bool modified(false);
     bool cont(true);
+    bool showSelected(true);
+    bool reDraw(false);
+
     position currentPos(0, false);
     position prevPos(0, false);
 
@@ -237,8 +236,7 @@ bool sudoku::edit(){
     menu.addItem(2, IDM_EDIT_CANCEL, IDS_EDIT_CANCEL);
     menu.update();
 
-    // Initial draw
-    bool showSelected(true), reDraw(false);
+    // Show selected item
     _drawSingleElement(currentPos.row(), currentPos.line(),
                     elements_[currentPos].value(),
                     SEL_BK_COLOUR, SEL_TXT_COLOUR);
@@ -300,6 +298,7 @@ bool sudoku::edit(){
         // Change the current value
         //
         case KEY_CODE_0:
+            // Remove the value
             elements_[currentPos].empty();
             modified = true;
             break;
@@ -380,20 +379,23 @@ bool sudoku::edit(){
             // if sel. changed, erase previously selected element
             if (prevPos != currentPos){
                 _drawSingleElement(prevPos.row(), prevPos.line(),
-                        elements_[prevPos].value(),
-                        BK_COLOUR, TXT_ORIGINAL_COLOUR);
+                    elements_[prevPos].value(),
+                    (prevPos.squareID()%2)?GRID_BK_COLOUR:GRID_BK_COLOUR_DARK,
+                    TXT_ORIGINAL_COLOUR);
             }
 
-            // Hilight the new value (or have it blink)
             if (showSelected){
+                // Hilight the new value (or have it blink)
                 _drawSingleElement(currentPos.row(), currentPos.line(),
-                            elements_[currentPos].value(),
-                            SEL_BK_COLOUR, SEL_TXT_COLOUR);
+                    elements_[currentPos].value(),
+                    SEL_BK_COLOUR, SEL_TXT_COLOUR);
             }
             else{
+                // "unhilite" for blinking effect
                 _drawSingleElement(currentPos.row(), currentPos.line(),
-                            elements_[currentPos].value(),
-                            BK_COLOUR, TXT_ORIGINAL_COLOUR);
+                    elements_[currentPos].value(),
+                    (currentPos.squareID()%2)?GRID_BK_COLOUR:GRID_BK_COLOUR_DARK,
+                    TXT_ORIGINAL_COLOUR);
             }
 
             dupdate();
@@ -407,9 +409,12 @@ bool sudoku::edit(){
     }
 
     // unselect
-    _drawSingleElement(currentPos.row(), currentPos.line(),
-            elements_[currentPos].value(),
-            BK_COLOUR, TXT_ORIGINAL_COLOUR);
+    if (modified){
+        _drawSingleElement(currentPos.row(), currentPos.line(),
+                elements_[currentPos].value(),
+                (currentPos.squareID()%2)?GRID_BK_COLOUR:GRID_BK_COLOUR_DARK,
+                TXT_ORIGINAL_COLOUR);
+    }
 
     return modified;
 }
@@ -480,7 +485,8 @@ bool sudoku::resolve(int* mDuration){
                 // out of range ! (status = POS_END_OF_LIST)
                 status = _findFirstEmptyPos(pos);
 
-                // At the next pos., we'll use (again) the lowest possible value
+                // At the next pos.,
+                // we'll use (again) the lowest possible value
                 candidate = 0;
             }
         }
@@ -583,25 +589,46 @@ bool sudoku::_checkAndSet(position& pos, uint8_t value){
 //
 void sudoku::_drawBackground(){
     // Erase background
-    drect(0, 0, screen_.w - 1, screen_.h - 1, BK_COLOUR);
+    drect(0, 0, screen_.w - 1, screen_.h - 1, SCREEN_BK_COLOUR);
 
-    // Draw thin borders
-    uint16_t posX, posY;
+    // Draw odd tiny rect.
+    uint16_t posX(screen_.x), posY(screen_.y), index(0);
+    uint8_t tSize(3*SQUARE_SIZE);
+    for (uint8_t line(0); line < 3; line++){
+        for (uint8_t co(0); co < 3; co++){
+            drect(posX, posY,
+                posX + tSize - 1, posY + tSize - 1,
+                ((index++)%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR);
+            posX += tSize;
+        }
+
+        posX = screen_.x;
+        posY += tSize;
+    }
+
+
+    // Draw thin borders ...
     uint8_t id;
     for (id = 1; id < LINE_COUNT; id++){
         posX = screen_.x + id * SQUARE_SIZE;
         posY = screen_.y + id * SQUARE_SIZE;
-        dline(posX, screen_.y, posX, screen_.y + GRID_SIZE, BORDER_COLOUR);   // vert
-        dline (screen_.x, posY, screen_.x + GRID_SIZE, posY, BORDER_COLOUR);  // horz
+        dline(posX, screen_.y,
+            posX, screen_.y + GRID_SIZE, BORDER_COLOUR);   // vert
+        dline(screen_.x, posY,
+            screen_.x + GRID_SIZE, posY, BORDER_COLOUR);  // horz
     }
 
-    // and large ext. borders
+    // ... and large borders
     uint16_t lSquare(SQUARE_SIZE * 3), thick(BORDER_THICK - 1);
     for (id = 0; id <= 3; id++){
         posX = screen_.x + id * lSquare;
         posY = screen_.y + id * lSquare;
-        drect(posX, screen_.y, posX + thick, screen_.y + GRID_SIZE, BORDER_COLOUR);   // vert
-        drect(screen_.x, posY, screen_.x + GRID_SIZE, posY + thick, BORDER_COLOUR);   // horz
+        drect(posX, screen_.y,
+            posX + thick, screen_.y + GRID_SIZE,
+            BORDER_COLOUR);   // vert
+        drect(screen_.x, posY,
+            screen_.x + GRID_SIZE, posY + thick,
+            BORDER_COLOUR);   // horz
     }
 }
 
@@ -616,7 +643,8 @@ void sudoku::_drawContent(){
             pElement = &elements_[pos];
             if (!pElement->isEmpty()){
                 _drawSingleElement(row, line,
-                    pElement->value(), BK_COLOUR,
+                    pElement->value(),
+                    (pos.squareID()%2)?GRID_BK_COLOUR:GRID_BK_COLOUR_DARK,
                     (pElement->isOriginal()?TXT_ORIGINAL_COLOUR:
                     (pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR)));
             }
@@ -632,7 +660,8 @@ void sudoku::_drawContent(){
 //  @bkColour : background colour
 //  @txtColour : text colour
 //
-void sudoku::_drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bkColour, int txtColour){
+void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
+                uint8_t value, int bkColour, int txtColour){
     uint16_t x(screen_.x + row * SQUARE_SIZE + BORDER_THICK);
     uint16_t y(screen_.y + line * SQUARE_SIZE + BORDER_THICK);
 
@@ -652,7 +681,8 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line, uint8_t value, int bk
         // Center the text
         uint16_t dx(1 + (INT_SQUARE_SIZE - w) / 2);
         uint16_t dy(1 + (INT_SQUARE_SIZE - h) / 2);
-        dtext_opt(x + dx, y + dy, txtColour, bkColour, DTEXT_LEFT, DTEXT_TOP, sVal, 1);
+        dtext_opt(x + dx, y + dy,
+            txtColour, bkColour, DTEXT_LEFT, DTEXT_TOP, sVal, 1);
     }
 }
 #endif // #ifdef DEST_CASIO_CALC
@@ -760,7 +790,8 @@ uint8_t sudoku::_setObviousValueInLines(position& pos, uint8_t value){
     CPOINT secondPos(tSquares_[secondID].findValue(elements_, value));
 
     // No for both of them or yes for both
-    if ((-1 == firstPos.line && -1 == secondPos.line) || (-1 != firstPos.line && -1 != secondPos.line)){
+    if ((-1 == firstPos.line && -1 == secondPos.line)
+            || (-1 != firstPos.line && -1 != secondPos.line)){
         return 0;
     }
 
@@ -769,11 +800,13 @@ uint8_t sudoku::_setObviousValueInLines(position& pos, uint8_t value){
     uint8_t candidate, candidateLine;
     if (-1 == firstPos.line){
         candidate = firstID;
-        candidateLine = 2 * (tSquares_[firstID].topLine() + 1) - secondPos.line - pos.line() + 1;
+        candidateLine = 2 * (tSquares_[firstID].topLine() + 1)
+                        - secondPos.line - pos.line() + 1;
     }
     else{
         candidate = secondID;
-        candidateLine = 2 * (tSquares_[secondID].topLine() + 1) - firstPos.line - pos.line() + 1;
+        candidateLine = 2 * (tSquares_[secondID].topLine() + 1)
+                        - firstPos.line - pos.line() + 1;
     }
 
     // Try to put the value in the line
@@ -847,7 +880,8 @@ uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
     CPOINT secondPos(tSquares_[secondID].findValue(elements_, value));
 
     // No for both of them or yes for both
-    if ((-1 == firstPos.row && -1 == secondPos.row) || (-1 != firstPos.row && -1 != secondPos.row)){
+    if ((-1 == firstPos.row && -1 == secondPos.row)
+        || (-1 != firstPos.row && -1 != secondPos.row)){
         return 0;
     }
 
@@ -856,11 +890,13 @@ uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
     uint8_t candidate, candidateRow;
     if (firstPos.row == -1){
         candidate = firstID;
-        candidateRow = 2 * (tSquares_[firstID].topRow() + 1) - secondPos.row - pos.row() + 1;
+        candidateRow = 2 * (tSquares_[firstID].topRow() + 1)
+                    - secondPos.row - pos.row() + 1;
     }
     else{
         candidate = secondID;
-        candidateRow = 2 * (tSquares_[secondID].topRow() + 1) - firstPos.row - pos.row() + 1;
+        candidateRow = 2 * (tSquares_[secondID].topRow() + 1)
+                    - firstPos.row - pos.row() + 1;
     }
 
     // Try to put the value ...
@@ -870,7 +906,8 @@ uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
     candidatePos.moveTo(tSquares_[candidate].topLine(), candidateRow);
 
     for (uint8_t line = 0; line < TINY_LINE_COUNT; line++){
-            if  (elements_[candidatePos].isEmpty() && _checkValue(candidatePos, value)){
+            if  (elements_[candidatePos].isEmpty()
+                    && _checkValue(candidatePos, value)){
                 if (found){
                     // Already a candiate
                     return 0;
@@ -930,7 +967,8 @@ uint8_t sudoku::_previousPos(position& current){
 
     // Don't touch "Original" nor "Obvious" values
     current -= 1;
-    while (POS_VALID == current.status() && !elements_[current].isChangeable()){
+    while (POS_VALID == current.status()
+            && !elements_[current].isChangeable()){
         current -= 1;
     }
 

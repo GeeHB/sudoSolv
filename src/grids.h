@@ -53,7 +53,7 @@ public:
     //
     //  @index: new position index
     //
-    //  @return : index or -1 if list is empty
+    //  @return : index or -1 if list is empty or on error
     //
     int setPos(int index);
 
@@ -95,7 +95,7 @@ public:
     //
     bool prevFile(FONTCHARACTER fName);
 
-    // newFileName() : Generates a unique file name
+    // getNewFileName() : Generates a unique file name
     //
     //  @fName : new FQN
     //  @UID : pointer to int who will receive file's unique ID
@@ -128,7 +128,7 @@ private:
     //
     bool _addFile(const FONTCHARACTER fileName);
 
-    // Informations about a file
+    // Informations about a file in the list
     //
     typedef struct _FNAME{
         FONTCHARACTER   fileName;   // FQN

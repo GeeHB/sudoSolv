@@ -2,7 +2,7 @@
 //--
 //--    element.cpp
 //--
-//--		Implementation of element object : A single sudoku element
+//--        Implementation of element object : A single sudoku element
 //--
 //----------------------------------------------------------------------
 

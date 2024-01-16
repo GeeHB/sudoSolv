@@ -2,7 +2,7 @@
 //--
 //--    element.h
 //--
-//--		Definition of element object : A single sudoku element
+//--        Definition of element object : A single sudoku element
 //--
 //----------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ public:
     //  @ status : new status
     //  @editMode : true if the grid is currently in edit mode
     //
-    void setValue(uint8_t value, uint8_t status = STATUS_EMPTY, 
+    void setValue(uint8_t value, uint8_t status = STATUS_EMPTY,
                     bool editMode = false);
 
     // Access

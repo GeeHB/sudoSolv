@@ -25,7 +25,7 @@ int main(void){
     gint_setrestart(1);
     //gint_osmenu();
 
-	return 1;
+    return 1;
 }
-  
+
 // EOF

@@ -278,10 +278,7 @@ void sudoSolver::_onEdit(){
     if ((modified = game_.edit())){
         _displayStats();
     }
-    else{
-        game_.revert();     // revert on cancel
-    }
-
+    
     menu_.selectByIndex(-1);
     _updateFileItemsState(modified);
 }
