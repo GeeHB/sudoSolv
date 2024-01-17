@@ -23,7 +23,7 @@ Le menu *File* permet de gérer les grilles de sodoku : création d'une nouvelle
 
 Les grilles sont toutes enregistrées et chargées à partir du dossier `fls0\grids`. Si le dossier n'existe pas, il sera crée au lancement de l'application.
 
-Le sous-dossier `grids` dans le dépôts propose quelques grilles.
+Le sous-dossier `grids` dans le dépôt propose quelques grilles.
 
 Dans ce dossier, chaque grille est enregistrée dans un fichier au format texte dont le nom est automatiquement incrémenté.
 
@@ -38,7 +38,7 @@ Le menu propose les options suivantes:
 ![Browse](assets/browse.png)
 
 
-### Modification d'un grille
+### Modification d'une grille
 Le menu *Edit* permet de modifier une grille existante ou de générer une nouvelle grille à partir d'une matrice vierge.
 
 Les touches 
