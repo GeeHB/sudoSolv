@@ -380,7 +380,7 @@ bool sudoku::edit(){
             if (prevPos != currentPos){
                 _drawSingleElement(prevPos.row(), prevPos.line(),
                     elements_[prevPos].value(),
-                    (prevPos.squareID()%2)?GRID_BK_COLOUR:GRID_BK_COLOUR_DARK,
+                    (prevPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
                     TXT_ORIGINAL_COLOUR);
             }
 
@@ -394,7 +394,7 @@ bool sudoku::edit(){
                 // "unhilite" for blinking effect
                 _drawSingleElement(currentPos.row(), currentPos.line(),
                     elements_[currentPos].value(),
-                    (currentPos.squareID()%2)?GRID_BK_COLOUR:GRID_BK_COLOUR_DARK,
+                    (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
                     TXT_ORIGINAL_COLOUR);
             }
 
@@ -408,13 +408,11 @@ bool sudoku::edit(){
         timer_stop(timerID);    // stop the timer
     }
 
-    // unselect
-    if (modified){
-        _drawSingleElement(currentPos.row(), currentPos.line(),
-                elements_[currentPos].value(),
-                (currentPos.squareID()%2)?GRID_BK_COLOUR:GRID_BK_COLOUR_DARK,
-                TXT_ORIGINAL_COLOUR);
-    }
+    // Draw in valid state (or erase)
+    _drawSingleElement(currentPos.row(), currentPos.line(),
+            elements_[currentPos].value(),
+            (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
+            TXT_ORIGINAL_COLOUR);
 
     return modified;
 }
@@ -644,7 +642,7 @@ void sudoku::_drawContent(){
             if (!pElement->isEmpty()){
                 _drawSingleElement(row, line,
                     pElement->value(),
-                    (pos.squareID()%2)?GRID_BK_COLOUR:GRID_BK_COLOUR_DARK,
+                    (pos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
                     (pElement->isOriginal()?TXT_ORIGINAL_COLOUR:
                     (pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR)));
             }

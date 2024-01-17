@@ -12,7 +12,7 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        "0.3.7"
+#define _GEEHB_MENU_VER_        "0.3.8"
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
@@ -295,7 +295,7 @@ public:
         return (MENUBAR*)(&current_);
     }
 
-    // handleKeyboard() : Handle the keyboard events
+    // handleKeyboard() : Handle keyboard events
     //
     // @return : MENUACTION struct containing info
     //          about item selected b user

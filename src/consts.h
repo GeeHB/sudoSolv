@@ -16,8 +16,6 @@
 #include <gint/keyboard.h>
 #else
 #include <iostream>
-#include <cstdint>
-//using namespace std;
 #endif // DEST_CASIO_CALC
 
 #include <cstring>
@@ -29,7 +27,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolver"
-#define APP_VERSION  "0.1.16"
+#define APP_VERSION  "0.1.18"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -89,7 +87,7 @@ extern "C" {
 #define BORDER_COLOUR           C_RGB(10, 19, 23)
 #define SCREEN_BK_COLOUR        C_RGB(28, 28, 30)
 #define GRID_BK_COLOUR          C_RGB(24, 24, 26)
-#define GRID_BK_COLOUR_DARK     C_RGB(16, 16, 18)
+#define GRID_BK_COLOUR_DARK     C_RGB(21, 21, 22)
 #define TXT_COLOUR              C_RGB(8, 8, 8)
 #define TXT_ORIGINAL_COLOUR     C_RGB(30, 15, 14)
 #define TXT_OBVIOUS_COLOUR      BORDER_COLOUR
