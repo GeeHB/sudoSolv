@@ -18,25 +18,25 @@ extern "C" {
 class scrCapture{
 public:
     // Construction
-    scrCapture(){
-        set_ = false;
-    }
+    scrCapture();
 
     // Destruction
-    ~scrCapture(){
-        remove();
-    }
+    ~scrCapture();
 
     // Already installed ?
-    bool isSet(){
-        return set_;
-    }
+    bool isSet();
 
     // Install
     bool install();
+    bool set(){
+        return install();
+    }
 
     // Remove
     void remove();
+    void unset(){
+        return remove();
+    }
 
 private:
     // Members

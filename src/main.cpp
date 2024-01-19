@@ -22,7 +22,7 @@ int main(void){
     // Enter app. main loop
     sSolver.run();
 
-    gint_setrestart(1);
+    gint_setrestart(0);
     //gint_osmenu();
 
     return 1;

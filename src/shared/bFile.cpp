@@ -116,7 +116,7 @@ int bFile::size(){
 //
 // @return : file opened ?
 //
-bool bFile::open(const FONTCHARACTER filename, int access){
+bool bFile::open(FONTCHARACTER const filename, int access){
     if (access && !isOpen()){
 #ifdef DEST_CASIO_CALC
         fd_ = gint_world_switch(GINT_CALL(BFile_Open, filename, access));
@@ -209,7 +209,7 @@ bool bFile::create(const FONTCHARACTER fname, int type, int *size){
 // @return : file or folder successfully created
 //          - and openend for file ?
 //
-bool bFile::createEx(const FONTCHARACTER fname, int type, 
+bool bFile::createEx(const FONTCHARACTER fname, int type,
                     int *size, int access){
     if (BFile_Folder == type){
         return create(fname, BFile_Folder, size);
@@ -343,7 +343,7 @@ bool bFile::rename(const FONTCHARACTER oldPath, const FONTCHARACTER newPath){
                     if (buffer &&  read(buffer, size, 0)){
                         // Create a new file with oldPath content
                         bFile newFile();
-                        if (newFile.createEx(newPath, BFile_File, 
+                        if (newFile.createEx(newPath, BFile_File,
                                 &size, BFile_WriteOnly)){
                             newFile.write(buffer, size);
                             newFile.close();

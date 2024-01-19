@@ -81,7 +81,7 @@ struct BFile_FileInfo
 
 #endif // #ifndef DEST_CASIO_CALC
 
-// Max lengthof a path  in "FONTCHARACTER" 
+// Max lengthof a path  in "FONTCHARACTER"
 //
 #define BFILE_MAX_PATH                  127
 
@@ -147,7 +147,7 @@ public:
     //
     // @return : file opened ?
     //
-    bool open(const FONTCHARACTER filename, int access);
+    bool open(FONTCHARACTER const filename, int access);
 
     // create() : Create a file or a folder
     //
@@ -174,7 +174,7 @@ public:
     // @return : file or folder successfully created
     //          - and openend for file ?
     //
-    bool createEx(const FONTCHARACTER fname, int type, 
+    bool createEx(const FONTCHARACTER fname, int type,
                     int *size, int access);
 
     // write() : Write data in the current file
@@ -203,7 +203,7 @@ public:
     //
     //  @return : file successfully renamed ?
     //
-    bool rename(const FONTCHARACTER oldPath, 
+    bool rename(const FONTCHARACTER oldPath,
                 const FONTCHARACTER newPath);
 
     // remove() : Remove a file
@@ -242,7 +242,7 @@ public:
     //
     //  @return : true if ok
     //
-    bool findNext(SEARCHHANDLE sHandle, FONTCHARACTER foundFile, 
+    bool findNext(SEARCHHANDLE sHandle, FONTCHARACTER foundFile,
                 struct BFile_FileInfo *fileInfo);
 
     // findClose() :  Close a search handle
