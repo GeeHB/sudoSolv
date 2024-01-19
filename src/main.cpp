@@ -23,7 +23,7 @@ int main(void){
     sSolver.run();
 
     gint_setrestart(0);
-    //gint_osmenu();
+    gint_osmenu();
 
     return 1;
 }

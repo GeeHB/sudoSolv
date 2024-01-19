@@ -357,10 +357,10 @@ bool bFile::rename(const FONTCHARACTER oldPath, const FONTCHARACTER newPath){
                 close();
                 if (done){
                     remove(oldPath);
-                    error_ = BFILE_ERROR_INVALID_PARAMETERS;
+                    error_ = BFILE_NO_ERROR;
                 }
                 else{
-                    error_ = BFILE_NO_ERROR;
+                    error_ = BFILE_ERROR_INVALID_PARAMETERS;
                 }
 
                 return done;

@@ -388,7 +388,7 @@ void sudoSolver::_updateFileItemsState( bool modified){
     if (count){
         bPrev = (pos>0);    // Not the first in list ?
         bNext = (pos < (count - 1)); // Not the last in list
-        bDelete = FC_ISEMPTY(fileName_);
+        bDelete = !FC_ISEMPTY(fileName_);
     }
 
     menu_.activate(IDM_FILE_PREV, SEARCH_BY_ID, bPrev);
