@@ -40,15 +40,10 @@ public:
     // Destruction
     ~position(){}
 
-    // Get sthe status
+    // Get the status
     //
     uint8_t status(){
         return status_;
-    }
-
-    position& operator=(const position & other){
-        set(other);
-        return *this;
     }
 
     // set() : Copy a position
@@ -57,6 +52,12 @@ public:
     //
     void set(const position& other);
 
+    position& operator=(const position & other){
+        set(other);
+        return *this;
+    }
+
+    // Comparison
     bool operator!=(const position& other){
         return (index_ != other.index_);
     }
@@ -66,10 +67,6 @@ public:
     //  @line, @row : new absolute position
     //
     void moveTo(uint8_t line, uint8_t  row);
-
-
-    // Index (ie. absolute value)
-    //
 
     // implicit conversion
     operator uint8_t() const{

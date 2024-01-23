@@ -14,7 +14,7 @@
 //
 uint8_t gTinySquaresIndexes[] = {0, 3, 6, 27, 30, 33, 54, 57, 60};
 
-// copyy() : Copy a tinySquare
+// copy() : Copy a tinySquare
 //
 //  other : tinySquate to copy
 //

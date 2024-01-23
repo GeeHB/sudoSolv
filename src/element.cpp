@@ -8,6 +8,14 @@
 
 #include "element.h"
 
+// Construction
+//
+element::element(int value){
+    status_ = (EMPTY_VALUE == value)?
+                    STATUS_EMPTY:STATUS_ORIGINAL | STATUS_SET;
+    value_ = value;
+}
+
 // setValue() : Set or modify a value
 //
 //  @value : new value for the object
@@ -35,6 +43,15 @@ void element::setValue(uint8_t value, uint8_t status, bool editMode){
         status_ = (value <= 0 || STATUS_EMPTY == status )?
                     STATUS_EMPTY : STATUS_SET | STATUS_ORIGINAL;
     }
+}
+
+ // empty() : Empty the element's value
+//  @return : previous value
+uint8_t element::empty(){
+    status_ = STATUS_EMPTY;
+    uint8_t value(value_);
+    value_ = EMPTY_VALUE;
+    return value;
 }
 
 // EOF

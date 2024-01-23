@@ -32,11 +32,7 @@ class element{
 public:
 
     // Construction
-    element(int value = EMPTY_VALUE){
-        status_ = (EMPTY_VALUE == value)?
-                        STATUS_EMPTY:STATUS_ORIGINAL | STATUS_SET;
-        value_ = value;
-    }
+    element(int value = EMPTY_VALUE);
 
     // Destrcution
     ~element(){}
@@ -58,12 +54,7 @@ public:
 
     // empty() : Empty the element's value
     //  @return : previous value
-    uint8_t empty(){
-        status_ = STATUS_EMPTY;
-        uint8_t value(value_);
-        value_ = EMPTY_VALUE;
-        return value;
-    }
+    uint8_t empty();
 
     // Element's status
     //
