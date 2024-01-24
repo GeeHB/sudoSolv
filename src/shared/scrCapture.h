@@ -38,9 +38,27 @@ public:
         return remove();
     }
 
+    //
+    // Handle activity
+    //
+
+    // pause() : pause the capture
+    //
+    // @return : paused ?
+    //
+    bool pause();
+
+    // resume() : resume the capture
+    //
+    // @return : paused ?
+    //
+    bool resume();
+
+
 private:
     // Members
     bool    set_;   // Is the capture on ?
+    bool    paused_;
 };
 
 #ifdef __cplusplus

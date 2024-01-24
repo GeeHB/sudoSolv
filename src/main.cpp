@@ -8,6 +8,7 @@
 //--
 //----------------------------------------------------------------------
 
+#ifdef DEST_CASIO_CALC
 #include "sudoSolver.h"
 
 // APP. entry-point
@@ -27,5 +28,5 @@ int main(void){
 
     return 1;
 }
-
+#endif // #ifdef DEST_CASIO_CALC
 // EOF

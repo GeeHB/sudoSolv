@@ -6,6 +6,8 @@
 //--
 //----------------------------------------------------------------------
 
+#ifdef DEST_CASIO_CALC
+
 #include "sudoSolver.h"
 
 extern bopti_image_t g_homeScreen;  // Background image
@@ -15,16 +17,6 @@ extern bopti_image_t g_homeScreen;  // Background image
 sudoSolver::sudoSolver(){
     // Initialize members
     _initStats();
-}
-
-// Destruction
-//
-sudoSolver::~sudoSolver(){
-#ifndef NO_CAPTURE
-    if (capture_.isSet()){
-       capture_.remove();  // stop "capture" on exit
-    }
-#endif // #ifndef NO_CAPTURE
 }
 
 // Create app. menu bar
@@ -78,8 +70,12 @@ void sudoSolver::showHomeScreen(){
 // browseGridFolder() : Browse the folder containing grid files
 //
 void sudoSolver::browseGridFolder(){
-    // List of grid files
-    if (files_.browse() > 0){
+
+    capture_.pause();
+    int count = files_.browse();    // Update folder content
+    capture_.resume();
+
+    if (count > 0){
         _updateFileItemsState();
     }
 }
@@ -170,16 +166,11 @@ void sudoSolver::run(void)
                         break;
 
                     // Activate or deactivate screen capture
-#ifndef NO_CAPTURE
                     case KEY_CODE_CAPTURE:
-                        //dtext(0,0,C_BLACK, "Capture");
-                        //dupdate();
-                        //if (MOD_SHIFT == (action.modifier & MOD_SHIFT)){
-                        _onCapture();
-                        dupdate();
-                        //}
+                        if (MOD_SHIFT == (action.modifier & MOD_SHIFT)){
+                            _onCapture();
+                        }
                         break;
-#endif // #ifndef NO_CAPTURE
 
                     default:
                         break;
@@ -244,7 +235,10 @@ void sudoSolver::_onFileSave(){
                 _newFileName(fName);
 
                 // Update internal list
+                capture_.pause();
                 files_.browse();
+                capture_.resume();
+
                 files_.setPos(files_.findByID(uid)); // select the file
             }
 
@@ -260,6 +254,9 @@ void sudoSolver::_onFileSave(){
 // _onFileDelete() : Delete current file (if any opened)
 //
 void sudoSolver::_onFileDelete(){
+    capture_.pause();
+
+    // Try to remove the file
     if (files_.deleteFile()){
         // Update the list
         if (files_.browse()){
@@ -268,11 +265,16 @@ void sudoSolver::_onFileDelete(){
             if (files_.currentFileName(fileName)){
                 _loadFile(fileName);
             }
+            else{
+                FC_EMPTY(fileName_);    // There is no more open file
+            }
         }
         else{
             _onFileNew();
         }
     }
+
+    capture_.resume();
 }
 
 // _onEdit() : Edit current grid
@@ -323,7 +325,6 @@ void sudoSolver::_onRevert(){
 
 // _onCapture() : Activate or deactivate capture mode
 //
-#ifndef NO_CAPTURE
 void sudoSolver::_onCapture(){
     if (!capture_.isSet()){
         capture_.install();
@@ -332,7 +333,6 @@ void sudoSolver::_onCapture(){
         capture_.remove();
     }
 }
-#endif // #ifndef NO_CAPTURE
 
 // _loadFile() : Load and display a grid
 //
@@ -348,7 +348,11 @@ bool sudoSolver::_loadFile(FONTCHARACTER fName){
     int error(FILE_NO_ERROR);
 
     // Update grid on screen
-    if (FILE_NO_ERROR == (error = game_.load(fName))){
+    //
+    capture_.pause();   // pause if installed
+    error = game_.load(fName);
+    capture_.resume();
+    if (FILE_NO_ERROR == error){
         game_.display(false);
         _newFileName(fName);
         _updateFileItemsState();
@@ -401,7 +405,7 @@ void sudoSolver::_updateFileItemsState( bool modified){
 
 // _newFileName() : Notifies FQN has changed
 //
-///  @fName : New FQN of grid
+//  @fName : New FQN of grid
 //
 void sudoSolver::_newFileName(FONTCHARACTER fName){
     _initStats(false);
@@ -448,5 +452,7 @@ void sudoSolver::_displayStats(){
 
     dupdate();
 }
+
+#endif // #ifdef DEST_CASIO_CALC
 
 // EOF
