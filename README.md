@@ -15,8 +15,8 @@ L'application est organisée autour d'une barre de menu horizontale; la navigati
 
 | Dépôt &nbsp;| https://gitea.planet-casio.com/Jhb/sudoSolv |
 |----- |-------------------------------------|
-| **Date** | 17 janvier 2024 |
-| **Version stable** | **0\.1.18** - branche `master` |
+| **Date** | 25 janvier 2024 |
+| **Version stable** | **0\.2.1** - branche `master` |
 
 ### Gestion des fichiers
 Le menu *File* permet de gérer les grilles de sodoku : création d'une nouvelle grillen navigation dans le dossier, sauvegarde, suppression.

@@ -6,7 +6,7 @@
 # Outputs
 /build-cg
 /build-cg-push
-/*.g3a
+/*.g3a*
 *.o
 /build
 
