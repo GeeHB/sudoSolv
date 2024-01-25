@@ -75,7 +75,7 @@ void sudoSolver::browseGridFolder(){
     int count = files_.browse();    // Update folder content
     capture_.resume();
 
-    if (count > 0){
+    if (count >= 0){
         _updateFileItemsState();
     }
 }
@@ -257,24 +257,25 @@ void sudoSolver::_onFileDelete(){
     capture_.pause();
 
     // Try to remove the file
+    bool done(false);
     if (files_.deleteFile()){
         // Update the list
         if (files_.browse()){
             files_.setPos(0);
             uint16_t fileName[BFILE_MAX_PATH + 1];
             if (files_.currentFileName(fileName)){
-                _loadFile(fileName);
+                done = _loadFile(fileName);
             }
-            else{
-                FC_EMPTY(fileName_);    // There is no more open file
-            }
-        }
-        else{
-            _onFileNew();
         }
     }
 
     capture_.resume();
+
+    // An error ?
+    if (!done){
+        FC_EMPTY(fileName_);    // There is no more open file
+        _onFileNew();
+    }
 }
 
 // _onEdit() : Edit current grid

@@ -47,7 +47,7 @@ grids::~grids(){
 //  @return : true if valid
 //
 bool grids::currentFileName(FONTCHARACTER fName){
-    if (-1 == index_ || 0 == count_ || FC_ISEMPTY(fName)){
+    if (-1 == index_ || 0 == count_ || NULL == fName){
         return false;
     }
 
