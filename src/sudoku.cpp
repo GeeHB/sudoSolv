@@ -216,19 +216,30 @@ int sudoku::save(const FONTCHARACTER fName){
 
 // edit() : Edit / modify the current grid
 //
+//  @mode : Edition mode,
+//          can be SUDOKU_MODE_CREATION or SUDOKU_MODE_GAME
+//
 //  @return : true if grid has been modified or false if left unchanged
 //
-bool sudoku::edit(){
+bool sudoku::edit(uint8_t mode){
+
+    if (mode != SUDOKU_MODE_CREATION || mode != SUDOKU_MODE_GAME){
+        return false;   // Invalid edition mode
+    }
+
     bool modified(false);
     bool cont(true);
     bool showSelected(true);
     bool reDraw(false);
+    int eStatus;
 
     position currentPos(0, false);
     position prevPos(0, false);
 
-    revert();   // Remove obious and found values (if any)
-    display();
+    if (SUDOKU_MODE_CREATION == mode){
+        revert();   // Remove obious and found values (if any)
+        display();
+    }
 
     menuBar menu;       // A simple menu bar
     MENUACTION action;
@@ -239,8 +250,17 @@ bool sudoku::edit(){
     // Show selected item
     _drawSingleElement(currentPos.row(), currentPos.line(),
                     elements_[currentPos].value(),
-                    SEL_BK_COLOUR, SEL_TXT_COLOUR);
+                    SEL_BK_COLOUR,
+                    _elementTxtColour(currentPos, mode, false));
     dupdate();
+
+    // # elements in the grid
+    uint8_t elements(0);
+    for (uint8_t index(INDEX_MIN); index<=INDEX_MAX ; index++){
+        if (!elements_[index].isEmpty()){
+            elements++;
+        }
+    }
 
     // Timer for blinking effect
     int tickCount(BLINK_TICKCOUNT);
@@ -299,61 +319,100 @@ bool sudoku::edit(){
         //
         case KEY_CODE_0:
             // Remove the value
-            elements_[currentPos].empty();
-            modified = true;
+            if (elements_[currentPos].empty()){
+                elements--; // one less element
+                 modified = true;
+            }
+
             break;
 
         case KEY_CODE_1:
-            if (_checkAndSet(currentPos, 1)){
+            if ((eStatus = _checkAndSet(currentPos, 1, mode)) >= 0){
                 modified = true;
+
+                if (eStatus){
+                    elements++;
+                }
             }
             break;
 
         case KEY_CODE_2:
-            if (_checkAndSet(currentPos, 2)){
+            if ((eStatus = _checkAndSet(currentPos, 2, mode)) >= 0){
                 modified = true;
+
+                if (eStatus){
+                    elements++;
+                }
             }
             break;
 
         case KEY_CODE_3:
-            if (_checkAndSet(currentPos, 3)){
+            if ((eStatus = _checkAndSet(currentPos, 3, mode)) >= 0){
                 modified = true;
+
+                if (eStatus){
+                    elements++;
+                }
             }
             break;
 
         case KEY_CODE_4:
-            if (_checkAndSet(currentPos, 4)){
+            if ((eStatus = _checkAndSet(currentPos, 4, mode)) >= 0){
                 modified = true;
+
+                if (eStatus){
+                    elements++;
+                }
             }
             break;
 
         case KEY_CODE_5:
-            if (_checkAndSet(currentPos, 5)){
+            if ((eStatus = _checkAndSet(currentPos, 5, mode)) >= 0){
                 modified = true;
+
+                if (eStatus){
+                    elements++;
+                }
             }
             break;
 
         case KEY_CODE_6:
-            if (_checkAndSet(currentPos, 6)){
+            if ((eStatus = _checkAndSet(currentPos, 6, mode)) >= 0){
                 modified = true;
+
+                if (eStatus){
+                    elements++;
+                }
             }
             break;
 
         case KEY_CODE_7:
-            if (_checkAndSet(currentPos, 7)){
+            if ((eStatus = _checkAndSet(currentPos, 7, mode)) >= 0){
                 modified = true;
+
+                if (eStatus){
+                    elements++;
+                }
             }
             break;
 
         case KEY_CODE_8:
-            if (_checkAndSet(currentPos, 8)){
+            if ((eStatus = _checkAndSet(currentPos, 8, mode)) >= 0){
                 modified = true;
+
+                if (eStatus){
+                    elements++;
+                }
             }
             break;
 
         case KEY_CODE_9:
-            if (_checkAndSet(currentPos, 9)){
+            if ((eStatus = _checkAndSet(currentPos, 9, mode)) >= 0){
                 modified = true;
+
+                if (eStatus){
+                    elements++;
+                }
             }
             break;
 
@@ -381,27 +440,37 @@ bool sudoku::edit(){
                 _drawSingleElement(prevPos.row(), prevPos.line(),
                     elements_[prevPos].value(),
                     (prevPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
-                    TXT_ORIGINAL_COLOUR);
+                    _elementTxtColour(prevPos, mode, false));
             }
 
             if (showSelected){
                 // Hilight the new value (or have it blink)
                 _drawSingleElement(currentPos.row(), currentPos.line(),
                     elements_[currentPos].value(),
-                    SEL_BK_COLOUR, SEL_TXT_COLOUR);
+                    SEL_BK_COLOUR,
+                    _elementTxtColour(currentPos, mode, true));
             }
             else{
                 // "unhilite" for blinking effect
                 _drawSingleElement(currentPos.row(), currentPos.line(),
                     elements_[currentPos].value(),
                     (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
-                    TXT_ORIGINAL_COLOUR);
+                    _elementTxtColour(currentPos, mode, false));
             }
 
             dupdate();
             prevPos = currentPos;
             reDraw = false;
         }
+
+        if (modified){
+            dprint_opt(CASIO_WIDTH - 100, CASIO_HEIGHT - 10,
+                C_BLACK, SCREEN_BK_COLOUR,
+                DTEXT_LEFT, DTEXT_TOP,
+                " Elements : %d   ", elements);
+            dupdate();
+        }
+        
     } // while (cont)
 
     if (timerID >= 0){
@@ -412,7 +481,7 @@ bool sudoku::edit(){
     _drawSingleElement(currentPos.row(), currentPos.line(),
             elements_[currentPos].value(),
             (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
-            TXT_ORIGINAL_COLOUR);
+            _elementTxtColour(currentPos, mode, false));
 
     return modified;
 }
@@ -560,22 +629,35 @@ bool sudoku::_checkValue(position& pos, uint8_t value){
             _checkTinySquare(pos, value));
 }
 
- // _checkAndSet() : Try to  put the value at the current position
+// _checkAndSet() : Try to put the value at the given position
 //
 //  @pos : position
 //  @value : value to put
+//  @mode : edition mode
 //
-//  @return : true if value is set
+//  @return : -1 if can't be changed, 0 if changed, 1 if new value set
 //
-bool sudoku::_checkAndSet(position& pos, uint8_t value){
-    if (_checkLine(pos, value) && _checkRow(pos, value) &&
-        _checkTinySquare(pos, value)){
-        // set
-        elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
-        return true;
+int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
+    uint8_t status(elements_[pos].status());
+    if (SUDOKU_MODE_GAME == mode){
+        // Check wether element's value can be changed
+        if (STATUS_ORIGINAL == status){
+            return -1;
+        }
     }
 
-    return false;
+    // Check value at the given pos.
+    if (_checkLine(pos, value) && _checkRow(pos, value) &&
+        _checkTinySquare(pos, value)){
+
+        uint8_t oValue(elements_[pos].value());  // current val
+            
+        // set new value
+        elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
+        return (value == oValue?0:1);
+    }
+
+    return -1;  // Not set
 }
 
 //
@@ -985,6 +1067,41 @@ int sudoku::__callbackTick(volatile int *pTick){
     *pTick = 1;
     return TIMER_CONTINUE;
 }
+
+// _elementTxtColour() : Retreive element text colour for edition
+//
+//  @pos : Element's position
+//  @editMode : Edition mode (game or creation)
+//  @selected :
+//
+int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
+    if (SUDOKU_MODE_CREATION == editMode){
+        return (TXT_ORIGINAL_COLOUR);   // always use "original" colour
+    }
+
+    int colour(TXT_COLOUR);
+    switch (elements_[pos].status()){
+
+        case STATUS_SET:
+            colour = (selected?SEL_TXT_GAME_COLOUR:TXT_COLOUR);
+            break;
+
+        case STATUS_OBVIOUS:
+            colour = TXT_OBVIOUS_COLOUR;
+            break;
+
+        case STATUS_ORIGINAL:
+            colour = TXT_ORIGINAL_COLOUR;
+            break;
+
+        case STATUS_EMPTY:
+        default:
+            break;    // Should be useless
+    }
+
+    return colour;
+}
+
 #endif // #ifdef DEST_CASIO_CALC
 
 // EOF

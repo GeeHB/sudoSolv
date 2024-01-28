@@ -27,7 +27,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolver"
-#define APP_VERSION  "0.2.1"
+#define APP_VERSION  "0.2.2"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -92,8 +92,8 @@ extern "C" {
 #define TXT_ORIGINAL_COLOUR     C_RGB(30, 15, 14)
 #define TXT_OBVIOUS_COLOUR      BORDER_COLOUR
 #define SEL_BK_COLOUR           C_RGB(6, 6, 31)
-//#define SEL_TXT_COLOUR          C_WHITE
-#define SEL_TXT_COLOUR          TXT_ORIGINAL_COLOUR
+#define SEL_TXT_GAME_COLOUR     C_WHITE     // in SUDOKU_MODE_GAME
+//#define SEL_TXT_COLOUR          TXT_ORIGINAL_COLOUR
 #endif // #ifdef DEST_CASIO_CALC
 
 // Keyboard

@@ -58,6 +58,10 @@ public:
 
     // Element's status
     //
+    uint8_t status(){
+        return status_;
+    }
+
     bool isEmpty(){
         return (STATUS_EMPTY == status_);
     }

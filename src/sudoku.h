@@ -21,7 +21,7 @@
 // Error codes
 //
 #define FILE_NO_ERROR           BFILE_NO_ERROR
-#define FILE_INVALID_FILENAME   (BFILE_LAST_ERROR_CODE + 1)	// File doesn't exist
+#define FILE_INVALID_FILENAME   (BFILE_LAST_ERROR_CODE + 1) // File doesn't exist
 #define FILE_INVALID_FILESIZE   (BFILE_LAST_ERROR_CODE + 2)
 #define FILE_NO_FILENAME        (BFILE_LAST_ERROR_CODE + 3)
 #define FILE_IO_ERROR           (BFILE_LAST_ERROR_CODE + 4)
@@ -29,6 +29,12 @@
 #define FILE_INVALID_FORMAT     (BFILE_LAST_ERROR_CODE + 12)
 // The value can't be set at this position
 #define FILE_VALUE_ERROR        (BFILE_LAST_ERROR_CODE + 13)
+
+//
+// Edition modes
+//
+#define SUDOKU_MODE_CREATION    0       // Creation of a grid
+#define SUDOKU_MODE_GAME        1       // Try to solve the grid
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,7 +48,7 @@ public:
     // Construction & destruction
     sudoku();
     ~sudoku(){}
-    
+
     // setScreenRect() : Screen dimensions
     //
     //  rect : pointer to rect containing new dimensions
@@ -88,9 +94,12 @@ public:
 #ifdef DEST_CASIO_CALC
     // edit() : Edit / modify the current grid
     //
+    //  @mode : Edition mode,
+    //          can be SUDOKU_MODE_CREATION or SUDOKU_MODE_GAME
+    //
     //  @return : true if grid has been modified or false if unchanged
     //
-    bool edit();
+    bool edit(uint8_t mode);
 #endif // #ifdef DEST_CASIO_CALC
 
     // findObviousValues() : Find all the obvious values
@@ -114,7 +123,7 @@ private:
     // Checks
     //
 
-    // _checkValue() : Can we put the value at the current position ?
+    // _checkValue() : Can we put the value at the given position ?
     //
     //  @pos : position
     //  @value : Check the given value at this 'position'
@@ -152,14 +161,15 @@ private:
         return (false == tSquares_[pos.squareID()].inMe(elements_, value));
     }
 
-    // _checkAndSet() : Try to  put the value at the current position
+    // _checkAndSet() : Try to  put the value at the given position
     //
     //  @pos : position
     //  @value : value to put
+    //  @mode : edition mode
     //
-    //  @return : true if value is set
+    //  @return : -1 if can't be changed, 0 if changed, 1 if new value set
     //
-    bool _checkAndSet(position& pos, uint8_t value);
+    int _checkAndSet(position& pos, uint8_t value, uint8_t mode);
 
     //
     // Drawings
@@ -258,10 +268,18 @@ private:
     static int __callbackTick(volatile int *pTick);
 #endif // #ifdef DEST_CASIO_CALC
 
+    // _elementTxtColour() : Retreive element text colour for edition
+    //
+    //  @pos : Element's position
+    //  @editMode : Edition mode (game or creation)
+    //  @selected :
+    //
+    int _elementTxtColour(position& pos, uint8_t editMode, bool selected);
+
     // Members
 private:
-    element elements_[LINE_COUNT * ROW_COUNT];	// grid as a one dim. table
-    tinySquare  tSquares_[TINY_COUNT];	// Elements IDs in tinySquares
+    element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one dim. table
+    tinySquare  tSquares_[TINY_COUNT];  // Elements IDs in tinySquares
 
     // Position & dims of screen
     // {x Grid, yGrid, "screen" width , "screen" height}

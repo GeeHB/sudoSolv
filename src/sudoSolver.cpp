@@ -35,6 +35,7 @@ void sudoSolver::createMenu(){
 
     // "Solve" sub menu
     menuBar sMenu;
+    sMenu.appendItem(IDM_SOLVE_MANUAL, IDS_SOLVE_MANUAL);
     sMenu.appendItem(IDM_SOLVE_OBVIOUS, IDS_SOLVE_OBVIOUS);
     sMenu.appendItem(IDM_SOLVE_RESOLVE, IDS_SOLVE_RESOLVE);
     sMenu.addItem(MENU_POS_RIGHT - 1, IDM_SOLVE_REVERT, IDS_SOLVE_REVERT);
@@ -283,7 +284,7 @@ void sudoSolver::_onFileDelete(){
 void sudoSolver::_onEdit(){
     bool modified;
     game_.display();
-    if ((modified = game_.edit())){
+    if ((modified = game_.edit(SUDOKU_MODE_CREATION))){
         _displayStats();
     }
 
