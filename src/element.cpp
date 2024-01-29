@@ -14,6 +14,7 @@ element::element(int value){
     status_ = (EMPTY_VALUE == value)?
                     STATUS_EMPTY:STATUS_ORIGINAL | STATUS_SET;
     value_ = value;
+    hypotheseColour_ = HYP_COLOUR_NONE; // No hypothese by default
 }
 
 // setValue() : Set or modify a value
@@ -45,12 +46,15 @@ void element::setValue(uint8_t value, uint8_t status, bool editMode){
     }
 }
 
- // empty() : Empty the element's value
+// empty() : Empty the element's value
+//
 //  @return : previous value
+//
 uint8_t element::empty(){
     status_ = STATUS_EMPTY;
     uint8_t value(value_);
     value_ = EMPTY_VALUE;
+    hypotheseColour_ = HYP_COLOUR_NONE;
     return value;
 }
 

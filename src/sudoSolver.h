@@ -69,6 +69,10 @@ private:
     //
     void _onEdit();
 
+    // _onSolveManual() : Try to "manually" solve the grid
+    //
+    void _onSolveManual();
+    
     // _onSolveFindObvious() : Search for obvious values
     //
     void _onSolveFindObvious();

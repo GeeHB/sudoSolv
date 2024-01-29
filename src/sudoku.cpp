@@ -217,13 +217,13 @@ int sudoku::save(const FONTCHARACTER fName){
 // edit() : Edit / modify the current grid
 //
 //  @mode : Edition mode,
-//          can be SUDOKU_MODE_CREATION or SUDOKU_MODE_GAME
+//          can be EDIT_MODE_CREATION or EDIT_MODE_MANUAL
 //
 //  @return : true if grid has been modified or false if left unchanged
 //
 bool sudoku::edit(uint8_t mode){
 
-    if (mode != SUDOKU_MODE_CREATION || mode != SUDOKU_MODE_GAME){
+    if (EDIT_MODE_CREATION != mode || EDIT_MODE_MANUAL != mode){
         return false;   // Invalid edition mode
     }
 
@@ -236,7 +236,7 @@ bool sudoku::edit(uint8_t mode){
     position currentPos(0, false);
     position prevPos(0, false);
 
-    if (SUDOKU_MODE_CREATION == mode){
+    if (EDIT_MODE_CREATION == mode){
         revert();   // Remove obious and found values (if any)
         display();
     }
@@ -467,7 +467,7 @@ bool sudoku::edit(uint8_t mode){
             dprint_opt(CASIO_WIDTH - 100, CASIO_HEIGHT - 10,
                 C_BLACK, SCREEN_BK_COLOUR,
                 DTEXT_LEFT, DTEXT_TOP,
-                " Elements : %d   ", elements);
+                " Elements : %d     ", elements);
             dupdate();
         }
         
@@ -639,7 +639,7 @@ bool sudoku::_checkValue(position& pos, uint8_t value){
 //
 int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
     uint8_t status(elements_[pos].status());
-    if (SUDOKU_MODE_GAME == mode){
+    if (EDIT_MODE_MANUAL == mode){
         // Check wether element's value can be changed
         if (STATUS_ORIGINAL == status){
             return -1;
@@ -739,9 +739,12 @@ void sudoku::_drawContent(){
 //  @value : value of the element in [1..9]
 //  @bkColour : background colour
 //  @txtColour : text colour
+//  @hypColour : colour of hypothese if not HYP_COLOUR_NONE
 //
 void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
-                uint8_t value, int bkColour, int txtColour){
+                uint8_t value,
+                int bkColour, int txtColour,
+                int hypColour){
     uint16_t x(screen_.x + row * SQUARE_SIZE + BORDER_THICK);
     uint16_t y(screen_.y + line * SQUARE_SIZE + BORDER_THICK);
 
@@ -750,6 +753,15 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
 
     // display the value (if valid)
     if (value){
+        // Hypothese colour
+        if (HYP_COLOUR_NONE != hypColour){
+            drect(x + INT_SQUARE_SIZE - HYP_SQUARE_SIZE - 1,
+                y + INT_SQUARE_SIZE - HYP_SQUARE_SIZE - 1,
+                x + INT_SQUARE_SIZE - 1,
+                y + INT_SQUARE_SIZE - 1,
+                hypColour);
+        }
+
         char sVal[2];
         sVal[0] = '0' + value;
         sVal[1] = '\0';
@@ -762,7 +774,7 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
         uint16_t dx(1 + (INT_SQUARE_SIZE - w) / 2);
         uint16_t dy(1 + (INT_SQUARE_SIZE - h) / 2);
         dtext_opt(x + dx, y + dy,
-            txtColour, bkColour, DTEXT_LEFT, DTEXT_TOP, sVal, 1);
+            txtColour, NO_COLOR, DTEXT_LEFT, DTEXT_TOP, sVal, 1);
     }
 }
 #endif // #ifdef DEST_CASIO_CALC
@@ -1068,14 +1080,16 @@ int sudoku::__callbackTick(volatile int *pTick){
     return TIMER_CONTINUE;
 }
 
-// _elementTxtColour() : Retreive element text colour for edition
+// _elementTxtColour() : Retreive element's text colour for edition
 //
 //  @pos : Element's position
 //  @editMode : Edition mode (game or creation)
-//  @selected :
+//  @selected :Is element in selectedmode ?
+//
+//  @return : Colour to use
 //
 int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
-    if (SUDOKU_MODE_CREATION == editMode){
+    if (EDIT_MODE_CREATION == editMode){
         return (TXT_ORIGINAL_COLOUR);   // always use "original" colour
     }
 

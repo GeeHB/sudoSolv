@@ -25,6 +25,10 @@ extern "C" {
 // An empty element value
 #define EMPTY_VALUE     0
 
+// Element's coloured hypothese
+//
+#define HYP_COLOUR_NONE COLOUR_WHITE
+
 // element - A single sudoku grid element
 //
 class element{
@@ -36,6 +40,10 @@ public:
 
     // Destrcution
     ~element(){}
+
+    //
+    // Element's value
+    //
 
     // setValue() : Set or modify a value
     //
@@ -56,26 +64,62 @@ public:
     //  @return : previous value
     uint8_t empty();
 
+    //
     // Element's status
+    //
+
+    // status() : Return element's status
+    //
+    //  @return : element's status
     //
     uint8_t status(){
         return status_;
     }
 
+    // isEmpty() : Check wether element is empty
+    //
+    //  @return : true if is element empty
+    //
     bool isEmpty(){
         return (STATUS_EMPTY == status_);
     }
 
+    // isOriginal() : Is the element original
+    //
+    //  An original element can't be modified at runtime
+    //
+    //  @return : true if element is original
+    //
     bool isOriginal(){
         return _isStatusBitSet(STATUS_ORIGINAL);
     }
 
+    // isObvious() : Has the element an obvious value ?
+    //
+    //  An obvious value is a the only possible value
+    //  at a given position
+    //
+    //  @return : true if element has an obvious value
+    //
     bool isObvious(){
         return _isStatusBitSet(STATUS_OBVIOUS);
     }
 
+    // isChangeable() : Can the element's value be changed
+    //
+    //  @return : true if element's value is changeable
+    //
     bool isChangeable(){
         return (status_ ==  STATUS_EMPTY || status_ == STATUS_SET);
+    }
+
+    //
+    // Hypotheses
+    //
+
+    void setHypothese();
+    uint8_t hypothese(){
+        return hypotheseColour_;
     }
 
 private:
@@ -93,6 +137,7 @@ private:
 private:
         uint8_t     status_;
         uint8_t     value_;
+        int         hypotheseColour_;   // Colour of hypothese
 }; // class element
 
 #ifdef __cplusplus

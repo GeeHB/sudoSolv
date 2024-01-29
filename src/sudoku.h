@@ -33,8 +33,8 @@
 //
 // Edition modes
 //
-#define SUDOKU_MODE_CREATION    0       // Creation of a grid
-#define SUDOKU_MODE_GAME        1       // Try to solve the grid
+#define EDIT_MODE_CREATION    0       // Creation of a grid
+#define EDIT_MODE_MANUAL      1       // Try to solve the grid
 
 #ifdef __cplusplus
 extern "C" {
@@ -95,7 +95,7 @@ public:
     // edit() : Edit / modify the current grid
     //
     //  @mode : Edition mode,
-    //          can be SUDOKU_MODE_CREATION or SUDOKU_MODE_GAME
+    //          can be SUDOKU_MODE_CREATION or SUDOKU_MODE_MANUAL
     //
     //  @return : true if grid has been modified or false if unchanged
     //
@@ -190,9 +190,11 @@ private:
     //  @value : value of the element in [1..9]
     //  @bkColour : background colour
     //  @txtColour : text colour
+    //  @hypColour : colour of hypothese if not HYP_COLOUR_NONE
     //
     void _drawSingleElement(uint8_t row, uint8_t line, uint8_t value,
-                        int bkColour, int txtColour);
+                        int bkColour, int txtColour,
+                        int hypColour = HYP_COLOUR_NONE);
 #endif // #ifdef DEST_CASIO_CALC
 
     //
@@ -268,11 +270,13 @@ private:
     static int __callbackTick(volatile int *pTick);
 #endif // #ifdef DEST_CASIO_CALC
 
-    // _elementTxtColour() : Retreive element text colour for edition
+    // _elementTxtColour() : Retreive element's text colour for edition
     //
     //  @pos : Element's position
     //  @editMode : Edition mode (game or creation)
-    //  @selected :
+    //  @selected :Is element in selectedmode ?
+    //
+    //  @return : Colour to use
     //
     int _elementTxtColour(position& pos, uint8_t editMode, bool selected);
 

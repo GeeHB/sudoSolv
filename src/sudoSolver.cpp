@@ -133,6 +133,12 @@ void sudoSolver::run(void)
                     break;
                 }
 
+                // Try to solve "manually" the grid
+                case IDM_SOLVE_MANUAL:{
+                    _onSolveManual();
+                    break;
+                }
+
                 // Search for obvious values
                 case IDM_SOLVE_OBVIOUS:{
                     _onSolveFindObvious();
@@ -284,7 +290,20 @@ void sudoSolver::_onFileDelete(){
 void sudoSolver::_onEdit(){
     bool modified;
     game_.display();
-    if ((modified = game_.edit(SUDOKU_MODE_CREATION))){
+    if ((modified = game_.edit(EDIT_MODE_CREATION))){
+        _displayStats();
+    }
+
+    menu_.selectByIndex(-1);
+    _updateFileItemsState(modified);
+}
+
+// _onSolveManual() : Try to "manually" solve the grid
+//
+void sudoSolver::_onSolveManual(){
+    bool modified;
+    game_.display();
+    if ((modified = game_.edit(EDIT_MODE_MANUAL))){
         _displayStats();
     }
 
