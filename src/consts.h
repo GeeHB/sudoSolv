@@ -85,7 +85,6 @@ extern "C" {
 #define HYP_SQUARE_SIZE         5
 
 // Colors
-#ifdef DEST_CASIO_CALC
 #define BORDER_COLOUR           C_RGB(10, 19, 23)
 #define SCREEN_BK_COLOUR        C_RGB(28, 28, 30)
 #define GRID_BK_COLOUR          C_RGB(24, 24, 26)
@@ -94,14 +93,7 @@ extern "C" {
 #define TXT_ORIGINAL_COLOUR     C_RGB(30, 15, 14)
 #define TXT_OBVIOUS_COLOUR      BORDER_COLOUR
 #define SEL_BK_COLOUR           C_RGB(6, 6, 31)
-#define SEL_TXT_GAME_COLOUR     GRID_BK_COLOUR  // in SUDOKU_MODE_MANUAL
-//#define SEL_TXT_COLOUR          TXT_ORIGINAL_COLOUR
-#endif // #ifdef DEST_CASIO_CALC
-
-// Keyboard
-//
-
-// Key codes
+#define SEL_TXT_GAME_COLOUR     TXT_ORIGINAL_COLOUR
 //
 #ifdef DEST_CASIO_CALC
 enum GAME_KEY{

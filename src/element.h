@@ -11,10 +11,6 @@
 
 #include "consts.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // #ifdef __cplusplus
-
 // Element status
 //
 #define STATUS_EMPTY    0
@@ -27,7 +23,15 @@ extern "C" {
 
 // Element's coloured hypothese
 //
-#define HYP_COLOUR_NONE COLOUR_WHITE
+#define HYP_COLOUR_NONE     GRID_BK_COLOUR
+#define HYP_COLOUR_YELLOW   COLOUR_YELLOW
+#define HYP_COLOUR_BLUE     COLOUR_BLUE
+#define  HYP_COLOUR_GREEN   COLOUR_GREEN
+#define HYP_COLOUR_RED      COLOUR_RED
+
+#ifdef __cplusplus
+extern "C" {
+#endif // #ifdef __cplusplus
 
 // element - A single sudoku grid element
 //
@@ -110,15 +114,17 @@ public:
     //  @return : true if element's value is changeable
     //
     bool isChangeable(){
-        return (status_ ==  STATUS_EMPTY || status_ == STATUS_SET);
+        return (STATUS_EMPTY == status_ || STATUS_SET == status_);
     }
 
     //
     // Hypotheses
     //
 
-    void setHypothese();
-    uint8_t hypothese(){
+    void setHypothese(int hypoColour){
+        hypotheseColour_ = hypoColour;
+    }
+    int hypothese(){
         return hypotheseColour_;
     }
 

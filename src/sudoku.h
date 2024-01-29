@@ -194,7 +194,15 @@ private:
     //
     void _drawSingleElement(uint8_t row, uint8_t line, uint8_t value,
                         int bkColour, int txtColour,
-                        int hypColour = HYP_COLOUR_NONE);
+                        int hypColour);
+
+    // _drawSingleElement : draw a single element of the grid
+    //
+    //  @pos: Position of the item
+    //  @bkColour : background colour
+    //  @txtColour : text colour
+    //
+    void _drawSingleElement(position pos, int bkColour, int txtColour);
 #endif // #ifdef DEST_CASIO_CALC
 
     //

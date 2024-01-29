@@ -223,7 +223,7 @@ int sudoku::save(const FONTCHARACTER fName){
 //
 bool sudoku::edit(uint8_t mode){
 
-    if (EDIT_MODE_CREATION != mode || EDIT_MODE_MANUAL != mode){
+    if (EDIT_MODE_CREATION != mode && EDIT_MODE_MANUAL != mode){
         return false;   // Invalid edition mode
     }
 
@@ -248,8 +248,7 @@ bool sudoku::edit(uint8_t mode){
     menu.update();
 
     // Show selected item
-    _drawSingleElement(currentPos.row(), currentPos.line(),
-                    elements_[currentPos].value(),
+    _drawSingleElement(currentPos,
                     SEL_BK_COLOUR,
                     _elementTxtColour(currentPos, mode, false));
     dupdate();
@@ -437,23 +436,20 @@ bool sudoku::edit(uint8_t mode){
         if (reDraw || (prevPos != currentPos)){
             // if sel. changed, erase previously selected element
             if (prevPos != currentPos){
-                _drawSingleElement(prevPos.row(), prevPos.line(),
-                    elements_[prevPos].value(),
+                _drawSingleElement(prevPos,
                     (prevPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
                     _elementTxtColour(prevPos, mode, false));
             }
 
             if (showSelected){
                 // Hilight the new value (or have it blink)
-                _drawSingleElement(currentPos.row(), currentPos.line(),
-                    elements_[currentPos].value(),
+                _drawSingleElement(currentPos,
                     SEL_BK_COLOUR,
                     _elementTxtColour(currentPos, mode, true));
             }
             else{
                 // "unhilite" for blinking effect
-                _drawSingleElement(currentPos.row(), currentPos.line(),
-                    elements_[currentPos].value(),
+                _drawSingleElement(currentPos,
                     (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
                     _elementTxtColour(currentPos, mode, false));
             }
@@ -478,11 +474,10 @@ bool sudoku::edit(uint8_t mode){
     }
 
     // Draw in valid state (or erase)
-    _drawSingleElement(currentPos.row(), currentPos.line(),
-            elements_[currentPos].value(),
+    _drawSingleElement(currentPos,
             (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
             _elementTxtColour(currentPos, mode, false));
-
+            
     return modified;
 }
 
@@ -726,7 +721,8 @@ void sudoku::_drawContent(){
                     pElement->value(),
                     (pos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
                     (pElement->isOriginal()?TXT_ORIGINAL_COLOUR:
-                    (pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR)));
+                    (pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR)),
+                    pElement->hypothese());
             }
             pos+=1; // next element
         }
@@ -756,9 +752,9 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
         // Hypothese colour
         if (HYP_COLOUR_NONE != hypColour){
             drect(x + INT_SQUARE_SIZE - HYP_SQUARE_SIZE - 1,
-                y + INT_SQUARE_SIZE - HYP_SQUARE_SIZE - 1,
+                y + 1,
                 x + INT_SQUARE_SIZE - 1,
-                y + INT_SQUARE_SIZE - 1,
+                y + HYP_SQUARE_SIZE,
                 hypColour);
         }
 
@@ -777,6 +773,19 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
             txtColour, NO_COLOR, DTEXT_LEFT, DTEXT_TOP, sVal, 1);
     }
 }
+
+// _drawSingleElement : draw a single element of the grid
+//
+//  @pos: Position of the item
+//  @bkColour : background colour
+//  @txtColour : text colour
+//
+void sudoku::_drawSingleElement(position pos, int bkColour, int txtColour){
+    element* pelement = &elements_[pos];
+    _drawSingleElement(pos.row(), pos.line(), pelement->value(),
+        bkColour, txtColour, pelement->hypothese());
+}
+
 #endif // #ifdef DEST_CASIO_CALC
 
 //
@@ -1093,24 +1102,17 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
         return (TXT_ORIGINAL_COLOUR);   // always use "original" colour
     }
 
-    int colour(TXT_COLOUR);
-    switch (elements_[pos].status()){
-
-        case STATUS_SET:
-            colour = (selected?SEL_TXT_GAME_COLOUR:TXT_COLOUR);
-            break;
-
-        case STATUS_OBVIOUS:
-            colour = TXT_OBVIOUS_COLOUR;
-            break;
-
-        case STATUS_ORIGINAL:
+    int colour;
+    if (elements_[pos].isObvious()){
+        colour = TXT_OBVIOUS_COLOUR;
+    }
+    else{
+        if (elements_[pos].isOriginal()){
             colour = TXT_ORIGINAL_COLOUR;
-            break;
-
-        case STATUS_EMPTY:
-        default:
-            break;    // Should be useless
+        }
+        else{
+            colour = (selected?SEL_TXT_GAME_COLOUR:TXT_COLOUR);
+        }
     }
 
     return colour;
