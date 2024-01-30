@@ -76,7 +76,17 @@ void sudoku::display(bool update){
                 car += pElement->value();
             }
 
-            cout << car;
+            cout << car << " - ";
+
+            // Colour ?
+            if (pElement->hypColour() != HYP_COLOUR_NONE){
+                car = (char)(pElement->hypColour());
+                cout << car;
+            }
+            else{
+                cout << " ";
+            }
+
             if (row == (ROW_COUNT-1)){
                 cout << endl;
             }
@@ -466,7 +476,7 @@ bool sudoku::edit(uint8_t mode){
                 " Elements : %d     ", elements);
             dupdate();
         }
-        
+
     } // while (cont)
 
     if (timerID >= 0){
@@ -477,7 +487,7 @@ bool sudoku::edit(uint8_t mode){
     _drawSingleElement(currentPos,
             (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
             _elementTxtColour(currentPos, mode, false));
-            
+
     return modified;
 }
 
@@ -646,7 +656,7 @@ int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
         _checkTinySquare(pos, value)){
 
         uint8_t oValue(elements_[pos].value());  // current val
-            
+
         // set new value
         elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
         return (value == oValue?0:1);
@@ -722,12 +732,13 @@ void sudoku::_drawContent(){
                     (pos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
                     (pElement->isOriginal()?TXT_ORIGINAL_COLOUR:
                     (pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR)),
-                    pElement->hypothese());
+                    pElement->hypColour());
             }
             pos+=1; // next element
         }
     }
 }
+#endif // #ifdef DEST_CASIO_CALC
 
 // _drawSingleElement : draw a single element of the grid
 //
@@ -741,6 +752,7 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
                 uint8_t value,
                 int bkColour, int txtColour,
                 int hypColour){
+#ifdef DEST_CASIO_CALC
     uint16_t x(screen_.x + row * SQUARE_SIZE + BORDER_THICK);
     uint16_t y(screen_.y + line * SQUARE_SIZE + BORDER_THICK);
 
@@ -772,7 +784,9 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
         dtext_opt(x + dx, y + dy,
             txtColour, NO_COLOR, DTEXT_LEFT, DTEXT_TOP, sVal, 1);
     }
+#endif // #ifdef DEST_CASIO_CALC
 }
+
 
 // _drawSingleElement : draw a single element of the grid
 //
@@ -783,10 +797,8 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
 void sudoku::_drawSingleElement(position pos, int bkColour, int txtColour){
     element* pelement = &elements_[pos];
     _drawSingleElement(pos.row(), pos.line(), pelement->value(),
-        bkColour, txtColour, pelement->hypothese());
+        bkColour, txtColour, pelement->hypColour());
 }
-
-#endif // #ifdef DEST_CASIO_CALC
 
 //
 //   Search for obvious values
@@ -1088,6 +1100,7 @@ int sudoku::__callbackTick(volatile int *pTick){
     *pTick = 1;
     return TIMER_CONTINUE;
 }
+#endif // #ifdef DEST_CASIO_CALC
 
 // _elementTxtColour() : Retreive element's text colour for edition
 //
@@ -1117,7 +1130,5 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 
     return colour;
 }
-
-#endif // #ifdef DEST_CASIO_CALC
 
 // EOF

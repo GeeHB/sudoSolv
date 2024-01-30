@@ -24,10 +24,18 @@
 // Element's coloured hypothese
 //
 #define HYP_COLOUR_NONE     GRID_BK_COLOUR
+
+#ifdef DEST_CASIO_CALC
 #define HYP_COLOUR_YELLOW   COLOUR_YELLOW
 #define HYP_COLOUR_BLUE     COLOUR_BLUE
 #define  HYP_COLOUR_GREEN   COLOUR_GREEN
 #define HYP_COLOUR_RED      COLOUR_RED
+#else
+#define HYP_COLOUR_YELLOW   'j'
+#define HYP_COLOUR_BLUE     'b'
+#define  HYP_COLOUR_GREEN   'v'
+#define HYP_COLOUR_RED      'r'
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -118,13 +126,13 @@ public:
     }
 
     //
-    // Hypotheses
+    // Hypotheses' colours
     //
 
-    void setHypothese(int hypoColour){
-        hypotheseColour_ = hypoColour;
+    void setHypColour(int hypColour){
+        hypotheseColour_ = hypColour;
     }
-    int hypothese(){
+    int hypColour(){
         return hypotheseColour_;
     }
 

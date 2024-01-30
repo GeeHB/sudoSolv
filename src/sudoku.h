@@ -183,6 +183,7 @@ private:
     // _drawContent() : : Draw all the elements
     //
     void _drawContent();
+#endif // #ifdef DEST_CASIO_CALC
 
     // _drawSingleElement : draw a single element of the grid
     //
@@ -195,6 +196,7 @@ private:
     void _drawSingleElement(uint8_t row, uint8_t line, uint8_t value,
                         int bkColour, int txtColour,
                         int hypColour);
+                
 
     // _drawSingleElement : draw a single element of the grid
     //
@@ -203,7 +205,6 @@ private:
     //  @txtColour : text colour
     //
     void _drawSingleElement(position pos, int bkColour, int txtColour);
-#endif // #ifdef DEST_CASIO_CALC
 
     //
     //   Search for obvious values
