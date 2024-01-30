@@ -54,7 +54,7 @@ uint8_t element::empty(){
     status_ = STATUS_EMPTY;
     uint8_t value(value_);
     value_ = EMPTY_VALUE;
-    hypotheseColour_ = HYP_COLOUR_YELLOW;
+    hypotheseColour_ = HYP_COLOUR_NONE;
     return value;
 }
 

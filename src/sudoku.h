@@ -187,20 +187,7 @@ private:
 
     // _drawSingleElement : draw a single element of the grid
     //
-    //  @row, @line : coordinate of the element in the grid
-    //  @value : value of the element in [1..9]
-    //  @bkColour : background colour
-    //  @txtColour : text colour
-    //  @hypColour : colour of hypothese if not HYP_COLOUR_NONE
-    //
-    void _drawSingleElement(uint8_t row, uint8_t line, uint8_t value,
-                        int bkColour, int txtColour,
-                        int hypColour);
-                
-
-    // _drawSingleElement : draw a single element of the grid
-    //
-    //  @pos: Position of the item
+    //  @pos: Position of the element
     //  @bkColour : background colour
     //  @txtColour : text colour
     //
@@ -279,7 +266,7 @@ private:
     static int __callbackTick(volatile int *pTick);
 #endif // #ifdef DEST_CASIO_CALC
 
-    // _elementTxtColour() : Retreive element's text colour for edition
+    // _elementTxtColour() : Get element's text colour for edition
     //
     //  @pos : Element's position
     //  @editMode : Edition mode (game or creation)
@@ -291,8 +278,8 @@ private:
 
     // Members
 private:
-    element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one dim. table
-    tinySquare  tSquares_[TINY_COUNT];  // Elements IDs in tinySquares
+    element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one-dim. table
+    tinySquare tSquares_[TINY_COUNT];  // Elements IDs in tinySquares
 
     // Position & dims of screen
     // {x Grid, yGrid, "screen" width , "screen" height}

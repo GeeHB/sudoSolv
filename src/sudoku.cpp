@@ -644,11 +644,14 @@ bool sudoku::_checkValue(position& pos, uint8_t value){
 //
 int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
     uint8_t status(elements_[pos].status());
+    bool edit(true);
     if (EDIT_MODE_MANUAL == mode){
         // Check wether element's value can be changed
         if (STATUS_ORIGINAL == status){
             return -1;
         }
+
+        edit = false;   // manual mode
     }
 
     // Check value at the given pos.
@@ -658,7 +661,8 @@ int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
         uint8_t oValue(elements_[pos].value());  // current val
 
         // set new value
-        elements_[pos.index()].setValue(value, STATUS_ORIGINAL, true);
+        elements_[pos.index()].setValue(value,
+            (edit?STATUS_ORIGINAL:STATUS_SET), edit);
         return (value == oValue?0:1);
     }
 
@@ -727,12 +731,11 @@ void sudoku::_drawContent(){
         for (row = 0; row < ROW_COUNT; row++){
             pElement = &elements_[pos];
             if (!pElement->isEmpty()){
-                _drawSingleElement(row, line,
-                    pElement->value(),
+                _drawSingleElement(pos,
                     (pos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
                     (pElement->isOriginal()?TXT_ORIGINAL_COLOUR:
-                    (pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR)),
-                    pElement->hypColour());
+                    (pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR))
+                    );
             }
             pos+=1; // next element
         }
@@ -742,20 +745,17 @@ void sudoku::_drawContent(){
 
 // _drawSingleElement : draw a single element of the grid
 //
-//  @row, @line : coordinate of the element in the grid
-//  @value : value of the element in [1..9]
+//  @pos: Position of the element
 //  @bkColour : background colour
 //  @txtColour : text colour
-//  @hypColour : colour of hypothese if not HYP_COLOUR_NONE
 //
-void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
-                uint8_t value,
-                int bkColour, int txtColour,
-                int hypColour){
+void sudoku::_drawSingleElement(position pos, int bkColour, int txtColour){
 #ifdef DEST_CASIO_CALC
+    element* pelement(&elements_[pos]);
+    uint8_t row(pos.row()), line(pos.line()), value(pelement->value());
+    int hypColour(pelement->hypColour());
     uint16_t x(screen_.x + row * SQUARE_SIZE + BORDER_THICK);
     uint16_t y(screen_.y + line * SQUARE_SIZE + BORDER_THICK);
-
     // Erase background
     drect(x, y, x + INT_SQUARE_SIZE, y + INT_SQUARE_SIZE, bkColour);
 
@@ -785,19 +785,6 @@ void sudoku::_drawSingleElement(uint8_t row, uint8_t line,
             txtColour, NO_COLOR, DTEXT_LEFT, DTEXT_TOP, sVal, 1);
     }
 #endif // #ifdef DEST_CASIO_CALC
-}
-
-
-// _drawSingleElement : draw a single element of the grid
-//
-//  @pos: Position of the item
-//  @bkColour : background colour
-//  @txtColour : text colour
-//
-void sudoku::_drawSingleElement(position pos, int bkColour, int txtColour){
-    element* pelement = &elements_[pos];
-    _drawSingleElement(pos.row(), pos.line(), pelement->value(),
-        bkColour, txtColour, pelement->hypColour());
 }
 
 //
@@ -841,7 +828,7 @@ uint8_t sudoku::_findObviousValues(){
     return found;
 }
 
-// _checkObviousValue() : Is there an obvious value for the given position ?
+// _checkObviousValue() : Is there an obvious value for the given pos ?
 //
 //  pos : current position in the grid
 //
@@ -908,7 +895,8 @@ uint8_t sudoku::_setObviousValueInLines(position& pos, uint8_t value){
         return 0;
     }
 
-    // Just one square misses the value => we'll try to put this value in the correct line
+    // Just one square misses the value => we'll try to put
+    // this value in the correct line
     //
     uint8_t candidate, candidateLine;
     if (-1 == firstPos.line){
@@ -1102,7 +1090,7 @@ int sudoku::__callbackTick(volatile int *pTick){
 }
 #endif // #ifdef DEST_CASIO_CALC
 
-// _elementTxtColour() : Retreive element's text colour for edition
+// _elementTxtColour() : Get element's text colour for edition
 //
 //  @pos : Element's position
 //  @editMode : Edition mode (game or creation)
@@ -1115,20 +1103,17 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
         return (TXT_ORIGINAL_COLOUR);   // always use "original" colour
     }
 
-    int colour;
     if (elements_[pos].isObvious()){
-        colour = TXT_OBVIOUS_COLOUR;
+        return TXT_OBVIOUS_COLOUR;
     }
     else{
         if (elements_[pos].isOriginal()){
-            colour = TXT_ORIGINAL_COLOUR;
+            return TXT_ORIGINAL_COLOUR;
         }
         else{
-            colour = (selected?SEL_TXT_GAME_COLOUR:TXT_COLOUR);
+            return (selected?SEL_TXT_GAME_COLOUR:TXT_COLOUR);
         }
     }
-
-    return colour;
 }
 
 // EOF
