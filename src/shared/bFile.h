@@ -16,7 +16,7 @@
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define VERSION_B_FILE_OBJECT       "0.5.3"
+#define _GEEHB_MENU_VER_    "0.5.3"
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>

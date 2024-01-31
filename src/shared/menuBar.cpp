@@ -43,6 +43,25 @@ menuBar::menuBar(){
 }
 
 //
+// Ownerdraw function
+//
+
+// setDrawingCallBack() : Set function for ownerdraw drawings
+//
+// When an item has the ITEM_STATUS_OWNERDRAWN status bit set, the 
+// ownerdraw callback function will be called each time the menubar
+// needs to redraw the item
+//
+// @pF : Pointer to the callback function or NULL if no ownerdraw
+//
+// @return : pointer to default drawing function
+//
+MENUDRAWINGCALLBACK menuBar::setDrawingCallBack(MENUDRAWINGCALLBACK pF){
+    current_.pDrawing = pF;    
+    return _defDrawItem;   // Def. function if needed by calling function
+}
+
+//
 // Dimensions
 //
 
@@ -328,6 +347,7 @@ void menuBar::_clearMenuBar(PMENUBAR bar){
         bar->itemCount = 0;
         bar->selIndex = -1;     // No item is selected
         bar->parent = NULL;
+        bar->pDrawing = NULL;   // No ownerdraw by default
         memset(bar->items, 0x00, sizeof(PMENUITEM) * MENU_MAX_ITEM_COUNT);
     }
 }
@@ -348,6 +368,7 @@ PMENUBAR menuBar::_copyMenuBar(const PMENUBAR source, bool noBackButton){
         _clearMenuBar(bar);
         bar->itemCount = source->itemCount;
         bar->parent = source->parent;
+        bar->pDrawing = source->pDrawing;
         uint8_t max(noBackButton?MENU_MAX_ITEM_COUNT:(MENU_MAX_ITEM_COUNT-1));
         PMENUITEM sitem, nitem;
         for (uint8_t index(0); index < max; index++){
@@ -664,7 +685,32 @@ bool menuBar::_selectByIndex(int8_t index, bool selected, bool redraw){
 //  @item : Pointer to a MENUITEM strcut containing informations
 //          concerning the item to draw
 //
-void menuBar::_drawItem(const RECT* anchor, const MENUITEM* item){
+//  @return : False on error(s)
+//
+bool menuBar::_drawItem(const RECT* anchor, const MENUITEM* item){
+    if (NULL == item || NULL == anchor){
+        return false;
+    }
+
+    MENUDRAWINGCALLBACK ownerFunction;
+    if (_isBitSet(item->status, ITEM_STATUS_OWNERDRAWN) &&
+        NULL != (ownerFunction = (visible_->pDrawing))){
+        return ownerFunction(anchor, item); // Call ownerdraw func.
+    }
+
+    // Call default method
+    return _defDrawItem(anchor, item);
+}
+
+//  _defDrawItem() : Draw an item
+//
+//  @anchor : Position of the item in screen coordinates
+//  @item : Pointer to a MENUITEM strcut containing informations
+//          concerning the item to draw
+//
+//  @return : False on error(s)
+//
+bool menuBar::_defDrawItem(const RECT* anchor, const MENUITEM* item){
 #ifdef DEST_CASIO_CALC
     bool selected(false);
 
@@ -743,6 +789,7 @@ void menuBar::_drawItem(const RECT* anchor, const MENUITEM* item){
                 anchor->x + anchor->w -1, anchor->y, COLOUR_BLACK);
     }
 #endif // #ifdef DEST_CASIO_CALC
+    return true;    // Done
 }
 
 // EOF

@@ -12,7 +12,7 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        "0.3.8"
+#define _GEEHB_MENU_VER_        "0.4.1"
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
@@ -39,9 +39,10 @@
 //
 #define ITEM_STATUS_DEFAULT     0
 #define ITEM_STATUS_TEXT        1
-#define ITEM_STATUS_SUBMENU     2       // Open a sub menu on "click"
-#define ITEM_STATUS_KEYCODE     4       // item's ID is a key code
+#define ITEM_STATUS_SUBMENU     2   // Open a sub menu on "click"
+#define ITEM_STATUS_KEYCODE     4   // item's ID is a key code
 #define ITEM_STATUS_CHECKBOX    8
+#define ITEM_STATUS_OWNERDRAWN  16  // Use own callback for item drawing
 
 // Reserved menu item ID
 //
@@ -69,12 +70,17 @@ typedef struct _menuItem{
     void* subMenu;      // if item is a submenu, points to the submenu
 } MENUITEM,* PMENUITEM;
 
+// Ownerdraw's function prototype
+//
+typedef bool (*MENUDRAWINGCALLBACK)(const RECT*, const MENUITEM*); 
+
 // A menu bar
 //
 typedef struct _menuBar{
     uint8_t itemCount;
     int8_t selIndex;
     _menuBar* parent;
+    MENUDRAWINGCALLBACK pDrawing;    // Pointer to ownerdraw callback
     PMENUITEM items[MENU_MAX_ITEM_COUNT];
 } MENUBAR, * PMENUBAR;
 
@@ -112,6 +118,22 @@ public:
     ~menuBar(){
         _freeMenuBar(&current_, false);
     }
+
+    //
+    // Ownerdraw function
+    //
+
+    // setDrawingCallBack() : Set function for ownerdraw drawings
+    //
+    // When an item has the ITEM_STATUS_OWNERDRAWN status bit set, the 
+    // ownerdraw callback function will be called each time the menubar
+    // needs to redraw the item
+    //
+    // @pF : Pointer to the callback function or NULL if no ownerdraw
+    //
+    // @return : pointer to default drawing function
+    //
+    MENUDRAWINGCALLBACK setDrawingCallBack(MENUDRAWINGCALLBACK pF);
 
     //
     // Dimensions
@@ -433,7 +455,19 @@ private:
     //  @item : Pointer to a MENUITEM strcut containing informations
     //          concerning the item to draw
     //
-    void _drawItem(const RECT* anchor, const MENUITEM* item);
+    //  @return : False on error(s)
+    //
+    bool _drawItem(const RECT* anchor, const MENUITEM* item);
+    
+    //  _defDrawItem() : Draw an item
+    //
+    //  @anchor : Position of the item in screen coordinates
+    //  @item : Pointer to a MENUITEM strcut containing informations
+    //          concerning the item to draw
+    //
+    //  @return : False on error(s)
+    //
+    static bool _defDrawItem(const RECT* anchor, const MENUITEM* item);
 
     // State & status
     //
