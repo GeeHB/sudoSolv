@@ -7,7 +7,7 @@
     - [x] removeItemByID / removeItemByIndex
     - [x] EXIT -> retour un niveau prec.
     - [x] MENU -> retour au menu (exit app)
-    - [ ] callback pour le dessin d'un item
+    - [x] callback pour le dessin d'un item
     - [ ] retaille du nom d'un item si trop long
     - [x] item de type checkbox
         - [ ] pour FX9680G ... ?
@@ -22,9 +22,9 @@
     - [x] # obvious
     - [x] Durée de résolution
 - [x] Clignotement en mode Edition    
-- [ ] Fichiers
-    - [ ] Suppression du fichier courant
-    - [ ] Sauvegarde (uniquement les éléments 'Originaux')
+- [x] Fichiers
+    - [x] Suppression du fichier courant
+    - [x] Sauvegarde (uniquement les éléments 'Originaux')
 - [x] revert
 - [ ] mode "zoom"
 
@@ -34,6 +34,6 @@
 - [x] La ligne supérieure de la barre de menu disparait
 - [ ] Nouvelle grille
     - [x] pas de nouvel ID si pas de sauvegarde
-    - [ ] Nouvel ID si à partir d'un nouveau fichier ...
-    - [ ] "compression" pour trouver le plus petit ID disponible possible
-- [ ] Sauvegarde d'un fichier
+    - [x] Nouvel ID si à partir d'un nouveau fichier ...
+    - [x] "compression" pour trouver le plus petit ID disponible possible
+- [x] Sauvegarde d'un fichier

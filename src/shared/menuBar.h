@@ -471,14 +471,14 @@ private:
 
     // State & status
     //
-    bool _isBitSet(int value, int bit){
+    static bool _isBitSet(int value, int bit){
         return (bit == (value & bit));
     }
-    int _setBit(int& value, int bit){
+    static int _setBit(int& value, int bit){
         value |= bit;
         return value;
     }
-    int _removeBit(int& value, int bit){
+    static int _removeBit(int& value, int bit){
         value = value & ~bit;
         return value;
     }
