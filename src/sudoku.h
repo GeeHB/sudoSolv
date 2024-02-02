@@ -11,6 +11,7 @@
 #define __S_SOLVER_SUDOKU_h__    1
 
 #include "consts.h"
+#include "menus.h"
 
 #include "element.h"
 #include "position.h"
@@ -266,6 +267,13 @@ private:
     static int __callbackTick(volatile int *pTick);
 #endif // #ifdef DEST_CASIO_CALC
 
+    // _createEditMenu() : Create sub-menu displayed on edition mode
+    //
+    //  @menu : Menu bar to modifiy
+    //  @editMode : Edition mode (game or creation)
+    //
+    void _createEditMenu(menuBar& menu, uint8_t editMode);
+
     // _elementTxtColour() : Get element's text colour for edition
     //
     //  @pos : Element's position
@@ -275,6 +283,16 @@ private:
     //  @return : Colour to use
     //
     int _elementTxtColour(position& pos, uint8_t editMode, bool selected);
+
+    //  _ownItemsDrawings() : Draw an "ownerdraw" menu item
+    //
+    //  @anchor : Position of the item in screen coordinates
+    //  @item : Pointer to a MENUITEM strcut containing informations
+    //          concerning the item to draw
+    //
+    //  @return : False on error(s)
+    //
+    static bool _ownItemsDrawings(const RECT* anchor, const MENUITEM* item);
 
     // Members
 private:

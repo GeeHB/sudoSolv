@@ -10,11 +10,11 @@
 #define __S_SOLVER_CONSTANTS_h__    1
 
 #include "shared/casioCalcs.h"
-#include "locals.h"
 
 #ifdef DEST_CASIO_CALC
 #include <gint/keyboard.h>
 #else
+#include "shared/locals.h"
 #include <iostream>
 #endif // DEST_CASIO_CALC
 

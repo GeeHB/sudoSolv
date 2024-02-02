@@ -11,7 +11,7 @@
 #ifndef __S_SOLVER_OBJECT_h__
 #define __S_SOLVER_OBJECT_h__    1
 
-#include "menu.h"
+#include "menus.h"
 #include "grids.h"
 #include "sudoku.h"
 

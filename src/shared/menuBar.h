@@ -12,7 +12,7 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        "0.4.1"
+#define _GEEHB_MENU_VER_        "0.4.3"
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
@@ -21,6 +21,10 @@
 #define MENUBAR_DEF_ITEM_WIDTH  (CASIO_WIDTH / MENU_MAX_ITEM_COUNT)
 
 #define ITEM_NAME_LEN           10  // Max length of item name
+
+// Image (in bar) dimensions
+#define MENU_IMG_WIDTH          12
+#define MENU_IMG_HEIGHT         12
 
 // Item pos is a menu bar
 //
@@ -67,7 +71,8 @@ typedef struct _menuItem{
     int state;
     int status;
     char text[ITEM_NAME_LEN + 1];
-    void* subMenu;      // if item is a submenu, points to the submenu
+    void* subMenu;  // if item is a submenu, points to the submenu
+    int ownerData;  // Can ba anything ...
 } MENUITEM,* PMENUITEM;
 
 // Ownerdraw's function prototype
@@ -120,10 +125,10 @@ public:
     }
 
     //
-    // Ownerdraw function
+    // Ownerdraw method
     //
 
-    // setDrawingCallBack() : Set function for ownerdraw drawings
+    // setMenuDrawingCallBack() : Set function for ownerdraw drawings
     //
     // When an item has the ITEM_STATUS_OWNERDRAWN status bit set, the 
     // ownerdraw callback function will be called each time the menubar
@@ -133,7 +138,7 @@ public:
     //
     // @return : pointer to default drawing function
     //
-    MENUDRAWINGCALLBACK setDrawingCallBack(MENUDRAWINGCALLBACK pF);
+    MENUDRAWINGCALLBACK setMenuDrawingCallBack(MENUDRAWINGCALLBACK pF);
 
     //
     // Dimensions
@@ -216,12 +221,28 @@ public:
     //  @state : Item's initial state
     //  @status : Item's status
     //
-    //  @return : true if the item has been added
+    //  @return : pointer the created item or NULL
     //
-    bool addItem(uint8_t index, int id, const char* text,
+    PMENUITEM addItem(uint8_t index, int id, const char* text,
                 int state = ITEM_STATE_DEFAULT,
                 int status = ITEM_STATUS_DEFAULT){
         return _addItem(&current_, index, id, text, state, status);
+    }
+
+    //  addCheckbox() : Add an item to the current menu bar
+    //
+    //  @index : Index (position) in the menu bar
+    //  @id : Item ID
+    //  @text : Item text
+    //  @state : Item's initial state
+    //
+    //  @return : pointer the created item or NULL
+    //
+    PMENUITEM addcheckBox(uint8_t index, int id, const char* text,
+                int state = ITEM_STATE_DEFAULT,
+                int status = ITEM_STATUS_DEFAULT){
+        return _addItem(&current_, index, id, text,
+                    state, ITEM_STATUS_CHECKBOX | status);
     }
 
     //  appendItem() : Append an item to the current menu bar
@@ -231,13 +252,29 @@ public:
     //  @state : Item's initial state
     //  @status : Item's status
     //
-    //  @return : true if the item has been added
+    //  @return : pointer the created item or NULL
     //
-    bool appendItem(int id, const char* text, int state = ITEM_STATE_DEFAULT,
+    PMENUITEM appendItem(int id, const char* text,
+                    int state = ITEM_STATE_DEFAULT,
                     int status = ITEM_STATUS_DEFAULT){
         return _addItem(&current_, current_.itemCount, id, text, state, status);
     }
 
+    //  appendCheckbox() : Append a checkbox to the current menu bar
+    //
+    //  @id : Item ID
+    //  @text : Item text
+    //  @state : Item's initial state
+    //
+    //  @return : pointer the created item or NULL
+    //
+    PMENUITEM appendCheckbox(int id, const char* text,
+                    int state = ITEM_STATE_DEFAULT,
+                    int status = ITEM_STATUS_DEFAULT){
+        return _addItem(&current_, current_.itemCount, id, text,
+                        state, ITEM_STATUS_CHECKBOX | status);
+    }
+    
     //  removeItem() : Remove an item from the current menu bar
     //      Remove the item menu or the submenu
     //
@@ -306,6 +343,25 @@ public:
     bool getItem(int searchID, int searchMode, PMENUITEM* pItem);
     bool setItem(int searchID, int searchMode, PMENUITEM pItem, int Mask);
 
+    //  findItem() : Find an item in the menu bar and its submenus
+    //
+    //  @searchedID : id or index of the searched item
+    //  @searchMode : Type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+    //
+    //  @containerBar : pointer to a PMENUBAR. when not NULL,
+    //          if item is found, containerBar will point to the bar
+    //          containing the item
+    //  @pIndex : when not NULL, will point to the item's index in its menu
+    //
+    //  @return : pointer to the item if found or NULL
+    //
+    PMENUITEM findItem(int searchedID, int searchMode,
+                PMENUBAR* containerBar = NULL,
+                uint8_t* pIndex = NULL){
+        return _findItem(&current_, searchedID, searchMode,
+                        containerBar, pIndex);
+    }
+
     //  freeMenuItem() : Free memory used by a menu item
     //
     //  @item : Pointer to the menu item to be released
@@ -323,6 +379,30 @@ public:
     //          about item selected b user
     //
     MENUACTION handleKeyboard();
+
+    //  defDrawItem() : Draw an item
+    //
+    //  @anchor : Position of the item in screen coordinates
+    //  @item : Pointer to a MENUITEM strcut containing informations
+    //          concerning the item to draw
+    //
+    //  @return : False on error(s)
+    //
+    static bool defDrawItem(const RECT* anchor, const MENUITEM* item);
+
+    // State & status
+    //
+    static bool isBitSet(int value, int bit){
+        return (bit == (value & bit));
+    }
+    static int setBit(int& value, int bit){
+        value |= bit;
+        return value;
+    }
+    static int removeBit(int& value, int bit){
+        value = value & ~bit;
+        return value;
+    }
 
     // Internal methods
 private:
@@ -383,9 +463,9 @@ private:
     //  @state : Item's initial state
     //  @status : Item's status
     //
-    //  @return : true if the item has been added
+    //  @return : pointer the created item or NULL
     //
-    bool _addItem(const PMENUBAR bar, uint8_t index, int id,
+    PMENUITEM _addItem(const PMENUBAR bar, uint8_t index, int id,
                     const char* text, int state = ITEM_STATE_DEFAULT,
                     int status = ITEM_STATUS_DEFAULT);
 
@@ -418,7 +498,7 @@ private:
     //  @containerBar : pointer to a PMENUBAR. when not NULL,
     //          if item is found, containerBar will point to the bar
     //          containing the item
-    //  @pIndex : when not NULL, will point to the Item'ID in its menu
+    //  @pIndex : when not NULL, will point to the item's index in its menu
     //
     //  @return : pointer to the item if found or NULL
     //
@@ -459,30 +539,6 @@ private:
     //
     bool _drawItem(const RECT* anchor, const MENUITEM* item);
     
-    //  _defDrawItem() : Draw an item
-    //
-    //  @anchor : Position of the item in screen coordinates
-    //  @item : Pointer to a MENUITEM strcut containing informations
-    //          concerning the item to draw
-    //
-    //  @return : False on error(s)
-    //
-    static bool _defDrawItem(const RECT* anchor, const MENUITEM* item);
-
-    // State & status
-    //
-    static bool _isBitSet(int value, int bit){
-        return (bit == (value & bit));
-    }
-    static int _setBit(int& value, int bit){
-        value |= bit;
-        return value;
-    }
-    static int _removeBit(int& value, int bit){
-        value = value & ~bit;
-        return value;
-    }
-
     // Members
 private:
     MENUBAR     current_;   // Active bar

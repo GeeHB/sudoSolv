@@ -35,10 +35,11 @@ void sudoSolver::createMenu(){
 
     // "Solve" sub menu
     menuBar sMenu;
-    sMenu.appendItem(IDM_SOLVE_MANUAL, IDS_SOLVE_MANUAL);
+    sMenu.appendItem(IDM_SOLVE_MANUAL_SUBMENU, IDS_SOLVE_MANUAL_SUBMENU);
     sMenu.appendItem(IDM_SOLVE_OBVIOUS, IDS_SOLVE_OBVIOUS);
     sMenu.appendItem(IDM_SOLVE_RESOLVE, IDS_SOLVE_RESOLVE);
     sMenu.addItem(MENU_POS_RIGHT - 1, IDM_SOLVE_REVERT, IDS_SOLVE_REVERT);
+
     menu_.appendSubMenu(&sMenu, IDM_SOLVE_SUBMENU, IDS_SOLVE_SUBMENU);
 
     menu_.addItem(MENU_POS_RIGHT, IDM_QUIT, IDS_QUIT);
@@ -134,7 +135,7 @@ void sudoSolver::run(void)
                 }
 
                 // Try to solve "manually" the grid
-                case IDM_SOLVE_MANUAL:{
+                case IDM_SOLVE_MANUAL_SUBMENU:{
                     _onSolveManual();
                     break;
                 }
@@ -252,7 +253,8 @@ void sudoSolver::_onFileSave(){
             _updateFileItemsState();
         }   // save
         else{
-            dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error saving : %d", error);
+            dprint(TEXT_X, TEXT_V_OFFSET, C_RED,
+                    "Error saving : %d", error);
             dupdate();
         }
     }
@@ -380,7 +382,7 @@ bool sudoSolver::_loadFile(FONTCHARACTER fName){
         return true;
     }
 
-    dprint(TEXT_X, TEXT_V_OFFSET, C_RED,  "Error loading file : %d",
+    dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error loading file : %d",
         (int)error);
     dupdate();
     return false;

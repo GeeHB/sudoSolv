@@ -8,7 +8,6 @@
 //----------------------------------------------------------------------
 
 #include "sudoku.h"
-#include "menu.h"
 #include "shared/bFile.h"
 #include "shared/keyboard.h"
 
@@ -251,13 +250,12 @@ bool sudoku::edit(uint8_t mode){
         display();
     }
 
-    menuBar menu;       // A simple menu bar
+    menuBar menu;
     MENUACTION action;
-    menu.addItem(1, IDM_EDIT_OK, IDS_EDIT_OK);
-    menu.addItem(2, IDM_EDIT_CANCEL, IDS_EDIT_CANCEL);
+    _createEditMenu(menu, mode);
     menu.update();
 
-    // Show selected item
+    // Show selected item in grid
     _drawSingleElement(currentPos,
                     SEL_BK_COLOUR,
                     _elementTxtColour(currentPos, mode, false));
@@ -282,7 +280,6 @@ bool sudoku::edit(uint8_t mode){
 
     // Edit grid
     while (cont){
-
         if (timerID >= 0){
             while(!tick){
                 sleep();
@@ -1090,6 +1087,50 @@ int sudoku::__callbackTick(volatile int *pTick){
 }
 #endif // #ifdef DEST_CASIO_CALC
 
+// _createEditMenu() : Create sub-menu displayed on edition mode
+//
+//  @menu : Menu bar to modifiy
+//  @editMode : Edition mode (game or creation)
+//
+void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
+    if (EDIT_MODE_CREATION == editMode){
+        menu.addItem(1, IDM_EDIT_OK, IDS_EDIT_OK);
+        menu.addItem(2, IDM_EDIT_CANCEL, IDS_EDIT_CANCEL);
+    }
+    else{
+        // Some items should be drawn be this class
+        // and not by the menubar object itself
+        menu.setMenuDrawingCallBack(_ownItemsDrawings);
+
+        // Coloured hyp. submenu
+        //  each colour is stored in the ownerData member ot item struct
+        menuBar hypMenu;
+        PMENUITEM item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST,
+                                NULL, ITEM_STATUS_OWNERDRAWN);
+        item->ownerData = HYP_COLOUR_YELLOW;
+
+        item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST + 1,
+                                NULL, ITEM_STATUS_OWNERDRAWN);
+        item->ownerData = HYP_COLOUR_BLUE;
+
+        item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST + 2,
+                                NULL, ITEM_STATUS_OWNERDRAWN);
+        item->ownerData = HYP_COLOUR_GREEN;
+
+        item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST + 3,
+                                NULL, ITEM_STATUS_OWNERDRAWN);
+        item->ownerData = HYP_COLOUR_RED;
+
+        menu.appendSubMenu(&hypMenu, IDM_MANUAL_SUBMENU, IDS_MANUAL_SUBMENU);
+        menu.appendItem(IDM_MANUAL_MERGE, IDS_MANUAL_MERGE);
+        menu.appendItem(IDM_MANUAL_REMOVE, IDS_MANUAL_REMOVE);
+        menu.addItem(MENU_POS_RIGHT, IDM_MANUAL_END, IDS_MANUAL_END);
+
+        // Draw coloured checkboxes
+        hypMenu.setMenuDrawingCallBack(_ownItemsDrawings);
+    }
+}
+
 // _elementTxtColour() : Get element's text colour for edition
 //
 //  @pos : Element's position
@@ -1116,4 +1157,43 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
     }
 }
 
+//  _ownItemsDrawings() : Draw an "ownerdraw" menu item
+//
+//  @anchor : Position of the item in screen coordinates
+//  @item : Pointer to a MENUITEM strcut containing informations
+//          concerning the item to draw
+//
+//  @return : False on error(s)
+//
+bool sudoku::_ownItemsDrawings(const RECT* anchor, const MENUITEM* item){
+#ifdef DEST_CASIO_CALC
+    int x, y;
+    if (menuBar::isBitSet(item->status, ITEM_STATUS_CHECKBOX)){
+        // Draw the checkbox
+        menuBar::defDrawItem(anchor, item);
+
+        // Draw a rectangle  whose colour is store in ownerData member
+        x = anchor->x + MENU_IMG_WIDTH + 2; // After the image
+        y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
+
+        drect(x, y,
+            anchor->x + anchor->w -3, y + MENU_IMG_HEIGHT - 1,
+            item->ownerData);
+    }
+    else{
+        // Draw a rectangle on the right of item
+        x = anchor->x + anchor->w - HYP_SQUARE_SIZE - 3;
+        y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
+        
+        drect(x, y,
+            x + HYP_SQUARE_SIZE- 1, y + HYP_SQUARE_SIZE - 1,
+            item->ownerData);
+
+        // Then, draw the text
+        menuBar::defDrawItem(anchor, item);
+    }
+#endif // #ifdef DEST_CASIO_CALC
+
+    return true;
+}
 // EOF
