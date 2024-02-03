@@ -641,14 +641,14 @@ bool sudoku::_checkValue(position& pos, uint8_t value){
 //
 int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
     uint8_t status(elements_[pos].status());
-    bool edit(true);
+    bool editGrid(true);
     if (EDIT_MODE_MANUAL == mode){
         // Check wether element's value can be changed
         if (STATUS_ORIGINAL == status){
             return -1;
         }
 
-        edit = false;   // manual mode
+        editGrid = false;   // manual mode
     }
 
     // Check value at the given pos.
@@ -659,7 +659,7 @@ int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
 
         // set new value
         elements_[pos.index()].setValue(value,
-            (edit?STATUS_ORIGINAL:STATUS_SET), edit);
+            (editGrid?STATUS_ORIGINAL:STATUS_SET), editGrid);
         return (value == oValue?0:1);
     }
 

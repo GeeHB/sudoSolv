@@ -23,18 +23,14 @@
 
 // Element's coloured hypothese
 //
-#define HYP_COLOUR_NONE     GRID_BK_COLOUR
-
 #ifdef DEST_CASIO_CALC
-#define HYP_COLOUR_YELLOW   COLOUR_YELLOW
-#define HYP_COLOUR_BLUE     COLOUR_BLUE
-#define  HYP_COLOUR_GREEN   COLOUR_GREEN
-#define HYP_COLOUR_RED      COLOUR_RED
-#else
-#define HYP_COLOUR_YELLOW   'j'
-#define HYP_COLOUR_BLUE     'b'
-#define  HYP_COLOUR_GREEN   'v'
-#define HYP_COLOUR_RED      'r'
+enum HYP_COLOUR{
+    HYP_COLOUR_NONE = GRID_BK_COLOUR,
+    HYP_COLOUR_YELLOW = COLOUR_YELLOW,
+    HYP_COLOUR_BLUE = COLOUR_BLUE,
+    HYP_COLOUR_GREEN = COLOUR_GREEN,
+    HYP_COLOUR_RED = COLOUR_RED
+};
 #endif
 
 #ifdef __cplusplus
