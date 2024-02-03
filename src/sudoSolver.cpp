@@ -55,7 +55,7 @@ void sudoSolver::showHomeScreen(){
 
     char copyright[255];
     strcpy(copyright, APP_NAME);
-    strcat(copyright, " par ");
+    strcat(copyright, " by ");
     strcat(copyright, APP_AUTHOR);
     strcat(copyright, " v");
     strcat(copyright, APP_VERSION);

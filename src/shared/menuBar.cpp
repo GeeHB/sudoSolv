@@ -43,13 +43,13 @@ menuBar::menuBar(){
 
 // setMenuDrawingCallBack() : Set function for ownerdraw drawings
 //
-// When an item has the ITEM_STATUS_OWNERDRAWN status bit set, the 
+// When an item has the ITEM_STATUS_OWNERDRAWN status bit set, the
 // ownerdraw callback function will be called each time the menubar
 // needs to redraw the item
 //
 // @pF : Pointer to the callback function or NULL if no ownerdraw
 //
-// @return : pointer to default drawing function
+// @return : pointer to the default drawing function
 //
 MENUDRAWINGCALLBACK menuBar::setMenuDrawingCallBack(MENUDRAWINGCALLBACK pF){
     current_.pDrawing = pF;
@@ -101,11 +101,16 @@ void menuBar::update(){
                     (isBitSet(item->state, ITEM_STATE_CHECKED)?"[x] ":"[ ] ");
             }
 
-            if (isBitSet(item->state,ITEM_STATE_INACTIVE)){
-                cout << "_" << (item->text+1);
+            if (isBitSet(item->status, ITEM_STATUS_TEXT)){
+                if (isBitSet(item->state,ITEM_STATE_INACTIVE)){
+                    cout << "_" << (item->text+1);
+                }
+                else {
+                    cout << item->text;
+                }
             }
-            else {
-                cout << item->text;
+            else{
+                cout << "[vide]";
             }
             cout << (isBitSet(item->state,ITEM_STATE_SELECTED)?"<" : " ");
             cout << "|";
@@ -301,13 +306,11 @@ bool menuBar::defDrawItem(const RECT* anchor, const MENUITEM* item){
         int imgID(-1);  // No image
 
         // Text
-        int x,y, w, h(0);
+        int x, w, h(0);
         if (isBitSet(item->status, ITEM_STATUS_TEXT)){
             // Text is centerd
             dsize(item->text, NULL, &w, &h);
         }
-        
-        y = anchor->y + (anchor->h - h) / 2;
 
         // An image ?
         if (IDM_RESERVED_BACK == item->id){
@@ -323,7 +326,6 @@ bool menuBar::defDrawItem(const RECT* anchor, const MENUITEM* item){
 
         if (imgID > -1){
             // New text position
-            //x = anchor->x + (anchor->w - w - MENU_IMG_WIDTH - 2) / 2;
             x = anchor->x + 2;
 
             // Draw the image on left of text
@@ -336,11 +338,12 @@ bool menuBar::defDrawItem(const RECT* anchor, const MENUITEM* item){
             x = anchor->x + (anchor->w - w) / 2;
         }
 
-        if (isBitSet(item->status, ITEM_STATUS_TEXT)){
+       // if (isBitSet(item->status, ITEM_STATUS_TEXT))
+       {
             // text too large ?
 
             // draw the text
-            dtext(x, y,
+            dtext(x, anchor->y + (anchor->h - h) / 2,
                 selected?
                     ITEM_COLOUR_SELECTED:
                     (isBitSet(item->state, ITEM_STATE_INACTIVE)?
@@ -417,7 +420,7 @@ bool menuBar::_addSubMenu(const PMENUBAR container, uint8_t index,
         return false;
     }
 
-    item->status = ITEM_STATUS_SUBMENU;
+    item->status = ITEM_STATUS_SUBMENU | ITEM_STATUS_TEXT;
     item->subMenu = sub;
     sub->parent = container;
 
@@ -433,10 +436,8 @@ bool menuBar::_addSubMenu(const PMENUBAR container, uint8_t index,
 //
 void menuBar::_clearMenuBar(PMENUBAR bar){
     if (bar){
-        bar->itemCount = 0;
+        memset(bar, 0x00, sizeof(MENUBAR));
         bar->selIndex = -1;     // No item is selected
-        bar->parent = NULL;
-        bar->pDrawing = NULL;   // No ownerdraw by default
         memset(bar->items, 0x00, sizeof(PMENUITEM) * MENU_MAX_ITEM_COUNT);
     }
 }
@@ -549,6 +550,7 @@ PMENUITEM menuBar::_createItem(int id, const char* text, int state, int status){
     size_t len(text?strlen(text):0);
     MENUITEM* item(NULL);
     if ((item = (PMENUITEM)malloc(sizeof(MENUITEM)))){
+        memset(item, 0x00, sizeof(MENUITEM));
         item->id = id;
         item->state = state;
         item->status = status;
@@ -566,9 +568,6 @@ PMENUITEM menuBar::_createItem(int id, const char* text, int state, int status){
                 removeBit(item->status, ITEM_STATUS_TEXT);
             }
         }
-
-        item->subMenu = NULL;
-        item->ownerData = 0;    // No "data" for this item
     }
 
     return item;
@@ -595,7 +594,7 @@ PMENUITEM menuBar::_copyItem(const PMENUBAR bar, PMENUITEM source){
             item->text[0] = '\0';
         }
 
-        if (source->status & ITEM_STATUS_SUBMENU){
+        if (isBitSet(source->status, ITEM_STATUS_SUBMENU)){
             item->subMenu = _copyMenuBar((PMENUBAR)source->subMenu,
                         isBitSet(item->state, ITEM_STATE_NO_BACK_BUTTON));
             ((PMENUBAR)(item->subMenu))->parent = bar;
@@ -763,7 +762,7 @@ bool menuBar::_selectByIndex(int8_t index, bool selected, bool redraw){
         }
     }
 
-    // Update screen ?
+    // Update item ?
     if (redraw){
         RECT anchor = {rect_.x, rect_.y, MENUBAR_DEF_ITEM_WIDTH, rect_.h};
         if (-1 != sel){
@@ -790,13 +789,13 @@ bool menuBar::_selectByIndex(int8_t index, bool selected, bool redraw){
 //  @return : False on error(s)
 //
 bool menuBar::_drawItem(const RECT* anchor, const MENUITEM* item){
-    if (NULL == item || NULL == anchor){
+    if (NULL == anchor){
         return false;
     }
 
     MENUDRAWINGCALLBACK ownerFunction;
     if (isBitSet(item->status, ITEM_STATUS_OWNERDRAWN) &&
-        NULL != (ownerFunction = (visible_->pDrawing))){
+        NULL != (ownerFunction = visible_->pDrawing)){
         return ownerFunction(anchor, item); // Call ownerdraw func.
     }
 

@@ -467,7 +467,7 @@ bool sudoku::edit(uint8_t mode){
         }
 
         if (modified){
-            dprint_opt(CASIO_WIDTH - 100, CASIO_HEIGHT - 10,
+            dprint_opt(CASIO_WIDTH - 100, CASIO_HEIGHT - 10 - MENUBAR_DEF_HEIGHT,
                 C_BLACK, SCREEN_BK_COLOUR,
                 DTEXT_LEFT, DTEXT_TOP,
                 " Elements : %d     ", elements);
@@ -1098,7 +1098,7 @@ void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
         menu.addItem(2, IDM_EDIT_CANCEL, IDS_EDIT_CANCEL);
     }
     else{
-        // Some items should be drawn be this class
+        // Some items should be drawn by this class
         // and not by the menubar object itself
         menu.setMenuDrawingCallBack(_ownItemsDrawings);
 
@@ -1177,14 +1177,14 @@ bool sudoku::_ownItemsDrawings(const RECT* anchor, const MENUITEM* item){
         y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
 
         drect(x, y,
-            anchor->x + anchor->w -3, y + MENU_IMG_HEIGHT - 1,
+            anchor->x + anchor->w -3, y + HYP_SQUARE_SIZE - 1,
             item->ownerData);
     }
     else{
         // Draw a rectangle on the right of item
         x = anchor->x + anchor->w - HYP_SQUARE_SIZE - 3;
         y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
-        
+
         drect(x, y,
             x + HYP_SQUARE_SIZE- 1, y + HYP_SQUARE_SIZE - 1,
             item->ownerData);

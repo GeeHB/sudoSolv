@@ -53,8 +53,6 @@
 #define IDM_RESERVED_BACK       0xFFFB  // Return to parent menu
 #ifdef DEST_CASIO_CALC
 #define STR_RESERVED_BACK       "back"
-#else
-#define STR_RESERVED_BACK       "^ back ^"
 #endif // #ifdef DEST_CASIO_CALC
 
 // Item colors
@@ -136,7 +134,7 @@ public:
     //
     // @pF : Pointer to the callback function or NULL if no ownerdraw
     //
-    // @return : pointer to default drawing function
+    // @return : pointer to the default drawing function
     //
     MENUDRAWINGCALLBACK setMenuDrawingCallBack(MENUDRAWINGCALLBACK pF);
 
@@ -297,11 +295,13 @@ public:
     //  @index : index of menu item to select or unselect
     //          if equal to -1, unselect the currently selected item
     //  @selected : true if item is to be selected
+    //  @redraw : Redraw the item ?
     //
     //  @return : true if item is selected
     //
-    bool selectByIndex(int8_t index, bool selected = true){
-        return _selectByIndex(index, selected, true);    // Redraw items
+    bool selectByIndex(int8_t index, bool selected = true,
+                    bool redraw = false){
+        return _selectByIndex(index, selected, redraw);    // Redraw items
     }
 
     //  getSelectedIndex() : Index of selected item in the current bar

@@ -27,7 +27,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolver"
-#define APP_VERSION  "0.3.1"
+#define APP_VERSION  "0.3.2"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -63,7 +63,7 @@ extern "C" {
 
 #ifndef GRIDS_FOLDER
 #define GRIDS_FOLDER            u"\\\\fls0\\grids"
-#endif // #ifdef GRIDS_FOLDER
+#endif // #ifdef GRID_FOLDER
 
 #define FILE_LINE_SIZE  ROW_COUNT * 2   // (value & separator) * ROW_COUNT
 #define FILE_SIZE       LINE_COUNT * FILE_LINE_SIZE
@@ -116,27 +116,6 @@ enum GAME_KEY{
     KEY_CODE_CAPTURE = KEY_7,
     KEY_CODE_EXIT = KEY_EXIT,
     KEY_CODE_EXE = KEY_EXE
-};
-#else
-enum GAME_KEY{
-    KEY_CODE_F1 = 'A',
-    KEY_CODE_F6 = 'F',
-    KEY_CODE_LEFT = 's',
-    KEY_CODE_RIGHT = 'f',
-    KEY_CODE_UP = 'e',
-    KEY_CODE_DOWN = 'x',
-    KEY_CODE_0 = '0',
-    KEY_CODE_1 = '1',
-    KEY_CODE_2 = '2',
-    KEY_CODE_3 = '3',
-    KEY_CODE_4 = '4',
-    KEY_CODE_5 = '5',
-    KEY_CODE_6 = '6',
-    KEY_CODE_7 = '7',
-    KEY_CODE_8 = '8',
-    KEY_CODE_9 = '9',
-    KEY_CODE_EXIT = 'q',
-    KEY_CODE_EXE = '\13'
 };
 #endif // #ifdef DEST_CASIO_CALC
 

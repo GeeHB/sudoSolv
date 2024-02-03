@@ -9,8 +9,8 @@
 //--
 //----------------------------------------------------------------------
 
-#ifndef __S_SOLVER_GRIDS_h__
-#define __S_SOLVER_GRIDS_h__    1
+#ifndef __S_SOLVER_GRID_h__
+#define __S_SOLVER_GRID_h__    1
 
 #include "consts.h"
 #include "shared/bFile.h"
@@ -230,6 +230,6 @@ private:
 }
 #endif // #ifdef __cplusplus
 
-#endif // __S_SOLVER_GRIDS_h__
+#endif // __S_SOLVER_GRID_h__
 
 // EOF
