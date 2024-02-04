@@ -112,6 +112,11 @@ void menuBar::update(){
             else{
                 cout << "[vide]";
             }
+
+            if (item->ownerData){
+                cout << "[" << (int)item->ownerData << "]";
+            }
+
             cout << (isBitSet(item->state,ITEM_STATE_SELECTED)?"<" : " ");
             cout << "|";
         }

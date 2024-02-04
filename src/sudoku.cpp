@@ -335,90 +335,63 @@ bool sudoku::edit(uint8_t mode){
         case KEY_CODE_1:
             if ((eStatus = _checkAndSet(currentPos, 1, mode)) >= 0){
                 modified = true;
-
-                if (eStatus){
-                    elements++;
-                }
+                elements+=eStatus;
             }
             break;
 
         case KEY_CODE_2:
             if ((eStatus = _checkAndSet(currentPos, 2, mode)) >= 0){
                 modified = true;
-
-                if (eStatus){
-                    elements++;
-                }
+                elements+=eStatus;
             }
             break;
 
         case KEY_CODE_3:
             if ((eStatus = _checkAndSet(currentPos, 3, mode)) >= 0){
                 modified = true;
-
-                if (eStatus){
-                    elements++;
-                }
+                elements+=eStatus;
             }
             break;
 
         case KEY_CODE_4:
             if ((eStatus = _checkAndSet(currentPos, 4, mode)) >= 0){
                 modified = true;
-
-                if (eStatus){
-                    elements++;
-                }
+                elements+=eStatus;
             }
             break;
 
         case KEY_CODE_5:
             if ((eStatus = _checkAndSet(currentPos, 5, mode)) >= 0){
                 modified = true;
-
-                if (eStatus){
-                    elements++;
-                }
+                elements+=eStatus;
             }
             break;
 
         case KEY_CODE_6:
             if ((eStatus = _checkAndSet(currentPos, 6, mode)) >= 0){
                 modified = true;
-
-                if (eStatus){
-                    elements++;
-                }
+                elements+=eStatus;
             }
             break;
 
         case KEY_CODE_7:
             if ((eStatus = _checkAndSet(currentPos, 7, mode)) >= 0){
                 modified = true;
-
-                if (eStatus){
-                    elements++;
-                }
+                elements+=eStatus;
             }
             break;
 
         case KEY_CODE_8:
             if ((eStatus = _checkAndSet(currentPos, 8, mode)) >= 0){
                 modified = true;
-
-                if (eStatus){
-                    elements++;
-                }
+                elements+=eStatus;
             }
             break;
 
         case KEY_CODE_9:
             if ((eStatus = _checkAndSet(currentPos, 9, mode)) >= 0){
                 modified = true;
-
-                if (eStatus){
-                    elements++;
-                }
+                elements+=eStatus;
             }
             break;
 
