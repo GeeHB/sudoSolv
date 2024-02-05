@@ -20,9 +20,12 @@ using namespace std;
 //
 extern bopti_image_t g_menuImgs;
 
-#define MENU_IMG_BACK_ID        0
-#define MENU_IMG_CHECKED_ID     1
-#define MENU_IMG_UNCHECKED_ID   2
+// Images index in the image
+enum IMAGE_INDEXES{
+    MENU_IMG_BACK_ID = 0,
+    MENU_IMG_CHECKED_ID = 1,
+    MENU_IMG_UNCHECKED_ID = 2
+};
 
 #endif // #ifndef DEST_CASIO_CALC
 
@@ -52,9 +55,29 @@ menuBar::menuBar(){
 // @return : pointer to the default drawing function
 //
 MENUDRAWINGCALLBACK menuBar::setMenuDrawingCallBack(MENUDRAWINGCALLBACK pF){
-    current_.pDrawing = pF;
-    return defDrawItem;   // Def. function if needed by calling function
+    current_.pDrawing = (void*)pF;
+    return (MENUDRAWINGCALLBACK)defDrawItem;   // Def. function if needed by calling function
 }
+
+// setColour() : Change the colour used for item's drawings in the
+//              active menu bar
+//
+//  @index : index of the colour to change
+//  @colour : new colour value
+//
+//  @return : previous colour or -1 if error
+//
+int menuBar::setColour(uint8_t index, int colour){
+    if (index>=COL_COUNT){
+        return -1;
+    }
+
+    // Change the colour
+    int actual = visible_->colours[index];
+    visible_->colours[index] = colour;
+    return actual;
+}
+
 
 //
 // Dimensions
@@ -91,7 +114,7 @@ void menuBar::update(){
     for (uint8_t index(0); index < MENU_MAX_ITEM_COUNT; index++){
         item = visible_->items[index];
 #ifdef DEST_CASIO_CALC
-        _drawItem(&anchor, item);
+        _drawItem(item, &anchor);
 #else
         if (item){
             cout << "|" <<
@@ -110,7 +133,7 @@ void menuBar::update(){
                 }
             }
             else{
-                cout << "[vide]";
+                cout << "[no text]";
             }
 
             if (item->ownerData){
@@ -121,7 +144,7 @@ void menuBar::update(){
             cout << "|";
         }
         else{
-            cout << "|     |";
+            cout << "| [empty] |";
         }
 #endif // DEST_CASIO_CALC
 
@@ -292,21 +315,33 @@ MENUACTION menuBar::handleKeyboard(){
 
 //  defDrawItem() : Draw an item
 //
-//  @anchor : Position of the item in screen coordinates
+// @bar : Pointer to the bar containing the item to be drawn
 //  @item : Pointer to a MENUITEM strcut containing informations
 //          concerning the item to draw
+//  @anchor : Position of the item in screen coordinates
+//  @style : Drawing style ie. element(s) to draw
 //
 //  @return : False on error(s)
 //
-bool menuBar::defDrawItem(const RECT* anchor, const MENUITEM* item){
+bool menuBar::defDrawItem(const MENUBAR* bar, const MENUITEM* item,
+                        const RECT* anchor, int style){
+    if (NULL == bar || NULL == anchor){
+        return false;
+    }
+    
 #ifdef DEST_CASIO_CALC
     bool selected(false);
 
     // Draw background
-    drect(anchor->x, anchor->y, anchor->x + anchor->w - 1,
-            anchor->y + anchor->h - 1, COLOUR_WHITE);
-
+    if (isBitSet(style, MENU_DRAW_BACKGROUND)){
+        drect(anchor->x, anchor->y, anchor->x + anchor->w - 1,
+                anchor->y + anchor->h - 1,
+                bar->colours[ITEM_BACKGROUND]);
+    }
+    
     if (item){
+        int colour;
+        
         selected = isBitSet(item->state, ITEM_STATE_SELECTED);
         int imgID(-1);  // No image
 
@@ -334,49 +369,55 @@ bool menuBar::defDrawItem(const RECT* anchor, const MENUITEM* item){
             x = anchor->x + 2;
 
             // Draw the image on left of text
-            dsubimage(x, anchor->y + (anchor->h - MENU_IMG_HEIGHT) / 2,
-                    &g_menuImgs, imgID * MENU_IMG_WIDTH,
-                    0, MENU_IMG_WIDTH, MENU_IMG_HEIGHT, DIMAGE_NOCLIP);
+            if (isBitSet(style, MENU_DRAW_IMAGE)){
+                dsubimage(x, anchor->y + (anchor->h - MENU_IMG_HEIGHT) / 2,
+                        &g_menuImgs, imgID * MENU_IMG_WIDTH,
+                        0, MENU_IMG_WIDTH, MENU_IMG_HEIGHT, DIMAGE_NOCLIP);
+            }
             x+=(MENU_IMG_WIDTH + 2);
         }
         else{
             x = anchor->x + (anchor->w - w) / 2;
         }
 
-       // if (isBitSet(item->status, ITEM_STATUS_TEXT))
-       {
+       if (isBitSet(style, MENU_DRAW_TEXT) &&
+            isBitSet(item->status, ITEM_STATUS_TEXT)){
+
             // text too large ?
+
+            // text colour ID
+            colour = (selected?
+                        TXT_SELECTED:
+                        (isBitSet(item->state, ITEM_STATE_INACTIVE)?
+                        TXT_INACTIVE:TXT_UNSELECTED));
 
             // draw the text
             dtext(x, anchor->y + (anchor->h - h) / 2,
-                selected?
-                    ITEM_COLOUR_SELECTED:
-                    (isBitSet(item->state, ITEM_STATE_INACTIVE)?
-                        ITEM_COLOUR_INACTIVE:
-                        ITEM_COLOUR_UNSELECTED)
-                , item->text);
+                    bar->colours[colour], item->text);
         }
 
-        // frame
-        if (selected){
+        // Borders
+        if (isBitSet(style, MENU_DRAW_BORDERS) && selected){
+            colour = bar->colours[ITEM_BORDER];
             dline(anchor->x, anchor->y,
-                anchor->x, anchor->y + anchor->h - 2, COLOUR_BLACK); // Left
+                anchor->x, anchor->y + anchor->h - 2, colour); // Left
             dline(anchor->x+1, anchor->y + anchor->h - 1,
                 anchor->x + anchor->w -1 - ITEM_ROUNDED_DIM,
-                anchor->y + anchor->h - 1, COLOUR_BLACK);  // top
+                anchor->y + anchor->h - 1, colour);  // top
             dline(anchor->x + anchor->w -1 - ITEM_ROUNDED_DIM, // bottom
                 anchor->y + anchor->h - 1,
                 anchor->x + anchor->w - 1,
-                anchor->y + anchor->h - 1 - ITEM_ROUNDED_DIM, COLOUR_BLACK);
+                anchor->y + anchor->h - 1 - ITEM_ROUNDED_DIM, colour);
             dline(anchor->x + anchor->w - 1, anchor->y,    // right
                 anchor->x + anchor->w - 1,
-                anchor->y + anchor->h - 1 - ITEM_ROUNDED_DIM, COLOUR_BLACK);
+                anchor->y + anchor->h - 1 - ITEM_ROUNDED_DIM, colour);
         }
     } // if (item)
 
-    if (!selected){
+    if (isBitSet(style, MENU_DRAW_BORDERS && !selected)){
         dline(anchor->x, anchor->y,
-                anchor->x + anchor->w -1, anchor->y, COLOUR_BLACK);
+                anchor->x + anchor->w -1, anchor->y,
+                bar->colours[ITEM_BORDER]);
     }
 #endif // #ifdef DEST_CASIO_CALC
     return true;    // Done
@@ -441,9 +482,18 @@ bool menuBar::_addSubMenu(const PMENUBAR container, uint8_t index,
 //
 void menuBar::_clearMenuBar(PMENUBAR bar){
     if (bar){
+        // Bar is empty
         memset(bar, 0x00, sizeof(MENUBAR));
         bar->selIndex = -1;     // No item is selected
         memset(bar->items, 0x00, sizeof(PMENUITEM) * MENU_MAX_ITEM_COUNT);
+
+        // Def colours
+        bar->colours[TXT_SELECTED] = ITEM_COLOUR_SELECTED;
+        bar->colours[TXT_UNSELECTED] = ITEM_COLOUR_UNSELECTED;
+        bar->colours[TXT_INACTIVE] = ITEM_COLOUR_INACTIVE;
+        bar->colours[ITEM_BACKGROUND] = ITEM_COLOUR_BACKGROUND;
+        bar->colours[ITEM_BACKGROUND_SELEECTED] = ITEM_COLOUR_BACKGROUND;
+        bar->colours[ITEM_BORDER] = ITEM_COLOUR_BORDER;
     }
 }
 
@@ -477,6 +527,11 @@ PMENUBAR menuBar::_copyMenuBar(const PMENUBAR source, bool noBackButton){
                     _createItem(IDM_RESERVED_BACK, STR_RESERVED_BACK,
                                 ITEM_STATE_DEFAULT, ITEM_STATUS_DEFAULT);
         }
+
+        // Copy choosen colours
+        memcpy(bar->colours, source->colours, COL_COUNT * sizeof(int));
+
+
     }
     return bar;
 }
@@ -772,12 +827,12 @@ bool menuBar::_selectByIndex(int8_t index, bool selected, bool redraw){
         RECT anchor = {rect_.x, rect_.y, MENUBAR_DEF_ITEM_WIDTH, rect_.h};
         if (-1 != sel){
             anchor.x+=(sel * anchor.w);
-            _drawItem(&anchor, visible_->items[sel]);
+            _drawItem(visible_->items[sel], &anchor);
         }
 
         if (-1 != index){
             anchor.x=(index * anchor.w + rect_.x);
-            _drawItem(&anchor, visible_->items[index]);
+            _drawItem(visible_->items[index], &anchor);
         }
     }
 
@@ -787,25 +842,25 @@ bool menuBar::_selectByIndex(int8_t index, bool selected, bool redraw){
 
 //  _drawItem() : Draw an item
 //
-//  @anchor : Position of the item in screen coordinates
 //  @item : Pointer to a MENUITEM strcut containing informations
 //          concerning the item to draw
+//  @anchor : Position of the item in screen coordinates
 //
 //  @return : False on error(s)
 //
-bool menuBar::_drawItem(const RECT* anchor, const MENUITEM* item){
+bool menuBar::_drawItem(const MENUITEM* item, const RECT* anchor){
     if (NULL == anchor){
         return false;
     }
 
     MENUDRAWINGCALLBACK ownerFunction;
     if (isBitSet(item->status, ITEM_STATUS_OWNERDRAWN) &&
-        NULL != (ownerFunction = visible_->pDrawing)){
-        return ownerFunction(anchor, item); // Call ownerdraw func.
+        NULL != (ownerFunction = (MENUDRAWINGCALLBACK)visible_->pDrawing)){
+        return ownerFunction(visible_, item, anchor, MENU_DRAW_ALL); // Call ownerdraw func.
     }
 
     // Call default method
-    return defDrawItem(anchor, item);
+    return defDrawItem(visible_, item, anchor, MENU_DRAW_ALL);
 }
 
 // EOF

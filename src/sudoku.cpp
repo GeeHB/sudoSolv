@@ -1132,21 +1132,24 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 
 //  _ownItemsDrawings() : Draw an "ownerdraw" menu item
 //
-//  @anchor : Position of the item in screen coordinates
+// @bar : Pointer to the bar containing the item to be drawn
 //  @item : Pointer to a MENUITEM strcut containing informations
 //          concerning the item to draw
+//  @anchor : Position of the item in screen coordinates
+//  @style : Drawing style ie. element(s) to draw
 //
 //  @return : False on error(s)
 //
-bool sudoku::_ownItemsDrawings(const RECT* anchor, const MENUITEM* item){
+ bool sudoku::_ownItemsDrawings(const MENUBAR* bar,
+            const MENUITEM* item, const RECT* anchor, int style){
 #ifdef DEST_CASIO_CALC
     int x, y;
     if (menuBar::isBitSet(item->status, ITEM_STATUS_CHECKBOX)){
         // Draw the checkbox
-        menuBar::defDrawItem(anchor, item);
+        menuBar::defDrawItem(bar, item, anchor, style);
 
         // Draw a rectangle  whose colour is store in ownerData member
-        x = anchor->x + MENU_IMG_WIDTH + 2; // After the image
+        x = anchor->x + MENU_IMG_WIDTH + 4; // After the image
         y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
 
         drect(x, y,
@@ -1154,6 +1157,9 @@ bool sudoku::_ownItemsDrawings(const RECT* anchor, const MENUITEM* item){
             item->ownerData);
     }
     else{
+        // Draw background
+        menuBar::defDrawItem(bar, item, anchor, MENU_DRAW_BACKGROUND);
+
         // Draw a rectangle on the right of item
         x = anchor->x + anchor->w - HYP_SQUARE_SIZE - 3;
         y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
@@ -1162,8 +1168,9 @@ bool sudoku::_ownItemsDrawings(const RECT* anchor, const MENUITEM* item){
             x + HYP_SQUARE_SIZE- 1, y + HYP_SQUARE_SIZE - 1,
             item->ownerData);
 
-        // Then, draw the text
-        menuBar::defDrawItem(anchor, item);
+        // Then, draw the text and borders
+        menuBar::defDrawItem(bar, item, anchor,
+                            MENU_DRAW_TEXT | MENU_DRAW_BORDERS);
     }
 #endif // #ifdef DEST_CASIO_CALC
 

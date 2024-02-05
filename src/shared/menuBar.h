@@ -12,11 +12,13 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        "0.4.3"
+#define _GEEHB_MENU_VER_        "0.5.1"
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
+//
 // Dimensions in pixels
+//
 #define MENUBAR_DEF_HEIGHT      22
 #define MENUBAR_DEF_ITEM_WIDTH  (CASIO_WIDTH / MENU_MAX_ITEM_COUNT)
 
@@ -26,11 +28,15 @@
 #define MENU_IMG_WIDTH          12
 #define MENU_IMG_HEIGHT         12
 
+#define ITEM_ROUNDED_DIM         4
+
+//
 // Item pos is a menu bar
 //
 #define MENU_POS_LEFT           0
 #define MENU_POS_RIGHT          (MENU_MAX_ITEM_COUNT-1)
 
+//
 // Item state - any combination of ...
 //
 #define ITEM_STATE_DEFAULT          0
@@ -39,6 +45,7 @@
 #define ITEM_STATE_CHECKED          4
 #define ITEM_STATE_NO_BACK_BUTTON   8
 
+//
 // Item status
 //
 #define ITEM_STATUS_DEFAULT     0
@@ -48,6 +55,22 @@
 #define ITEM_STATUS_CHECKBOX    8
 #define ITEM_STATUS_OWNERDRAWN  16  // Use own callback for item drawing
 
+// Drawing styles for ownerdraw function
+//
+#define MENU_DRAW_BACKGROUND    1
+#define MENU_DRAW_TEXT          2
+#define MENU_DRAW_IMAGE         4
+#define MENU_DRAW_BORDERS       8
+
+// A few helpers ...
+
+// Draw content (but not background)
+#define MENU_DRAW_CONTENT (MENU_DRAW_TEXT|MENU_DRAW_IMAGE|MENU_DRAW_BORDERS)
+
+// Draw all, by default
+#define MENU_DRAW_ALL           (MENU_DRAW_CONTENT | MENU_DRAW_BACKGROUND)
+
+//
 // Reserved menu item ID
 //
 #define IDM_RESERVED_BACK       0xFFFB  // Return to parent menu
@@ -55,12 +78,29 @@
 #define STR_RESERVED_BACK       "back"
 #endif // #ifdef DEST_CASIO_CALC
 
-// Item colors
-#define ITEM_COLOUR_SELECTED     COLOUR_BLUE
-#define ITEM_COLOUR_UNSELECTED   COLOUR_DK_GREY
-#define ITEM_COLOUR_INACTIVE     COLOUR_LT_GREY
+//
+// Menu colours
+//
 
-#define ITEM_ROUNDED_DIM         4
+// ID of colours (for {set/get}Colour methods
+//
+enum MENU_COL_ID{
+    TXT_SELECTED = 0,
+    TXT_UNSELECTED = 1,
+    TXT_INACTIVE = 2,
+    ITEM_BACKGROUND = 3,
+    ITEM_BACKGROUND_SELEECTED = 4,
+    ITEM_BORDER = 5,
+    COL_COUNT = 6
+};
+
+// Default colours
+//
+#define ITEM_COLOUR_SELECTED    COLOUR_BLUE
+#define ITEM_COLOUR_UNSELECTED  COLOUR_DK_GREY
+#define ITEM_COLOUR_INACTIVE    COLOUR_LT_GREY
+#define ITEM_COLOUR_BACKGROUND  COLOUR_WHITE
+#define ITEM_COLOUR_BORDER      COLOUR_BLACK
 
 // A single item
 //
@@ -73,18 +113,15 @@ typedef struct _menuItem{
     int ownerData;  // Can ba anything ...
 } MENUITEM,* PMENUITEM;
 
-// Ownerdraw's function prototype
-//
-typedef bool (*MENUDRAWINGCALLBACK)(const RECT*, const MENUITEM*); 
-
 // A menu bar
 //
 typedef struct _menuBar{
     uint8_t itemCount;
     int8_t selIndex;
     _menuBar* parent;
-    MENUDRAWINGCALLBACK pDrawing;    // Pointer to ownerdraw callback
+    void* pDrawing;    // Pointer to ownerdraw callback
     PMENUITEM items[MENU_MAX_ITEM_COUNT];
+    int colours[COL_COUNT];
 } MENUBAR, * PMENUBAR;
 
 // Action to perform
@@ -94,6 +131,14 @@ typedef struct _menuAction{
     uint modifier;
     uint8_t type;
 } MENUACTION;
+
+// Ownerdraw's function prototype
+//
+typedef bool (*MENUDRAWINGCALLBACK)(
+            const MENUBAR*,     // MenuBar containing the item
+            const MENUITEM*,    // Item to draw
+            const RECT*,        // Drawing rect for item
+            int style);         // Elements (in item) to draw
 
 // Types of actions
 //
@@ -137,6 +182,27 @@ public:
     // @return : pointer to the default drawing function
     //
     MENUDRAWINGCALLBACK setMenuDrawingCallBack(MENUDRAWINGCALLBACK pF);
+
+    // getColour() : Get the colour used for item's drawings in the
+    //              active menu bar
+    //
+    //  @index : index of the colour to retreive
+    //
+    //  @return : colour or -1 if error
+    //
+    int getColour(uint8_t index, int colour){
+        return ((index>=COL_COUNT)?-1:visible_->colours[index]);
+    }
+
+    // setColour() : Change the colour used for item's drawings in the
+    //              active menu bar
+    //
+    //  @index : index of the colour to change
+    //  @colour : new colour value
+    //
+    //  @return : previous colour or -1 if error
+    //
+    int setColour(uint8_t index, int colour);
 
     //
     // Dimensions
@@ -382,13 +448,16 @@ public:
 
     //  defDrawItem() : Draw an item
     //
-    //  @anchor : Position of the item in screen coordinates
+    // @bar : Pointer to the bar containing the item to be drawn
     //  @item : Pointer to a MENUITEM strcut containing informations
     //          concerning the item to draw
+    //  @anchor : Position of the item in screen coordinates
+    //  @style : Drawing style ie. element(s) to draw
     //
     //  @return : False on error(s)
     //
-    static bool defDrawItem(const RECT* anchor, const MENUITEM* item);
+    static bool defDrawItem(const MENUBAR* bar, const MENUITEM* item,
+                            const RECT* anchor, int style);
 
     // State & status
     //
@@ -531,13 +600,13 @@ private:
 
     //  _drawItem() : Draw an item
     //
-    //  @anchor : Position of the item in screen coordinates
     //  @item : Pointer to a MENUITEM strcut containing informations
     //          concerning the item to draw
+    //  @anchor : Position of the item in screen coordinates
     //
     //  @return : False on error(s)
     //
-    bool _drawItem(const RECT* anchor, const MENUITEM* item);
+    bool _drawItem( const MENUITEM* item, const RECT* anchor);
     
     // Members
 private:

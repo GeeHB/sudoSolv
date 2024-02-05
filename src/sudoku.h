@@ -286,13 +286,16 @@ private:
 
     //  _ownItemsDrawings() : Draw an "ownerdraw" menu item
     //
-    //  @anchor : Position of the item in screen coordinates
+    // @bar : Pointer to the bar containing the item to be drawn
     //  @item : Pointer to a MENUITEM strcut containing informations
     //          concerning the item to draw
+    //  @anchor : Position of the item in screen coordinates
+    //  @style : Drawing style ie. element(s) to draw
     //
     //  @return : False on error(s)
     //
-    static bool _ownItemsDrawings(const RECT* anchor, const MENUITEM* item);
+    static bool _ownItemsDrawings(const MENUBAR* bar,
+                const MENUITEM* item, const RECT* anchor, int style);
 
     // Members
 private:

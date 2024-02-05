@@ -36,5 +36,5 @@ target_link_libraries(sudoSolver Gint::Gint)
 
 if("${FXSDK_PLATFORM_LONG}" STREQUAL fxCG50)
 	generate_g3a(TARGET sudoSolver OUTPUT "sudoSolv.g3a"
-		NAME "sudoSolver D" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)
+		NAME "sudoSolver" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)
 endif()
