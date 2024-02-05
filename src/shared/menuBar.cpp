@@ -34,9 +34,7 @@ enum IMAGE_INDEXES{
 menuBar::menuBar(){
     // Intializes members
     visible_ = &current_; // show current bar
-    rect_ = {0, CASIO_HEIGHT - MENUBAR_DEF_HEIGHT,
-            CASIO_WIDTH, MENUBAR_DEF_HEIGHT};
-
+    setHeight(MENUBAR_DEF_HEIGHT, false);
     _clearMenuBar(&current_);
 }
 
@@ -92,12 +90,15 @@ void menuBar::getRect(RECT& barRect){
 //  setHeight() : change menu bar height
 //
 //  @barHeight : New height in pixels
+//  @updateBar : Update the menubar ?
 //
 //  @return : true if hieght has changed
 //
-bool menuBar::setHeight(uint16_t barHeight){
+bool menuBar::setHeight(uint16_t barHeight, bool updateBar){
     rect_ = {0, CASIO_HEIGHT - barHeight, CASIO_WIDTH, barHeight};
-    update();
+    if (updateBar){
+        update();
+    }
     return true;
 }
 
@@ -328,7 +329,7 @@ bool menuBar::defDrawItem(const MENUBAR* bar, const MENUITEM* item,
     if (NULL == bar || NULL == anchor){
         return false;
     }
-    
+
 #ifdef DEST_CASIO_CALC
     bool selected(false);
 
@@ -338,10 +339,10 @@ bool menuBar::defDrawItem(const MENUBAR* bar, const MENUITEM* item,
                 anchor->y + anchor->h - 1,
                 bar->colours[ITEM_BACKGROUND]);
     }
-    
+
     if (item){
         int colour;
-        
+
         selected = isBitSet(item->state, ITEM_STATE_SELECTED);
         int imgID(-1);  // No image
 
@@ -423,6 +424,51 @@ bool menuBar::defDrawItem(const MENUBAR* bar, const MENUITEM* item,
     return true;    // Done
 }
 
+// isMenuItemChecked() : Check wether a checkbox is in the checked state
+//
+//  @id : checkbox item id
+//  @searchMode : type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+//
+//  return : ITEM_CHECKED if the item is checked, ITEM_UNCHECKED if the item is not cheched
+//          ITEM_ERROR on error (invalid id, not a check box, ...)
+//
+int menuBar::isMenuItemChecked(int id, int searchMode){
+    PMENUITEM item(_findItem(&current_, id, searchMode));
+    if (item && isBitSet(item->status, ITEM_STATUS_CHECKBOX)){
+        return (isBitSet(item->state, ITEM_STATE_CHECKED)?ITEM_CHECKED:ITEM_UNCHECKED);
+    }
+
+    // Not found or not a checkbox
+    return ITEM_ERROR;
+}
+
+// checkMenuItem() : Check or uncheck a menu item checkbox
+//
+//  @id : checkbox item id
+//  @searchMode : type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+//  @checkState : ITEM_CHECKED if item should be checked or ITEM_UNCHECKED
+//
+//  return : ITEM_CHECKED it item is checked, ITEM_UNCHECKED if not checked
+//           and return ITEM_ERROR on error
+//
+int menuBar::checkMenuItem(int id, int searchMode, int check){
+    PMENUITEM item(_findItem(&current_, id, searchMode));
+    if (item && isBitSet(item->status, ITEM_STATUS_CHECKBOX)){
+        if (1 == check){
+            setBit(item->state, ITEM_STATE_CHECKED);
+        }
+        else{
+            removeBit(item->state, ITEM_STATE_CHECKED);
+        }
+
+        // return tatus of bit
+        return (isBitSet(item->state, ITEM_STATE_CHECKED)?ITEM_CHECKED:ITEM_UNCHECKED);
+    }
+
+    // Not found or not a checkbox
+    return ITEM_ERROR;
+}
+
 //
 // Menu bars
 //
@@ -492,7 +538,7 @@ void menuBar::_clearMenuBar(PMENUBAR bar){
         bar->colours[TXT_UNSELECTED] = ITEM_COLOUR_UNSELECTED;
         bar->colours[TXT_INACTIVE] = ITEM_COLOUR_INACTIVE;
         bar->colours[ITEM_BACKGROUND] = ITEM_COLOUR_BACKGROUND;
-        bar->colours[ITEM_BACKGROUND_SELEECTED] = ITEM_COLOUR_BACKGROUND;
+        bar->colours[ITEM_BACKGROUND_SELECTED] = ITEM_COLOUR_BACKGROUND;
         bar->colours[ITEM_BORDER] = ITEM_COLOUR_BORDER;
     }
 }

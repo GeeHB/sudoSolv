@@ -284,7 +284,7 @@ private:
     //
     int _elementTxtColour(position& pos, uint8_t editMode, bool selected);
 
-    //  _ownItemsDrawings() : Draw an "ownerdraw" menu item
+    //  _ownMenuItemsDrawings() : Draw an "ownerdraw" menu item
     //
     // @bar : Pointer to the bar containing the item to be drawn
     //  @item : Pointer to a MENUITEM strcut containing informations
@@ -294,7 +294,7 @@ private:
     //
     //  @return : False on error(s)
     //
-    static bool _ownItemsDrawings(const MENUBAR* bar,
+    static bool _ownMenuItemsDrawings(const MENUBAR* bar,
                 const MENUITEM* item, const RECT* anchor, int style);
 
     // Members

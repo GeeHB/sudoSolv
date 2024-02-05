@@ -49,10 +49,10 @@
 // Item status
 //
 #define ITEM_STATUS_DEFAULT     0
-#define ITEM_STATUS_TEXT        1
+#define ITEM_STATUS_TEXT        1   // Item's text is valid
 #define ITEM_STATUS_SUBMENU     2   // Open a sub menu on "click"
 #define ITEM_STATUS_KEYCODE     4   // item's ID is a key code
-#define ITEM_STATUS_CHECKBOX    8
+#define ITEM_STATUS_CHECKBOX    8   // Item is a checkbox
 #define ITEM_STATUS_OWNERDRAWN  16  // Use own callback for item drawing
 
 // Drawing styles for ownerdraw function
@@ -61,6 +61,14 @@
 #define MENU_DRAW_TEXT          2
 #define MENU_DRAW_IMAGE         4
 #define MENU_DRAW_BORDERS       8
+
+// Checkbox state
+//
+enum CHECKBOX_STATE{
+    ITEM_ERROR = -1,     // Unknown state or not a checkbox
+    ITEM_UNCHECKED = 0,
+    ITEM_CHECKED = 1
+};
 
 // A few helpers ...
 
@@ -89,7 +97,7 @@ enum MENU_COL_ID{
     TXT_UNSELECTED = 1,
     TXT_INACTIVE = 2,
     ITEM_BACKGROUND = 3,
-    ITEM_BACKGROUND_SELEECTED = 4,
+    ITEM_BACKGROUND_SELECTED = 4,       // for future use
     ITEM_BORDER = 5,
     COL_COUNT = 6
 };
@@ -173,7 +181,7 @@ public:
 
     // setMenuDrawingCallBack() : Set function for ownerdraw drawings
     //
-    // When an item has the ITEM_STATUS_OWNERDRAWN status bit set, the 
+    // When an item has the ITEM_STATUS_OWNERDRAWN status bit set, the
     // ownerdraw callback function will be called each time the menubar
     // needs to redraw the item
     //
@@ -223,10 +231,11 @@ public:
     //  setHeight() : change menu bar height
     //
     //  @barHeight : New height in pixels
+    //  @updateBar : Update the menubar ?
     //
     //  @return : true if hieght has changed
     //
-    bool setHeight(uint16_t barHeight);
+    bool setHeight(uint16_t barHeight, bool updateBar = true);
 
     //  update() : Update the menu bar
     //
@@ -299,10 +308,11 @@ public:
     //  @id : Item ID
     //  @text : Item text
     //  @state : Item's initial state
+    //  @status : Item's status
     //
     //  @return : pointer the created item or NULL
     //
-    PMENUITEM addcheckBox(uint8_t index, int id, const char* text,
+    PMENUITEM addCheckBox(uint8_t index, int id, const char* text,
                 int state = ITEM_STATE_DEFAULT,
                 int status = ITEM_STATUS_DEFAULT){
         return _addItem(&current_, index, id, text,
@@ -329,6 +339,7 @@ public:
     //  @id : Item ID
     //  @text : Item text
     //  @state : Item's initial state
+    //  @status : Item's status
     //
     //  @return : pointer the created item or NULL
     //
@@ -336,9 +347,30 @@ public:
                     int state = ITEM_STATE_DEFAULT,
                     int status = ITEM_STATUS_DEFAULT){
         return _addItem(&current_, current_.itemCount, id, text,
-                        state, ITEM_STATUS_CHECKBOX | status);
+                        state,  status | ITEM_STATUS_CHECKBOX);
     }
-    
+
+    // isMenuItemChecked() : Check wether a checkbox is in the checked state
+    //
+    //  @id : checkbox item id
+    //  @searchMode : type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+    //
+    //  return : ITEM_CHECKED if the item is checked, ITEM_UNCHECKED if the item is not cheched
+    //          ITEM_ERROR on error (invalid id, not a check box, ...)
+    //
+    int isMenuItemChecked(int id, int searchMode = SEARCH_BY_ID);
+
+    // checkMenuItem() : Check or uncheck a menu item checkbox
+    //
+    //  @id : checkbox item id
+    //  @searchMode : type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+    //  @checkState : ITEM_CHECKED if item should be checked or ITEM_UNCHECKED
+    //
+    //  return : ITEM_CHECKED it item is checked, ITEM_UNCHECKED if not checked
+    //           and return ITEM_ERROR on error
+    //
+    int checkMenuItem(int id, int searchMode = SEARCH_BY_ID, int check = 1);
+
     //  removeItem() : Remove an item from the current menu bar
     //      Remove the item menu or the submenu
     //
@@ -607,7 +639,7 @@ private:
     //  @return : False on error(s)
     //
     bool _drawItem( const MENUITEM* item, const RECT* anchor);
-    
+
     // Members
 private:
     MENUBAR     current_;   // Active bar

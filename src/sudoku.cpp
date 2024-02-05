@@ -1073,7 +1073,7 @@ void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
     else{
         // Some items should be drawn by this class
         // and not by the menubar object itself
-        menu.setMenuDrawingCallBack(_ownItemsDrawings);
+        menu.setMenuDrawingCallBack(_ownMenuItemsDrawings);
 
         // Coloured hyp. submenu
         //  each colour is stored in the ownerData member ot item struct
@@ -1100,7 +1100,7 @@ void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
         menu.addItem(MENU_POS_RIGHT, IDM_MANUAL_END, IDS_MANUAL_END);
 
         // Draw coloured checkboxes
-        hypMenu.setMenuDrawingCallBack(_ownItemsDrawings);
+        hypMenu.setMenuDrawingCallBack(_ownMenuItemsDrawings);
     }
 }
 
@@ -1130,7 +1130,7 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
     }
 }
 
-//  _ownItemsDrawings() : Draw an "ownerdraw" menu item
+//  _ownMenuItemsDrawings() : Draw an "ownerdraw" menu item
 //
 // @bar : Pointer to the bar containing the item to be drawn
 //  @item : Pointer to a MENUITEM strcut containing informations
@@ -1140,7 +1140,7 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 //
 //  @return : False on error(s)
 //
- bool sudoku::_ownItemsDrawings(const MENUBAR* bar,
+ bool sudoku::_ownMenuItemsDrawings(const MENUBAR* bar,
             const MENUITEM* item, const RECT* anchor, int style){
 #ifdef DEST_CASIO_CALC
     int x, y;
