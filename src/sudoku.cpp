@@ -78,7 +78,7 @@ void sudoku::display(bool update){
             cout << car << " - ";
 
             // Colour ?
-            if (pElement->hypColour() != HYP_COLOUR_NONE){
+            if (pElement->hypColour() != HYP_NO_COLOUR){
                 car = (char)(pElement->hypColour());
                 cout << car;
             }
@@ -93,7 +93,7 @@ void sudoku::display(bool update){
                 cout << ',';
             }
 
-            pos+=1;  // next position
+            pos++;  // next position
         }
     }
 #endif // #ifdef DEST_CASIO_CALC
@@ -164,7 +164,7 @@ uint8_t sudoku::load(const FONTCHARACTER fName){
         car = buffer[index++];
 
         // next element
-        pos+=1;
+        pos++;
     }
 
     // The new grid is valid
@@ -241,6 +241,9 @@ bool sudoku::edit(uint8_t mode){
     bool showSelected(true);
     bool reDraw(false);
     int eStatus;
+    int hypID(-1);   // No hypothese
+    int hypColour(HYP_NO_COLOUR);
+    int index;
 
     position currentPos(0, false);
     position prevPos(0, false);
@@ -321,6 +324,7 @@ bool sudoku::edit(uint8_t mode){
             reDraw = true;
             break;
 
+        //
         // Change the current value
         //
         case KEY_CODE_0:
@@ -395,6 +399,23 @@ bool sudoku::edit(uint8_t mode){
             }
             break;
 
+        //
+        // Hyptoheses
+        //
+        case IDM_MANUAL_ACCEPT:
+            if (_acceptHypothese(hypColour)){
+                // At least one element's colour has changed => redraw
+                display();
+            }
+            break;
+
+        case IDM_MANUAL_REJECT:
+            if (_rejectHypothese(hypColour)){
+                // At least one element's colour has changed => redraw
+                display();
+            }
+            break;
+
         // Cancel modifications
         case IDM_EDIT_CANCEL:
             revert();
@@ -403,15 +424,27 @@ bool sudoku::edit(uint8_t mode){
 
         // Exit from "edit" mode
         case KEY_MENU:
-        case KEY_EXIT:
+        //case KEY_EXIT:
         case IDM_EDIT_OK:
             cont = false;
             break;
 
-        // ???
+        // Other messages
         default:
+            if ((index = (action.value - IDM_MANUAL_COLOUR_FIRST)) >=0 &&
+            index <= (IDM_MANUAL_COLOUR_FIRST+3) &&
+            _onChangeHypothese(menu, index, hypID, hypColour)){
+                menu.showParentBar(false);   // Return to "manual" menubar
+                PMENUITEM item = menu.findItem(IDM_MANUAL_HYP_SUBMENU, SEARCH_BY_ID);
+                if (item){
+                    item->ownerData = hypColour;    // Update col in menu
+                }
+
+                menu.update();
+            }
+            
             break;
-        } // switch (car)
+        } // switch (action.value)
 
         if (reDraw || (prevPos != currentPos)){
             // if sel. changed, erase previously selected element
@@ -707,7 +740,7 @@ void sudoku::_drawContent(){
                     (pElement->isObvious()?TXT_OBVIOUS_COLOUR:TXT_COLOUR))
                     );
             }
-            pos+=1; // next element
+            pos++; // next element
         }
     }
 }
@@ -721,18 +754,19 @@ void sudoku::_drawContent(){
 //
 void sudoku::_drawSingleElement(position pos, int bkColour, int txtColour){
 #ifdef DEST_CASIO_CALC
-    element* pelement(&elements_[pos]);
-    uint8_t row(pos.row()), line(pos.line()), value(pelement->value());
-    int hypColour(pelement->hypColour());
+    element* pElement(&elements_[pos]);
+    uint8_t row(pos.row()), line(pos.line()), value(pElement->value());
+    int hypColour(pElement->hypColour());
     uint16_t x(screen_.x + row * SQUARE_SIZE + BORDER_THICK);
     uint16_t y(screen_.y + line * SQUARE_SIZE + BORDER_THICK);
+
     // Erase background
     drect(x, y, x + INT_SQUARE_SIZE, y + INT_SQUARE_SIZE, bkColour);
 
     // display the value (if valid)
     if (value){
         // Hypothese colour
-        if (HYP_COLOUR_NONE != hypColour){
+        if (HYP_NO_COLOUR != hypColour){
             drect(x + INT_SQUARE_SIZE - HYP_SQUARE_SIZE - 1,
                 y + 1,
                 x + INT_SQUARE_SIZE - 1,
@@ -791,7 +825,7 @@ uint8_t sudoku::_findObviousValues(){
         }
 
         // Next pos.
-        pos+=1;
+        pos++;
 
     }   // for
 
@@ -899,13 +933,13 @@ uint8_t sudoku::_setObviousValueInLines(position& pos, uint8_t value){
         }
 
         // Next row
-        candidatePos+=1;
+        candidatePos++;
     }
 
     // Did we find a position ?
     if (found){
-        // Yes !!!
-        elements_[foundPos].setValue(value, STATUS_OBVIOUS);   // One more obvious value
+        // Yes => one more obvious val.
+        elements_[foundPos].setValue(value, STATUS_OBVIOUS);
         return 1;
     }
 
@@ -956,7 +990,8 @@ uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
         return 0;
     }
 
-    // Just one square misses the value => we'll try to put this value in the correct line
+    // Just one square misses the value
+    // => we'll try to put this value in the correct line
     //
     uint8_t candidate, candidateRow;
     if (firstPos.row == -1){
@@ -1037,10 +1072,10 @@ uint8_t sudoku::_previousPos(position& current){
     elements_[current].empty();
 
     // Don't touch "Original" nor "Obvious" values
-    current -= 1;
+    current--;
     while (POS_VALID == current.status()
             && !elements_[current].isChangeable()){
-        current -= 1;
+        current--;
     }
 
     return current.status();
@@ -1079,24 +1114,31 @@ void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
         //  each colour is stored in the ownerData member ot item struct
         menuBar hypMenu;
         PMENUITEM item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST,
-                                NULL, ITEM_STATUS_OWNERDRAWN);
+                                NULL, ITEM_STATE_DEFAULT,
+                                ITEM_STATUS_OWNERDRAWN);
         item->ownerData = HYP_COLOUR_YELLOW;
 
         item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST + 1,
-                                NULL, ITEM_STATUS_OWNERDRAWN);
+                                NULL, ITEM_STATE_DEFAULT,
+                                ITEM_STATUS_OWNERDRAWN);
         item->ownerData = HYP_COLOUR_BLUE;
 
         item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST + 2,
-                                NULL, ITEM_STATUS_OWNERDRAWN);
+                                NULL, ITEM_STATE_DEFAULT,
+                                ITEM_STATUS_OWNERDRAWN);
         item->ownerData = HYP_COLOUR_GREEN;
 
         item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST + 3,
-                                NULL, ITEM_STATUS_OWNERDRAWN);
+                                NULL, ITEM_STATE_DEFAULT,
+                                ITEM_STATUS_OWNERDRAWN);
         item->ownerData = HYP_COLOUR_RED;
 
-        menu.appendSubMenu(&hypMenu, IDM_MANUAL_SUBMENU, IDS_MANUAL_SUBMENU);
-        menu.appendItem(IDM_MANUAL_MERGE, IDS_MANUAL_MERGE);
-        menu.appendItem(IDM_MANUAL_REMOVE, IDS_MANUAL_REMOVE);
+        item = menu.appendSubMenu(&hypMenu,
+                    IDM_MANUAL_HYP_SUBMENU, IDS_MANUAL_HYP_SUBMENU);
+        item->ownerData = HYP_NO_COLOUR;
+                    
+        menu.appendItem(IDM_MANUAL_ACCEPT, IDS_MANUAL_ACCEPT);
+        menu.appendItem(IDM_MANUAL_REJECT, IDS_MANUAL_REJECT);
         menu.addItem(MENU_POS_RIGHT, IDM_MANUAL_END, IDS_MANUAL_END);
 
         // Draw coloured checkboxes
@@ -1176,4 +1218,91 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 
     return true;
 }
+
+//
+// Coloured hypotheses
+//
+
+// _acceptHypothese() : Accept all the hypothese's values
+//
+//  When accepted, all elements with the given hyp. colour
+//  will be merged with non coloured elements 
+//  and have their hyp. colour removed.
+//
+//  @colour : Hypothese's colour
+//
+//  @return : Count of elements concerned
+//
+uint8_t sudoku::_acceptHypothese(int colour){
+    int count(0);
+    if (colour != HYP_NO_COLOUR){
+        for (uint8_t index(INDEX_MIN); index < INDEX_MAX; index++){
+            if (colour == elements_[index].hypColour()){
+                elements_[index].setHypColour(HYP_NO_COLOUR);
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+// _rejectHypothese() : Reject all the hypothese's values
+//
+//  When rejectedted, all elements with the given hyp. colour
+//  will be cleared (emptied with no more hyp. colour)
+//
+//  @colour : Hypothese's colour
+//
+//  @return : Count of elements concerned
+//
+uint8_t sudoku::_rejectHypothese(int colour){
+    int count(0);
+    if (colour != HYP_NO_COLOUR){
+        for (uint8_t index(INDEX_MIN); index < INDEX_MAX; index++){
+            if (colour == elements_[index].hypColour()){
+                elements_[index].empty();
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+// _onChangeHypothese() : Change coloured hyp.
+//
+//  @menu : Hyp. colours menu
+//  @newHypID : Colour index
+//  @currentID : Current colour index
+//  @currentCol : Current col. value
+//
+//  @return : true if successfully changed the hyp. colour
+//
+bool sudoku::_onChangeHypothese(menuBar& menu, int newHypID,
+                                int& currentID, int& currentCol){
+    PMENUITEM item = menu.findItem(newHypID + IDM_MANUAL_COLOUR_FIRST,
+                                    SEARCH_BY_ID);
+    if (item){
+        // Unselect previous col.
+        if (currentID >= 0){
+            menu.checkMenuItem(currentID + IDM_MANUAL_COLOUR_FIRST,
+                                SEARCH_BY_ID, ITEM_UNCHECKED);
+        }
+
+        if (menu.isBitSet(item->state, ITEM_STATE_CHECKED)){
+            currentCol = item->ownerData;
+            currentID = newHypID;
+        }
+        else{
+            currentCol = HYP_NO_COLOUR; // No hyp.
+            currentID = -1;
+        }
+
+        return true;
+    }
+    
+    return false;
+}
+
 // EOF

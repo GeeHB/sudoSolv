@@ -41,7 +41,7 @@ enum GAME_KEY{
     KEY_CODE_EXE = '\13'
 };
 
-#define HYP_COLOUR_NONE     ' '
+#define HYP_NO_COLOUR       ' '
 #define HYP_COLOUR_YELLOW   'j'
 #define HYP_COLOUR_BLUE     'b'
 #define  HYP_COLOUR_GREEN   'v'

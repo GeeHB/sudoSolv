@@ -297,6 +297,45 @@ private:
     static bool _ownMenuItemsDrawings(const MENUBAR* bar,
                 const MENUITEM* item, const RECT* anchor, int style);
 
+    //
+    // Coloured hypotheses
+    //
+
+    // _acceptHypothese() : Accept all the hypothese's values
+    //
+    //  When accepted, all elements with the given hyp. colour
+    //  will be merged with non coloured elements 
+    //  and have their hyp. colour removed.
+    //
+    //  @colour : Hypothese's colour
+    //
+    //  @return : Count of elements concerned
+    //
+    uint8_t _acceptHypothese(int colour);
+
+    // _rejectHypothese() : Reject all the hypothese's values
+    //
+    //  When rejectedted, all elements with the given hyp. colour
+    //  will be cleared (emptied with no more hyp. colour)
+    //
+    //  @colour : Hypothese's colour
+    //
+    //  @return : Count of elements concerned
+    //
+    uint8_t _rejectHypothese(int colour);
+
+    // _onChangeHypothese() : Change coloured hyp.
+    //
+    //  @menu : Hyp. colours menu
+    //  @newHypID : Colour index
+    //  @currentID : Current colour index
+    //  @currentCol : Current col. value
+    //
+    //  @return : true if successfully changed the hyp. colour
+    //
+    bool _onChangeHypothese(menuBar& menu, int newHypID,
+                                    int& currentID, int& currentCol);
+
     // Members
 private:
     element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one-dim. table

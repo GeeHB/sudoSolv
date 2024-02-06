@@ -25,7 +25,7 @@
 //
 #ifdef DEST_CASIO_CALC
 enum HYP_COLOUR{
-    HYP_COLOUR_NONE = GRID_BK_COLOUR,
+    HYP_NO_COLOUR = GRID_BK_COLOUR,
     HYP_COLOUR_YELLOW = COLOUR_YELLOW,
     HYP_COLOUR_BLUE = COLOUR_BLUE,
     HYP_COLOUR_GREEN = COLOUR_GREEN,
@@ -68,8 +68,10 @@ public:
         return (_isStatusBitSet(STATUS_SET)?value_:EMPTY_VALUE);
     }
 
-    // empty() : Empty the element's value
+    // empty() : Empty the element
+    //
     //  @return : previous value
+    //
     uint8_t empty();
 
     //
@@ -125,9 +127,18 @@ public:
     // Hypotheses' colours
     //
 
+    // setHypColour() : Change the hypothese's colour
+    //
+    //  @hypcolour : Colour to use
+    //
     void setHypColour(int hypColour){
         hypotheseColour_ = hypColour;
     }
+
+    // hypColour() : Get the hyp. colour used by the element
+    //
+    //  @return : Current hyp. colour
+    //
     int hypColour(){
         return hypotheseColour_;
     }

@@ -95,10 +95,18 @@ public:
         forward(inc);
         return *this;
     }
+    position& operator++(int){
+        forward(1);
+        return *this;
+    }
     uint8_t forward(uint8_t inc = 1);
 
     position& operator-=(uint8_t dec){
         backward(dec);
+        return *this;
+    }
+    position& operator--(int){
+        backward(1);
         return *this;
     }
     uint8_t backward(uint8_t dec = 1);

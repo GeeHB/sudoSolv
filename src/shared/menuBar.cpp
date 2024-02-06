@@ -258,9 +258,7 @@ MENUACTION menuBar::handleKeyboard(){
                 }
                 else{
                     if (IDM_RESERVED_BACK == item->id){
-                        visible_ = visible_->parent;    // Return to parent menu
-                        _selectByIndex(-1, false, false);
-                        update();
+                        showParentBar();
                     }
                     else{
                         // a selectable item ...
@@ -312,6 +310,21 @@ MENUACTION menuBar::handleKeyboard(){
     // Return keyboard event
     ret.modifier = kb.modifier();
     return ret;
+}
+
+// showParentBar() : Return to parent menubar if exists
+//
+//  @updateBar : update the menu ?
+//
+void menuBar::showParentBar(bool updateBar){
+    if (visible_ && visible_->parent){
+        visible_ = visible_->parent;
+        _selectByIndex(-1, false, false);
+
+        if (updateBar){
+            update();
+        }
+    }
 }
 
 //  defDrawItem() : Draw an item
@@ -482,9 +495,9 @@ int menuBar::checkMenuItem(int id, int searchMode, int check){
 //  @text : Submenu text
 //  @state : initial state of submenu
 //
-//  @return : true if sub menu is added
+//  @return : pointer the created item or NULL
 //
-bool menuBar::_addSubMenu(const PMENUBAR container, uint8_t index,
+PMENUITEM menuBar::_addSubMenu(const PMENUBAR container, uint8_t index,
                             PMENUBAR subMenu, int id,
                             const char* text, int itemState){
     size_t len(0);
@@ -494,14 +507,14 @@ bool menuBar::_addSubMenu(const PMENUBAR container, uint8_t index,
         _findItem(container, id, SEARCH_BY_ID) ||
         container->itemCount == (MENU_MAX_ITEM_COUNT - 1) ||
         ! text || !(len = strlen(text))){
-        return false;
+        return NULL;
     }
 
     // Create a copy of the menu bar
     PMENUBAR sub(_copyMenuBar(subMenu,
                     isBitSet(itemState, ITEM_STATE_NO_BACK_BUTTON)));
     if (NULL == sub){
-        return false;
+        return NULL;
     }
 
     // Create item
@@ -509,7 +522,7 @@ bool menuBar::_addSubMenu(const PMENUBAR container, uint8_t index,
                             ITEM_STATE_DEFAULT, ITEM_STATUS_DEFAULT);
     if (NULL == item){
         _freeMenuBar(sub, true);
-        return false;
+        return NULL;
     }
 
     item->status = ITEM_STATUS_SUBMENU | ITEM_STATUS_TEXT;
@@ -519,7 +532,7 @@ bool menuBar::_addSubMenu(const PMENUBAR container, uint8_t index,
     container->items[index] = item;    // item pointing to the sub menu
     container->itemCount++;
 
-    return true;
+    return item;
 }
 
 // _clearMenuBar() : Empty a menu bar
@@ -733,20 +746,20 @@ PMENUITEM menuBar::_findItem(const PMENUBAR bar, int searchedID, int searchMode,
             for (uint8_t index = 0;
                 !foundItem && index < MENU_MAX_ITEM_COUNT; index++){
                 if ((item = bar->items[index])){
-                    if (isBitSet(item->status, ITEM_STATUS_SUBMENU)){
-                        // in a sub menu ?
-                        if ((sItem = _findItem((PMENUBAR)item->subMenu,
-                                searchedID, searchMode, containerBar, pIndex))){
-                            foundItem = sItem;   // Found in a sub menu
+                    if (item->id == searchedID){    // items and submenus have IDs !!!
+                        if (pIndex){
+                            (*pIndex) = index;
                         }
+
+                        foundItem = item;
                     }
                     else{
-                        if (item->id == searchedID){
-                            if (pIndex){
-                                (*pIndex) = index;
+                        if (isBitSet(item->status, ITEM_STATUS_SUBMENU)){
+                            // in a sub menu ?
+                            if ((sItem = _findItem((PMENUBAR)item->subMenu,
+                                    searchedID, searchMode, containerBar, pIndex))){
+                                foundItem = sItem;   // Found in a sub menu
                             }
-
-                            foundItem = item;
                         }
                     }
                 }

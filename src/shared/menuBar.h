@@ -37,7 +37,7 @@
 #define MENU_POS_RIGHT          (MENU_MAX_ITEM_COUNT-1)
 
 //
-// Item state - any combination of ...
+// Item state - could be any combination of :
 //
 #define ITEM_STATE_DEFAULT          0
 #define ITEM_STATE_SELECTED         1
@@ -46,7 +46,7 @@
 #define ITEM_STATE_NO_BACK_BUTTON   8
 
 //
-// Item status
+// Item status - could be any combination of :
 //
 #define ITEM_STATUS_DEFAULT     0
 #define ITEM_STATUS_TEXT        1   // Item's text is valid
@@ -76,7 +76,7 @@ enum CHECKBOX_STATE{
 #define MENU_DRAW_CONTENT (MENU_DRAW_TEXT|MENU_DRAW_IMAGE|MENU_DRAW_BORDERS)
 
 // Draw all, by default
-#define MENU_DRAW_ALL           (MENU_DRAW_CONTENT | MENU_DRAW_BACKGROUND)
+#define MENU_DRAW_ALL    (MENU_DRAW_CONTENT | MENU_DRAW_BACKGROUND)
 
 //
 // Reserved menu item ID
@@ -92,7 +92,7 @@ enum CHECKBOX_STATE{
 
 // ID of colours (for {set/get}Colour methods
 //
-enum MENU_COL_ID{
+enum MENU_COLOURS_ID{
     TXT_SELECTED = 0,
     TXT_UNSELECTED = 1,
     TXT_INACTIVE = 2,
@@ -150,13 +150,17 @@ typedef bool (*MENUDRAWINGCALLBACK)(
 
 // Types of actions
 //
-#define ACTION_MENU         0     // value is a menu ID
-#define ACTION_KEYBOARD     1     // value is a keycode
+enum MENU_ACTION{
+    ACTION_MENU = 0,    // value is a menu ID
+    ACTION_KEYBOARD = 1 // value is a keycode
+};
 
 // Types of search modes
 //
-#define SEARCH_BY_ID        0
-#define SEARCH_BY_INDEX     1
+enum MENU_SEZARCH_MODE{
+    SEARCH_BY_ID = 0,
+    SEARCH_BY_INDEX = 1
+};
 
 #ifdef __cplusplus
 extern "C" {
@@ -198,7 +202,7 @@ public:
     //
     //  @return : colour or -1 if error
     //
-    int getColour(uint8_t index, int colour){
+    int getColour(uint8_t index){
         return ((index>=COL_COUNT)?-1:visible_->colours[index]);
     }
 
@@ -263,9 +267,9 @@ public:
     //  @text : Submenu text
     //  @state : Menu item initial state
     //
-    //  @return : true if sub menu is added
+    //  @return : pointer the created item or NULL
     //
-    bool addSubMenu(uint8_t index, const menuBar* subMenu,
+    PMENUITEM addSubMenu(uint8_t index, const menuBar* subMenu,
             int id, const char* text, int state = ITEM_STATE_DEFAULT){
         return _addSubMenu(&current_, index,
                         (PMENUBAR)subMenu, id, text, state);
@@ -278,9 +282,9 @@ public:
     //  @text : Submenu text
     //  @state : Menu item initial state
     //
-    //  @return : true if sub menu is added
+    //  @return : pointer the created item or NULL
     //
-    bool appendSubMenu(const menuBar* subMenu, int id,
+    PMENUITEM appendSubMenu(const menuBar* subMenu, int id,
                         const char* text, int state = ITEM_STATE_DEFAULT){
         return _addSubMenu(&current_, current_.itemCount,
                             (PMENUBAR)subMenu, id, text, state);
@@ -355,8 +359,9 @@ public:
     //  @id : checkbox item id
     //  @searchMode : type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
     //
-    //  return : ITEM_CHECKED if the item is checked, ITEM_UNCHECKED if the item is not cheched
-    //          ITEM_ERROR on error (invalid id, not a check box, ...)
+    //  return : ITEM_CHECKED if the item is checked, ITEM_UNCHECKED
+    //          if the item is not cheched and ITEM_ERROR on error
+    //          (invalid id, not a check box, ...)
     //
     int isMenuItemChecked(int id, int searchMode = SEARCH_BY_ID);
 
@@ -369,7 +374,8 @@ public:
     //  return : ITEM_CHECKED it item is checked, ITEM_UNCHECKED if not checked
     //           and return ITEM_ERROR on error
     //
-    int checkMenuItem(int id, int searchMode = SEARCH_BY_ID, int check = 1);
+    int checkMenuItem(int id, int searchMode = SEARCH_BY_ID,
+                    int check = ITEM_CHECKED);
 
     //  removeItem() : Remove an item from the current menu bar
     //      Remove the item menu or the submenu
@@ -478,6 +484,12 @@ public:
     //
     MENUACTION handleKeyboard();
 
+    // showParentBar() : Return to parent menubar if exists
+    //
+    //  @updateBar : update the menu ?
+    //
+    void showParentBar(bool updateBar = true);
+
     //  defDrawItem() : Draw an item
     //
     // @bar : Pointer to the bar containing the item to be drawn
@@ -521,9 +533,9 @@ private:
     //  @text : Submenu text
     //  @state : initial state of submenu
     //
-    //  @return : true if sub menu is added
+    //  @return : pointer the created item or NULL
     //
-    bool _addSubMenu(const PMENUBAR container, uint8_t index,
+    PMENUITEM _addSubMenu(const PMENUBAR container, uint8_t index,
                 PMENUBAR subMenu, int id, const char* text, int state);
 
     // _clearMenuBar() : Empty a menu bar
