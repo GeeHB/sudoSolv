@@ -85,13 +85,14 @@ extern "C" {
 #define HYP_SQUARE_SIZE         5
 
 // Colors
-#define BORDER_COLOUR           C_RGB(10, 19, 23)
+#define EXT_BORDER_COLOUR       C_RGB(10, 19, 23)   // Large ext. borders
+#define INT_BORDER_COLOUR       C_RGB(12, 12, 31)   // Thin int. borders
 #define SCREEN_BK_COLOUR        C_RGB(28, 28, 30)
 #define GRID_BK_COLOUR          C_RGB(24, 24, 26)
 #define GRID_BK_COLOUR_DARK     C_RGB(21, 21, 22)
 #define TXT_COLOUR              C_RGB(8, 8, 8)
 #define TXT_ORIGINAL_COLOUR     C_RGB(30, 15, 14)
-#define TXT_OBVIOUS_COLOUR      BORDER_COLOUR
+#define TXT_OBVIOUS_COLOUR      EXT_BORDER_COLOUR
 #define SEL_BK_COLOUR           C_RGB(6, 6, 31)
 #define SEL_TXT_GAME_COLOUR     TXT_ORIGINAL_COLOUR
 //

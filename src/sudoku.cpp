@@ -643,7 +643,8 @@ bool sudoku::_checkValue(position& pos, uint8_t value){
 //  @value : value to put
 //  @mode : edition mode
 //
-//  @return : -1 if can't be changed, 0 if changed, 1 if new value set
+//  @return : -1 if can't be changed, 0 if changed an existing value,
+//          1 if new value set
 //
 int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
     uint8_t status(elements_[pos].status());
@@ -698,33 +699,32 @@ void sudoku::_drawBackground(){
         posY += tSize;
     }
 
-
-    // Draw thin borders ...
+    // Draw thin (internal) borders
     uint8_t id;
     for (id = 1; id < LINE_COUNT; id++){
         posX = screen_.x + id * SQUARE_SIZE;
         posY = screen_.y + id * SQUARE_SIZE;
         dline(posX, screen_.y,
-            posX, screen_.y + GRID_SIZE, BORDER_COLOUR);   // vert
+            posX, screen_.y + GRID_SIZE, INT_BORDER_COLOUR);   // vert
         dline(screen_.x, posY,
-            screen_.x + GRID_SIZE, posY, BORDER_COLOUR);  // horz
+            screen_.x + GRID_SIZE, posY, INT_BORDER_COLOUR);  // horz
     }
 
-    // ... and large borders
+    // Draw large (external) borders
     uint16_t lSquare(SQUARE_SIZE * 3), thick(BORDER_THICK - 1);
     for (id = 0; id <= 3; id++){
         posX = screen_.x + id * lSquare;
         posY = screen_.y + id * lSquare;
         drect(posX, screen_.y,
             posX + thick, screen_.y + GRID_SIZE,
-            BORDER_COLOUR);   // vert
+            EXT_BORDER_COLOUR);   // vert
         drect(screen_.x, posY,
             screen_.x + GRID_SIZE, posY + thick,
-            BORDER_COLOUR);   // horz
+            EXT_BORDER_COLOUR);   // horz
     }
 }
 
-// _drawContent() : : Draw all the elements
+// _drawContent() : Draw all the elements
 //
 void sudoku::_drawContent(){
     position pos(0, false);
@@ -1236,7 +1236,7 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 uint8_t sudoku::_acceptHypothese(int colour){
     int count(0);
     if (colour != HYP_NO_COLOUR){
-        for (uint8_t index(INDEX_MIN); index < INDEX_MAX; index++){
+        for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
             if (colour == elements_[index].hypColour()){
                 elements_[index].setHypColour(HYP_NO_COLOUR);
                 count++;
@@ -1259,7 +1259,7 @@ uint8_t sudoku::_acceptHypothese(int colour){
 uint8_t sudoku::_rejectHypothese(int colour){
     int count(0);
     if (colour != HYP_NO_COLOUR){
-        for (uint8_t index(INDEX_MIN); index < INDEX_MAX; index++){
+        for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
             if (colour == elements_[index].hypColour()){
                 elements_[index].empty();
                 count++;
@@ -1273,7 +1273,7 @@ uint8_t sudoku::_rejectHypothese(int colour){
 // _onChangeHypothese() : Change coloured hyp.
 //
 //  @menu : Hyp. colours menu
-//  @newHypID : Colour index
+//  @newHypID : New colour index (in menu)
 //  @currentID : Current colour index
 //  @currentCol : Current col. value
 //
@@ -1290,6 +1290,8 @@ bool sudoku::_onChangeHypothese(menuBar& menu, int newHypID,
                                 SEARCH_BY_ID, ITEM_UNCHECKED);
         }
 
+        /* (menu.isMenuItemChecked(newHypID + IDM_MANUAL_COLOUR_FIRST,
+            SEARCH_BY_ID) == ITEM_CHECKED) */
         if (menu.isBitSet(item->state, ITEM_STATE_CHECKED)){
             currentCol = item->ownerData;
             currentID = newHypID;

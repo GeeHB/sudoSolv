@@ -70,6 +70,7 @@ public:
     //
     void revert();
 
+    //
     // io
     //
 
@@ -133,7 +134,7 @@ private:
     //
     bool _checkValue(position& pos, uint8_t value);
 
-    // _checkLine() : Can we put the value at the current position ?
+    // _checkLine() : Can we put the value at the current line ?
     //
     //  @pos : position
     //  @value : Check this value at this position's line
@@ -168,8 +169,8 @@ private:
     //  @value : value to put
     //  @mode : edition mode
     //
-    //  @return : -1 if can't be changed, 0 if changed, 1 if new value set
-    //
+    //  @return : -1 if can't be changed, 0 if changed an existing value,
+    //          1 if new value set
     int _checkAndSet(position& pos, uint8_t value, uint8_t mode);
 
     //
@@ -181,7 +182,7 @@ private:
     //
     void _drawBackground();
 
-    // _drawContent() : : Draw all the elements
+    // _drawContent() : Draw all the elements
     //
     void _drawContent();
 #endif // #ifdef DEST_CASIO_CALC
@@ -327,7 +328,7 @@ private:
     // _onChangeHypothese() : Change coloured hyp.
     //
     //  @menu : Hyp. colours menu
-    //  @newHypID : Colour index
+    //  @newHypID : New colour index (in menu)
     //  @currentID : Current colour index
     //  @currentCol : Current col. value
     //
@@ -339,7 +340,7 @@ private:
     // Members
 private:
     element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one-dim. table
-    tinySquare tSquares_[TINY_COUNT];  // Elements IDs in tinySquares
+    tinySquare tSquares_[TINY_COUNT];	// Access to elements in tinySquares
 
     // Position & dims of screen
     // {x Grid, yGrid, "screen" width , "screen" height}

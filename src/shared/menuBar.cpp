@@ -462,7 +462,7 @@ int menuBar::isMenuItemChecked(int id, int searchMode){
 //  @checkState : ITEM_CHECKED if item should be checked or ITEM_UNCHECKED
 //
 //  return : ITEM_CHECKED it item is checked, ITEM_UNCHECKED if not checked
-//           and return ITEM_ERROR on error
+//           and ITEM_ERROR on error
 //
 int menuBar::checkMenuItem(int id, int searchMode, int check){
     PMENUITEM item(_findItem(&current_, id, searchMode));
@@ -746,7 +746,7 @@ PMENUITEM menuBar::_findItem(const PMENUBAR bar, int searchedID, int searchMode,
             for (uint8_t index = 0;
                 !foundItem && index < MENU_MAX_ITEM_COUNT; index++){
                 if ((item = bar->items[index])){
-                    if (item->id == searchedID){    // items and submenus have IDs !!!
+                    if (item->id == searchedID){    // items and sub-menus have IDs !!!
                         if (pIndex){
                             (*pIndex) = index;
                         }
@@ -755,15 +755,15 @@ PMENUITEM menuBar::_findItem(const PMENUBAR bar, int searchedID, int searchMode,
                     }
                     else{
                         if (isBitSet(item->status, ITEM_STATUS_SUBMENU)){
-                            // in a sub menu ?
+                            // search in the sub-menu ?
                             if ((sItem = _findItem((PMENUBAR)item->subMenu,
                                     searchedID, searchMode, containerBar, pIndex))){
-                                foundItem = sItem;   // Found in a sub menu
+                                foundItem = sItem;   // Found in a sub-menu
                             }
                         }
                     }
-                }
-            }
+                } // if (item)
+            } // for
         }
         else{
             if (SEARCH_BY_INDEX == searchMode){

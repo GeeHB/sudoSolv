@@ -157,7 +157,7 @@ enum MENU_ACTION{
 
 // Types of search modes
 //
-enum MENU_SEZARCH_MODE{
+enum MENU_SEARCH_MODE{
     SEARCH_BY_ID = 0,
     SEARCH_BY_INDEX = 1
 };
@@ -372,7 +372,7 @@ public:
     //  @checkState : ITEM_CHECKED if item should be checked or ITEM_UNCHECKED
     //
     //  return : ITEM_CHECKED it item is checked, ITEM_UNCHECKED if not checked
-    //           and return ITEM_ERROR on error
+    //           and ITEM_ERROR on error
     //
     int checkMenuItem(int id, int searchMode = SEARCH_BY_ID,
                     int check = ITEM_CHECKED);

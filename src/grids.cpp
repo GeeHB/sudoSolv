@@ -251,7 +251,7 @@ bool grids::deleteFile(){
         bFile current;
         if (current.remove(fName)){
             // remove from list
-            int ID = __fileName2i(fName);
+            int ID(__fileName2i(fName));
             PFNAME pFile(NULL);
             bool done(false);
             for (int index=0; !done && index < count_; index++){
@@ -305,7 +305,7 @@ void grids::content(){
 //  @return : true if added
 //
 bool grids::_addFile(const FONTCHARACTER fileName){
-    PFNAME file = (PFNAME)malloc(sizeof(FNAME));
+    PFNAME file((PFNAME)malloc(sizeof(FNAME)));
     if (NULL == file){
         return false;
     }
@@ -378,7 +378,7 @@ bool grids::__vector_add(PFNAME file){
         return false;
     }
 
-    // find item's position
+    // Find item's position
     int pos(0);
     while(pos < count_ && file->ID >= files_[pos]->ID ){
         pos++;
@@ -386,7 +386,7 @@ bool grids::__vector_add(PFNAME file){
 
     if (pos < count_){
         size_t tail((count_ - pos) * sizeof(PFNAME));
-        char* buffer = (char*)malloc(tail);
+        char* buffer((char*)malloc(tail));
         if (!buffer){
             return false;
         }
@@ -562,7 +562,7 @@ char* grids::__itoa(int num, char* str){
     int sum ((num < 0)?-1*num:num);
     uint8_t i(0), digit;
 
-    // buid the string in reverse order
+    // build the string in reverse order
     do{
         digit = sum % 10;
         strVal[i++] = '0' + digit;

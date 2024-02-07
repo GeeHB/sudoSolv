@@ -1,5 +1,6 @@
 # Personnal files
 /src/shared/locals.h
+/src/shared/bFileLocals.h
 /src/tests.cpp
 /assets-cg/base
 
