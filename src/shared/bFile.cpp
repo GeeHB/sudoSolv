@@ -44,7 +44,7 @@ bFile::~bFile(){
 //
 // @return : true if the file or folder exists
 //
-bool bFile::exist(const FONTCHARACTER fName){
+bool bFile::exist(FONTCHARACTER const fName){
     if (!FC_len(fName)){
         error_ = BFILE_ERROR_INVALID_PARAMETERS;
         return false;
@@ -161,7 +161,7 @@ bool bFile::open(FONTCHARACTER const filename, int access){
 //
 // @return : file successfully created ?
 //
-bool bFile::create(const FONTCHARACTER fname, int type, int *size){
+bool bFile::create(FONTCHARACTER const fname, int type, int *size){
     if (type == BFile_File){
         // File can't be open
         if (!isOpen()){
@@ -209,7 +209,7 @@ bool bFile::create(const FONTCHARACTER fname, int type, int *size){
 // @return : file or folder successfully created
 //          - and openend for file ?
 //
-bool bFile::createEx(const FONTCHARACTER fname, int type,
+bool bFile::createEx(FONTCHARACTER const fname, int type,
                     int *size, int access){
     if (BFile_Folder == type){
         return create(fname, BFile_Folder, size);
@@ -328,7 +328,7 @@ int bFile::read(void *data, int lg, int whence){
 //
 //  @return : file successfully renamed ?
 //
-bool bFile::rename(const FONTCHARACTER oldPath, const FONTCHARACTER newPath){
+bool bFile::rename(FONTCHARACTER const oldPath, FONTCHARACTER const newPath){
     // File shouldn't be open
     if (!isOpen()){
 #ifdef DEST_CASIO_CALC
@@ -389,7 +389,7 @@ bool bFile::rename(const FONTCHARACTER oldPath, const FONTCHARACTER newPath){
 //
 // @return : file successfully removed ?
 //
-bool bFile::remove(const FONTCHARACTER filename){
+bool bFile::remove(FONTCHARACTER const filename){
     // File shouldn't be open
     if (!isOpen()){
 #ifdef DEST_CASIO_CALC
@@ -435,7 +435,7 @@ void bFile::close(){
 //
 //  @return :  True on success
 //
-bool bFile::findFirst(const FONTCHARACTER pattern, SEARCHHANDLE *sHandle,
+bool bFile::findFirst(FONTCHARACTER const pattern, SEARCHHANDLE *sHandle,
         FONTCHARACTER foundFile, struct BFile_FileInfo *fileInfo){
     if (sHandle && fileInfo){
 #ifdef DEST_CASIO_CALC
@@ -522,7 +522,7 @@ bool bFile::findClose(SEARCHHANDLE sHandle){
 //
 //  @return : pointer to a FONTCHARACTER
 //
-bool bFile::FC_str2FC(const char* src, FONTCHARACTER dest){
+bool bFile::FC_str2FC(char* const src, FONTCHARACTER dest){
     size_t len;
     if (!src || !dest || 0 == (len = strlen(src))){
         return false;
@@ -548,7 +548,7 @@ bool bFile::FC_str2FC(const char* src, FONTCHARACTER dest){
 //
 //  @return : pointer to a FONTCHARACTER
 //
-bool bFile::FC_FC2str(const FONTCHARACTER src, char* dest){
+bool bFile::FC_FC2str(FONTCHARACTER const src, char* dest){
 #ifdef DEST_CASIO_CALC
     size_t len;
     if (!src || !dest || 0 == (len = FC_len(src))){
@@ -573,7 +573,7 @@ bool bFile::FC_FC2str(const FONTCHARACTER src, char* dest){
 //
 //  @return : pointer to the copy if done  NULL on error
 //
-FONTCHARACTER bFile::FC_cpy(FONTCHARACTER dest, const FONTCHARACTER src){
+FONTCHARACTER bFile::FC_cpy(FONTCHARACTER dest, FONTCHARACTER const src){
 #ifdef DEST_CASIO_CALC
     size_t len(FC_len(src));
     if (0 == len){
@@ -596,7 +596,7 @@ FONTCHARACTER bFile::FC_cpy(FONTCHARACTER dest, const FONTCHARACTER src){
 //
 //  @return : pointer to the destination string if done  NULL on error
 //
-FONTCHARACTER bFile::FC_cat(FONTCHARACTER dest, const FONTCHARACTER add){
+FONTCHARACTER bFile::FC_cat(FONTCHARACTER dest, FONTCHARACTER const add){
     if (!dest || !add){
         return NULL;
     }
@@ -614,7 +614,7 @@ FONTCHARACTER bFile::FC_cat(FONTCHARACTER dest, const FONTCHARACTER add){
 //
 //  @return : filename copy or NULL on error
 //
-FONTCHARACTER bFile::FC_dup(const FONTCHARACTER src){
+FONTCHARACTER bFile::FC_dup(FONTCHARACTER const src){
 #ifdef DEST_CASIO_CALC
     size_t len(FC_len(src));
     if (0 == len){
@@ -640,7 +640,7 @@ FONTCHARACTER bFile::FC_dup(const FONTCHARACTER src){
 //
 //  @return : size of fName (O on error)
 //
-size_t bFile::FC_len(const FONTCHARACTER fName){
+size_t bFile::FC_len(FONTCHARACTER const fName){
     if (fName){
 #ifdef DEST_CASIO_CALC
         size_t len(0), lChar(sizeof(uint16_t));

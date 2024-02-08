@@ -1182,8 +1182,8 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 //
 //  @return : False on error(s)
 //
- bool sudoku::_ownMenuItemsDrawings(const MENUBAR* bar,
-            const MENUITEM* item, const RECT* anchor, int style){
+ bool sudoku::_ownMenuItemsDrawings(PMENUBAR const bar,
+            PMENUITEM const  item, RECT* const anchor, int style){
 #ifdef DEST_CASIO_CALC
     int x, y;
     if (menuBar::isBitSet(item->status, ITEM_STATUS_CHECKBOX)){

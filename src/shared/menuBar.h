@@ -143,9 +143,9 @@ typedef struct _menuAction{
 // Ownerdraw's function prototype
 //
 typedef bool (*MENUDRAWINGCALLBACK)(
-            const MENUBAR*,     // MenuBar containing the item
-            const MENUITEM*,    // Item to draw
-            const RECT*,        // Drawing rect for item
+            PMENUBAR const,     // MenuBar containing the item
+            PMENUITEM const,    // Item to draw
+            RECT* const,        // Drawing rect for item
             int style);         // Elements (in item) to draw
 
 // Types of actions
@@ -269,7 +269,7 @@ public:
     //
     //  @return : pointer the created item or NULL
     //
-    PMENUITEM addSubMenu(uint8_t index, const menuBar* subMenu,
+    PMENUITEM addSubMenu(uint8_t index, menuBar* const subMenu,
             int id, const char* text, int state = ITEM_STATE_DEFAULT){
         return _addSubMenu(&current_, index,
                         (PMENUBAR)subMenu, id, text, state);
@@ -500,8 +500,8 @@ public:
     //
     //  @return : False on error(s)
     //
-    static bool defDrawItem(const MENUBAR* bar, const MENUITEM* item,
-                            const RECT* anchor, int style);
+    static bool defDrawItem(MENUBAR* const bar, MENUITEM* const item,
+                            RECT* const anchor, int style);
 
     // State & status
     //
@@ -535,8 +535,8 @@ private:
     //
     //  @return : pointer the created item or NULL
     //
-    PMENUITEM _addSubMenu(const PMENUBAR container, uint8_t index,
-                PMENUBAR subMenu, int id, const char* text, int state);
+    PMENUITEM _addSubMenu(PMENUBAR const container, uint8_t index,
+                PMENUBAR const subMenu, int id, const char* text, int state);
 
     // _clearMenuBar() : Empty a menu bar
     //
@@ -554,7 +554,7 @@ private:
     //
     //  @return : Pointer to the new copy or NULL on error
     //
-    PMENUBAR _copyMenuBar(const PMENUBAR source, bool noBackButton);
+    PMENUBAR _copyMenuBar(PMENUBAR const source, bool noBackButton);
 
     //  _freeMenuBar() : Free memory used by a bar
     //
@@ -578,7 +578,7 @@ private:
     //
     //  @return : pointer the created item or NULL
     //
-    PMENUITEM _addItem(const PMENUBAR bar, uint8_t index, int id,
+    PMENUITEM _addItem(PMENUBAR const bar, uint8_t index, int id,
                     const char* text, int state = ITEM_STATE_DEFAULT,
                     int status = ITEM_STATUS_DEFAULT);
 
@@ -600,7 +600,7 @@ private:
     //
     //  @return : pointer to the copied item or NULL
     //
-    PMENUITEM _copyItem(const PMENUBAR bar, PMENUITEM source);
+    PMENUITEM _copyItem(PMENUBAR const bar, PMENUITEM const source);
 
     //  _findItem() : Find an item in the given bar
     //
@@ -615,7 +615,7 @@ private:
     //
     //  @return : pointer to the item if found or NULL
     //
-    PMENUITEM _findItem(const PMENUBAR bar, int searchedID,
+    PMENUITEM _findItem(PMENUBAR const bar, int searchedID,
                 int searchMode, PMENUBAR* containerBar = NULL,
                 uint8_t* pIndex = NULL);
 
@@ -629,7 +629,7 @@ private:
     //
     //  @return : true if the item has been successfully removed
     //
-    bool _removeItem(const PMENUBAR bar, int searchedID, int searchMode);
+    bool _removeItem(PMENUBAR const bar, int searchedID, int searchMode);
 
     //  _selectByIndex() : Select an item by index in the current bar
     //
@@ -650,7 +650,7 @@ private:
     //
     //  @return : False on error(s)
     //
-    bool _drawItem( const MENUITEM* item, const RECT* anchor);
+    bool _drawItem(PMENUITEM const item, RECT* const anchor);
 
     // Members
 private:

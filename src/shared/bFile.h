@@ -16,7 +16,7 @@
 #ifndef __GEE_TOOLS_B_FILE_h__
 #define __GEE_TOOLS_B_FILE_h__      1
 
-#define _GEEHB_BFILE_VER_    "0.5.5"
+#define _GEEHB_BFILE_VER_    "0.5.6"
 
 #ifdef DEST_CASIO_CALC
 #include <gint/gint.h>
@@ -75,7 +75,7 @@ public:
     //
     // @return : true if the file or folder exists
     //
-    bool exist(const FONTCHARACTER fName);
+    bool exist(FONTCHARACTER const fName);
 
     // isOpen() : Is the file already open ?
     //
@@ -111,7 +111,7 @@ public:
     //
     // @return : file or folder successfully created ?
     //
-    bool create(const FONTCHARACTER fname, int type, int *size);
+    bool create(FONTCHARACTER const fname, int type, int *size);
 
     // createEx() : Create a file or a folder
     //
@@ -127,7 +127,7 @@ public:
     // @return : file or folder successfully created
     //          - and openend for file ?
     //
-    bool createEx(const FONTCHARACTER fname, int type,
+    bool createEx(FONTCHARACTER const fname, int type,
                     int *size, int access);
 
     // write() : Write data in the current file
@@ -156,8 +156,8 @@ public:
     //
     //  @return : file successfully renamed ?
     //
-    bool rename(const FONTCHARACTER oldPath,
-                const FONTCHARACTER newPath);
+    bool rename(FONTCHARACTER const oldPath,
+                FONTCHARACTER const newPath);
 
     // remove() : Remove a file
     //
@@ -165,7 +165,7 @@ public:
     //
     // @return : file successfully removed ?
     //
-    bool remove(const FONTCHARACTER filename);
+    bool remove(FONTCHARACTER const filename);
 
     // close() : Close the file
     //
@@ -181,7 +181,7 @@ public:
     //
     //  @return :  True on success
     //
-    bool findFirst(const FONTCHARACTER pattern,
+    bool findFirst(FONTCHARACTER const pattern,
                 SEARCHHANDLE*sHandle, FONTCHARACTER foundFile,
                 struct BFile_FileInfo *fileInfo);
 
@@ -225,7 +225,7 @@ public:
     //
     //  @return : pointer to a FONTCHARACTER
     //
-    static bool FC_str2FC(const char* src, FONTCHARACTER dest);
+    static bool FC_str2FC(char* const src, FONTCHARACTER dest);
 
     // FC_FC2str() : Convert a string from FC format to char*
     //
@@ -234,7 +234,7 @@ public:
     //
     //  @return : pointer to a FONTCHARACTER
     //
-    static bool FC_FC2str(const FONTCHARACTER src, char* dest);
+    static bool FC_FC2str(FONTCHARACTER const src, char* dest);
 
     // FC_cpy() : Copy a FONTCHARACTER to another FONTCHARACTER
     //
@@ -243,7 +243,7 @@ public:
     //
     //  @return : pointer to the copy if done  NULL on error
     //
-    static FONTCHARACTER FC_cpy(FONTCHARACTER dest, const FONTCHARACTER src);
+    static FONTCHARACTER FC_cpy(FONTCHARACTER dest, FONTCHARACTER const src);
 
     // FC_cat() : Cancatenate 2 FONTCHARACTER
     //
@@ -252,7 +252,7 @@ public:
     //
     //  @return : pointer to the destination string if done  NULL on error
     //
-    static FONTCHARACTER FC_cat(FONTCHARACTER dest, const FONTCHARACTER add);
+    static FONTCHARACTER FC_cat(FONTCHARACTER dest, FONTCHARACTER const add);
 
     // FC_dup() : Duplicate a FONTCHARACTER
     //
@@ -260,7 +260,7 @@ public:
     //
     //  @return : pointer to the copy or NULL on error
     //
-    static FONTCHARACTER FC_dup(const FONTCHARACTER src);
+    static FONTCHARACTER FC_dup(FONTCHARACTER const src);
 
     // FC_len() : length of a fileName in "char"
     //
@@ -268,7 +268,7 @@ public:
     //
     //  @return : size of fName (O on error)
     //
-    static size_t FC_len(const FONTCHARACTER fName);
+    static size_t FC_len(FONTCHARACTER const fName);
 
 private:
 #ifdef DEST_CASIO_CALC

@@ -295,8 +295,8 @@ private:
     //
     //  @return : False on error(s)
     //
-    static bool _ownMenuItemsDrawings(const MENUBAR* bar,
-                const MENUITEM* item, const RECT* anchor, int style);
+    static bool _ownMenuItemsDrawings(PMENUBAR const bar,
+            PMENUITEM const  item, RECT* const anchor, int style);
 
     //
     // Coloured hypotheses

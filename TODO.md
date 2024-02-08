@@ -1,39 +1,4 @@
 #### Ajouts
-- [ ] menuBar
-    - [x] icone de navigation
-    - [x] addItem
-    - [x] appenItem
-    - [x] appendMenu(PMENUBAR)
-    - [x] removeItemByID / removeItemByIndex
-    - [x] EXIT -> retour un niveau prec.
-    - [x] MENU -> retour au menu (exit app)
-    - [x] callback pour le dessin d'un item
-    - [ ] retaille du nom d'un item si trop long
-    - [x] item de type checkbox
-        - [ ] pour FX9680G ... ?
-    - [ ] getItem / setItem
-- [x] _homeScreen()
-    - [ ] "Fermeture" après x sec.
-- [x] icones
-- [x] grids
-- [x] Copie d'écran - *fxlink*
-- [x] Textes sur une grille
-    - [x] nom court
-    - [x] # obvious
-    - [x] Durée de résolution
-- [x] Clignotement en mode Edition    
-- [x] Fichiers
-    - [x] Suppression du fichier courant
-    - [x] Sauvegarde (uniquement les éléments 'Originaux')
-- [x] revert
-- [ ] mode "zoom"
-
-#### Corrections
-- [x] Affichage de la grille centrée verticalement
-- [ ] Code refactoring
-- [x] La ligne supérieure de la barre de menu disparait
-- [ ] Nouvelle grille
-    - [x] pas de nouvel ID si pas de sauvegarde
-    - [x] Nouvel ID si à partir d'un nouveau fichier ...
-    - [x] "compression" pour trouver le plus petit ID disponible possible
-- [x] Sauvegarde d'un fichier
+- [ ] Création / génération d'une grille avec choix du niveau / complexité
+- [ ] Résolution manuelle : mode "help" avec proposition d'une ou plusieurs valeurs
+- [ ] Mode "pause" (cacher la grille) 
