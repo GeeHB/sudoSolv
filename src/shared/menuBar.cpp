@@ -53,7 +53,7 @@ menuBar::menuBar(){
 // @return : pointer to the default drawing function
 //
 MENUDRAWINGCALLBACK menuBar::setMenuDrawingCallBack(MENUDRAWINGCALLBACK pF){
-    current_.pDrawing = (void*)pF;
+    visible_->pDrawing = (void*)pF;
     return (MENUDRAWINGCALLBACK)defDrawItem;   // Def. function if needed by calling function
 }
 
@@ -913,7 +913,7 @@ bool menuBar::_drawItem(PMENUITEM const item, RECT* const anchor){
     }
 
     MENUDRAWINGCALLBACK ownerFunction;
-    if (isBitSet(item->status, ITEM_STATUS_OWNERDRAWN) &&
+    if (item && isBitSet(item->status, ITEM_STATUS_OWNERDRAWN) &&
         NULL != (ownerFunction = (MENUDRAWINGCALLBACK)visible_->pDrawing)){
         return ownerFunction(visible_, item, anchor, MENU_DRAW_ALL); // Call ownerdraw func.
     }

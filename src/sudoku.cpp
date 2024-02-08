@@ -337,63 +337,63 @@ bool sudoku::edit(uint8_t mode){
             break;
 
         case KEY_CODE_1:
-            if ((eStatus = _checkAndSet(currentPos, 1, mode)) >= 0){
+            if ((eStatus = _checkAndSet(currentPos, 1, hypColour, mode)) >= 0){
                 modified = true;
                 elements+=eStatus;
             }
             break;
 
         case KEY_CODE_2:
-            if ((eStatus = _checkAndSet(currentPos, 2, mode)) >= 0){
+            if ((eStatus = _checkAndSet(currentPos, 2, hypColour, mode)) >= 0){
                 modified = true;
                 elements+=eStatus;
             }
             break;
 
         case KEY_CODE_3:
-            if ((eStatus = _checkAndSet(currentPos, 3, mode)) >= 0){
+            if ((eStatus = _checkAndSet(currentPos, 3, hypColour, mode)) >= 0){
                 modified = true;
                 elements+=eStatus;
             }
             break;
 
         case KEY_CODE_4:
-            if ((eStatus = _checkAndSet(currentPos, 4, mode)) >= 0){
+            if ((eStatus = _checkAndSet(currentPos, 4, hypColour, mode)) >= 0){
                 modified = true;
                 elements+=eStatus;
             }
             break;
 
         case KEY_CODE_5:
-            if ((eStatus = _checkAndSet(currentPos, 5, mode)) >= 0){
+            if ((eStatus = _checkAndSet(currentPos, 5, hypColour, mode)) >= 0){
                 modified = true;
                 elements+=eStatus;
             }
             break;
 
         case KEY_CODE_6:
-            if ((eStatus = _checkAndSet(currentPos, 6, mode)) >= 0){
+            if ((eStatus = _checkAndSet(currentPos, 6, hypColour, mode)) >= 0){
                 modified = true;
                 elements+=eStatus;
             }
             break;
 
         case KEY_CODE_7:
-            if ((eStatus = _checkAndSet(currentPos, 7, mode)) >= 0){
+            if ((eStatus = _checkAndSet(currentPos, 7, hypColour, mode)) >= 0){
                 modified = true;
                 elements+=eStatus;
             }
             break;
 
         case KEY_CODE_8:
-            if ((eStatus = _checkAndSet(currentPos, 8, mode)) >= 0){
+            if ((eStatus = _checkAndSet(currentPos, 8, hypColour, mode)) >= 0){
                 modified = true;
                 elements+=eStatus;
             }
             break;
 
         case KEY_CODE_9:
-            if ((eStatus = _checkAndSet(currentPos, 9, mode)) >= 0){
+            if ((eStatus = _checkAndSet(currentPos, 9, hypColour, mode)) >= 0){
                 modified = true;
                 elements+=eStatus;
             }
@@ -486,11 +486,22 @@ bool sudoku::edit(uint8_t mode){
         timer_stop(timerID);    // stop the timer
     }
 
-    // Draw in valid state (or erase)
-    _drawSingleElement(currentPos,
-            (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
-            _elementTxtColour(currentPos, mode, false));
+    // Remove all coloured hyp.
+    if (EDIT_MODE_MANUAL == mode){
+        for (uint8_t index(INDEX_MIN); index<=INDEX_MAX ; index++){
+            elements_[index].setHypColour(HYP_NO_COLOUR);
+        }
 
+        // Redraw the whole grid
+        display();
+    }
+    else{
+        // Draw in valid state (or erase)
+        _drawSingleElement(currentPos,
+                (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
+                _elementTxtColour(currentPos, mode, false));
+    }
+    
     return modified;
 }
 
@@ -641,12 +652,14 @@ bool sudoku::_checkValue(position& pos, uint8_t value){
 //
 //  @pos : position
 //  @value : value to put
+//  @hypoCol : Hypothese's colour
 //  @mode : edition mode
 //
 //  @return : -1 if can't be changed, 0 if changed an existing value,
 //          1 if new value set
 //
-int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
+int sudoku::_checkAndSet(position& pos, uint8_t value,
+                        int hypColour, uint8_t mode){
     uint8_t status(elements_[pos].status());
     bool editGrid(true);
     if (EDIT_MODE_MANUAL == mode){
@@ -664,10 +677,11 @@ int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
 
         uint8_t oValue(elements_[pos].value());  // current val
 
-        // set new value
+        // Set new value and colour
         elements_[pos.index()].setValue(value,
             (editGrid?STATUS_ORIGINAL:STATUS_SET), editGrid);
-        return (value == oValue?0:1);
+        elements_[pos.index()].setHypColour(hypColour);
+        return (oValue?0:1);
     }
 
     return -1;  // Not set
@@ -1185,34 +1199,39 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
  bool sudoku::_ownMenuItemsDrawings(PMENUBAR const bar,
             PMENUITEM const  item, RECT* const anchor, int style){
 #ifdef DEST_CASIO_CALC
-    int x, y;
-    if (menuBar::isBitSet(item->status, ITEM_STATUS_CHECKBOX)){
-        // Draw the checkbox
-        menuBar::defDrawItem(bar, item, anchor, style);
+    if (item){
+        int x, y;
+        if (menuBar::isBitSet(item->status, ITEM_STATUS_CHECKBOX)){
+            // Draw the checkbox
+            menuBar::defDrawItem(bar, item, anchor, style);
 
-        // Draw a rectangle  whose colour is store in ownerData member
-        x = anchor->x + MENU_IMG_WIDTH + 4; // After the image
-        y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
+            // Draw a rectangle  whose colour is store in ownerData member
+            x = anchor->x + MENU_IMG_WIDTH + 4; // After the image
+            y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
 
-        drect(x, y,
-            anchor->x + anchor->w -3, y + HYP_SQUARE_SIZE - 1,
-            item->ownerData);
+            drect(x, y,
+                anchor->x + anchor->w -3, y + HYP_SQUARE_SIZE - 1,
+                item->ownerData);
+        }
+        else{
+            // Draw background
+            menuBar::defDrawItem(bar, item, anchor, MENU_DRAW_BACKGROUND);
+
+            // Draw a rectangle on the right of item
+            x = anchor->x + anchor->w - HYP_SQUARE_SIZE - 3;
+            y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
+
+            drect(x, y,
+                x + HYP_SQUARE_SIZE- 1, y + HYP_SQUARE_SIZE - 1,
+                item->ownerData);
+
+            // Then, draw the text and borders
+            menuBar::defDrawItem(bar, item, anchor,
+                                MENU_DRAW_TEXT | MENU_DRAW_BORDERS);
+        }
     }
     else{
-        // Draw background
-        menuBar::defDrawItem(bar, item, anchor, MENU_DRAW_BACKGROUND);
-
-        // Draw a rectangle on the right of item
-        x = anchor->x + anchor->w - HYP_SQUARE_SIZE - 3;
-        y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
-
-        drect(x, y,
-            x + HYP_SQUARE_SIZE- 1, y + HYP_SQUARE_SIZE - 1,
-            item->ownerData);
-
-        // Then, draw the text and borders
-        menuBar::defDrawItem(bar, item, anchor,
-                            MENU_DRAW_TEXT | MENU_DRAW_BORDERS);
+        menuBar::defDrawItem(bar, item, anchor, style);
     }
 #endif // #ifdef DEST_CASIO_CALC
 
@@ -1244,6 +1263,7 @@ uint8_t sudoku::_acceptHypothese(int colour){
         }
     }
 
+    display();
     return count;
 }
 
@@ -1267,6 +1287,7 @@ uint8_t sudoku::_rejectHypothese(int colour){
         }
     }
 
+    display();
     return count;
 }
 

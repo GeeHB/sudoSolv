@@ -167,11 +167,12 @@ private:
     //
     //  @pos : position
     //  @value : value to put
+    //  @hypoCol : Hypothese's colour
     //  @mode : edition mode
     //
     //  @return : -1 if can't be changed, 0 if changed an existing value,
     //          1 if new value set
-    int _checkAndSet(position& pos, uint8_t value, uint8_t mode);
+    int _checkAndSet(position& pos, uint8_t value, int hypColour, uint8_t mode);
 
     //
     // Drawings
