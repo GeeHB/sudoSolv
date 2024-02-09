@@ -111,44 +111,10 @@ void menuBar::update(){
 
     // First item's rect
     RECT anchor = {rect_.x, rect_.y, MENUBAR_DEF_ITEM_WIDTH, rect_.h};
-    PMENUITEM item(NULL);
+
+    //  Draw all items (even empty ones)
     for (uint8_t index(0); index < MENU_MAX_ITEM_COUNT; index++){
-        item = visible_->items[index];
-#ifdef DEST_CASIO_CALC
-        _drawItem(item, &anchor);
-#else
-        if (item){
-            cout << "|" <<
-                (isBitSet(item->state, ITEM_STATE_SELECTED)?">" : " ");
-            if (isBitSet(item->status, ITEM_STATUS_CHECKBOX)){
-                cout <<
-                    (isBitSet(item->state, ITEM_STATE_CHECKED)?"[x] ":"[ ] ");
-            }
-
-            if (isBitSet(item->status, ITEM_STATUS_TEXT)){
-                if (isBitSet(item->state,ITEM_STATE_INACTIVE)){
-                    cout << "_" << (item->text+1);
-                }
-                else {
-                    cout << item->text;
-                }
-            }
-            else{
-                cout << "[no text]";
-            }
-
-            if (item->ownerData){
-                cout << "[" << (int)item->ownerData << "]";
-            }
-
-            cout << (isBitSet(item->state,ITEM_STATE_SELECTED)?"<" : " ");
-            cout << "|";
-        }
-        else{
-            cout << "| [empty] |";
-        }
-#endif // DEST_CASIO_CALC
-
+        _drawItem(visible_->items[index], &anchor);
         anchor.x += anchor.w;   // Next item's position
     } // for
 
@@ -362,7 +328,6 @@ bool menuBar::defDrawItem(PMENUBAR const bar, PMENUITEM const item,
         // Text
         int x, w, h(0);
         if (isBitSet(item->status, ITEM_STATUS_TEXT)){
-            // Text is centerd
             dsize(item->text, NULL, &w, &h);
         }
 
@@ -406,8 +371,11 @@ bool menuBar::defDrawItem(PMENUBAR const bar, PMENUITEM const item,
                         TXT_INACTIVE:TXT_UNSELECTED));
 
             // draw the text
-            dtext(x, anchor->y + (anchor->h - h) / 2,
-                    bar->colours[colour], item->text);
+            dtext_opt(x, anchor->y + (anchor->h - h) / 2,
+                    bar->colours[colour],
+                    bar->colours[ITEM_BACKGROUND],
+                    DTEXT_LEFT, DTEXT_TOP,
+                     item->text, -1);
         }
 
         // Borders
@@ -432,6 +400,39 @@ bool menuBar::defDrawItem(PMENUBAR const bar, PMENUITEM const item,
         dline(anchor->x, anchor->y,
                 anchor->x + anchor->w -1, anchor->y,
                 bar->colours[ITEM_BORDER]);
+    }
+#else
+    if (item){
+        cout << "|" <<
+            (isBitSet(item->state, ITEM_STATE_SELECTED)?">" : " ");
+        if (isBitSet(item->status, ITEM_STATUS_CHECKBOX)){
+            cout <<
+                (isBitSet(item->state, ITEM_STATE_CHECKED)?"[x] ":"[ ] ");
+        }
+
+        if (isBitSet(item->status, ITEM_STATUS_TEXT)){
+            if (isBitSet(item->state,ITEM_STATE_INACTIVE)){
+                cout << "_" << (item->text+1);
+            }
+            else {
+                cout << item->text;
+            }
+        }
+        else{
+            cout << "[no text]";
+        }
+
+        /*
+        if (item->ownerData){
+            cout << "[" << (int)item->ownerData << "]";
+        }
+        */
+
+        cout << (isBitSet(item->state,ITEM_STATE_SELECTED)?"<" : " ");
+        cout << "|";
+    }
+    else{
+        cout << "| [empty] |";
     }
 #endif // #ifdef DEST_CASIO_CALC
     return true;    // Done
@@ -494,12 +495,13 @@ int menuBar::checkMenuItem(int id, int searchMode, int check){
 //  @id : ID associated to the menu
 //  @text : Submenu text
 //  @state : initial state of submenu
+//  @status : initial status of submenu
 //
 //  @return : pointer the created item or NULL
 //
 PMENUITEM menuBar::_addSubMenu(PMENUBAR const container, uint8_t index,
-                            PMENUBAR subMenu, int id,
-                            const char* text, int itemState){
+                            PMENUBAR subMenu, int id, const char* text,
+                            int itemState, int status){
     size_t len(0);
     if (!container || !subMenu ||
         index >= MENU_MAX_ITEM_COUNT ||
@@ -519,13 +521,13 @@ PMENUITEM menuBar::_addSubMenu(PMENUBAR const container, uint8_t index,
 
     // Create item
     PMENUITEM item = _createItem(id, text,
-                            ITEM_STATE_DEFAULT, ITEM_STATUS_DEFAULT);
+                            ITEM_STATE_DEFAULT, status);
     if (NULL == item){
         _freeMenuBar(sub, true);
         return NULL;
     }
 
-    item->status = ITEM_STATUS_SUBMENU | ITEM_STATUS_TEXT;
+    setBit(item->status, ITEM_STATUS_SUBMENU);
     item->subMenu = sub;
     sub->parent = container;
 
@@ -914,7 +916,7 @@ bool menuBar::_drawItem(PMENUITEM const item, RECT* const anchor){
 
     MENUDRAWINGCALLBACK ownerFunction;
     if (item && isBitSet(item->status, ITEM_STATUS_OWNERDRAWN) &&
-        NULL != (ownerFunction = (MENUDRAWINGCALLBACK)visible_->pDrawing)){
+        NULL != (ownerFunction = ((MENUDRAWINGCALLBACK)visible_->pDrawing))){
         return ownerFunction(visible_, item, anchor, MENU_DRAW_ALL); // Call ownerdraw func.
     }
 

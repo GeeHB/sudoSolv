@@ -410,11 +410,16 @@ bool sudoku::edit(uint8_t mode){
             break;
 
         case IDM_MANUAL_REJECT:
-            if (_rejectHypothese(hypColour)){
+        {
+            uint8_t count;
+            if ((count = _rejectHypothese(hypColour))){
+                elements-=count;
+
                 // At least one element's colour has changed => redraw
                 display();
             }
             break;
+        }
 
         // Cancel modifications
         case IDM_EDIT_CANCEL:
@@ -442,7 +447,7 @@ bool sudoku::edit(uint8_t mode){
 
                 menu.update();
             }
-            
+
             break;
         } // switch (action.value)
 
@@ -473,7 +478,7 @@ bool sudoku::edit(uint8_t mode){
         }
 
         if (modified){
-            dprint_opt(CASIO_WIDTH - 100, CASIO_HEIGHT - 10 - MENUBAR_DEF_HEIGHT,
+            dprint_opt(CASIO_WIDTH - 100, CASIO_HEIGHT - 12 - MENUBAR_DEF_HEIGHT,
                 C_BLACK, SCREEN_BK_COLOUR,
                 DTEXT_LEFT, DTEXT_TOP,
                 " Elements : %d     ", elements);
@@ -501,7 +506,7 @@ bool sudoku::edit(uint8_t mode){
                 (currentPos.squareID()%2)?GRID_BK_COLOUR_DARK:GRID_BK_COLOUR,
                 _elementTxtColour(currentPos, mode, false));
     }
-    
+
     return modified;
 }
 
@@ -671,12 +676,14 @@ int sudoku::_checkAndSet(position& pos, uint8_t value,
         editGrid = false;   // manual mode
     }
 
+    uint8_t oValue(elements_[pos].value());  // current val
+
     // Check value at the given pos.
-    if (_checkLine(pos, value) && _checkRow(pos, value) &&
-        _checkTinySquare(pos, value)){
-
-        uint8_t oValue(elements_[pos].value());  // current val
-
+    //  New allowed value or same value with diff. hyp. colour
+    if ((oValue == value && elements_[pos.index()].hypColour() != hypColour)
+        ||
+        (_checkLine(pos, value) && _checkRow(pos, value) &&
+        _checkTinySquare(pos, value))){
         // Set new value and colour
         elements_[pos.index()].setValue(value,
             (editGrid?STATUS_ORIGINAL:STATUS_SET), editGrid);
@@ -1147,16 +1154,17 @@ void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
                                 ITEM_STATUS_OWNERDRAWN);
         item->ownerData = HYP_COLOUR_RED;
 
+        // Draw coloured checkboxes
+        hypMenu.setMenuDrawingCallBack(_ownMenuItemsDrawings);
+
         item = menu.appendSubMenu(&hypMenu,
-                    IDM_MANUAL_HYP_SUBMENU, IDS_MANUAL_HYP_SUBMENU);
+                    IDM_MANUAL_HYP_SUBMENU, IDS_MANUAL_HYP_SUBMENU,
+                    ITEM_STATE_DEFAULT, ITEM_STATUS_OWNERDRAWN);
         item->ownerData = HYP_NO_COLOUR;
-                    
+
         menu.appendItem(IDM_MANUAL_ACCEPT, IDS_MANUAL_ACCEPT);
         menu.appendItem(IDM_MANUAL_REJECT, IDS_MANUAL_REJECT);
         menu.addItem(MENU_POS_RIGHT, IDM_MANUAL_END, IDS_MANUAL_END);
-
-        // Draw coloured checkboxes
-        hypMenu.setMenuDrawingCallBack(_ownMenuItemsDrawings);
     }
 }
 
@@ -1217,13 +1225,18 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
             // Draw background
             menuBar::defDrawItem(bar, item, anchor, MENU_DRAW_BACKGROUND);
 
-            // Draw a rectangle on the right of item
-            x = anchor->x + anchor->w - HYP_SQUARE_SIZE - 3;
-            y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
+            if (item->ownerData != HYP_NO_COLOUR){
+                // Draw a rectangle on the right of item
+                //x = anchor->x + anchor->w - HYP_SQUARE_SIZE - 3;
+                x = anchor->x + 2;
+                y = anchor->y + (anchor->h - HYP_SQUARE_SIZE) / 2;
 
-            drect(x, y,
-                x + HYP_SQUARE_SIZE- 1, y + HYP_SQUARE_SIZE - 1,
-                item->ownerData);
+                drect(x, y,
+                    //x + HYP_SQUARE_SIZE- 1,
+                    anchor->x + anchor->w -3,
+                    y + HYP_SQUARE_SIZE - 1,
+                    item->ownerData);
+            }
 
             // Then, draw the text and borders
             menuBar::defDrawItem(bar, item, anchor,
@@ -1245,7 +1258,7 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 // _acceptHypothese() : Accept all the hypothese's values
 //
 //  When accepted, all elements with the given hyp. colour
-//  will be merged with non coloured elements 
+//  will be merged with non coloured elements
 //  and have their hyp. colour removed.
 //
 //  @colour : Hypothese's colour
@@ -1324,7 +1337,7 @@ bool sudoku::_onChangeHypothese(menuBar& menu, int newHypID,
 
         return true;
     }
-    
+
     return false;
 }
 

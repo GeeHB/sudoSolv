@@ -266,13 +266,15 @@ public:
     //  @id : ID associated to the menu
     //  @text : Submenu text
     //  @state : Menu item initial state
+    //  @status : initial status of submenu
     //
     //  @return : pointer the created item or NULL
     //
     PMENUITEM addSubMenu(uint8_t index, menuBar* const subMenu,
-            int id, const char* text, int state = ITEM_STATE_DEFAULT){
+            int id, const char* text, int state = ITEM_STATE_DEFAULT,
+            int status = ITEM_STATUS_DEFAULT){
         return _addSubMenu(&current_, index,
-                        (PMENUBAR)subMenu, id, text, state);
+                        (PMENUBAR)subMenu, id, text, state, status);
     }
 
     //  appendSubMenu() : Append a sub menu
@@ -281,13 +283,15 @@ public:
     //  @id : ID associated to the menu
     //  @text : Submenu text
     //  @state : Menu item initial state
+    //  @status : initial status of submenu
     //
     //  @return : pointer the created item or NULL
     //
     PMENUITEM appendSubMenu(const menuBar* subMenu, int id,
-                        const char* text, int state = ITEM_STATE_DEFAULT){
+                        const char* text, int state = ITEM_STATE_DEFAULT,
+                        int status = ITEM_STATUS_DEFAULT){
         return _addSubMenu(&current_, current_.itemCount,
-                            (PMENUBAR)subMenu, id, text, state);
+                            (PMENUBAR)subMenu, id, text, state, status);
     }
 
     //  addItem() : Add an item to the current menu bar
@@ -532,11 +536,13 @@ private:
     //  @id : ID associated to the menu
     //  @text : Submenu text
     //  @state : initial state of submenu
+    //  @status : initial status of submenu
     //
     //  @return : pointer the created item or NULL
     //
     PMENUITEM _addSubMenu(PMENUBAR const container, uint8_t index,
-                PMENUBAR const subMenu, int id, const char* text, int state);
+                PMENUBAR const subMenu, int id, const char* text,
+                int state, int status);
 
     // _clearMenuBar() : Empty a menu bar
     //
