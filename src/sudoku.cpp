@@ -477,6 +477,7 @@ bool sudoku::edit(uint8_t mode){
             reDraw = false;
         }
 
+        /*
         if (modified){
             dprint_opt(CASIO_WIDTH - 100, CASIO_HEIGHT - 12 - MENUBAR_DEF_HEIGHT,
                 C_BLACK, SCREEN_BK_COLOUR,
@@ -484,6 +485,7 @@ bool sudoku::edit(uint8_t mode){
                 " Elements : %d     ", elements);
             dupdate();
         }
+        */
 
     } // while (cont)
 

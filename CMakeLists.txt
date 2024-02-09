@@ -7,7 +7,6 @@ find_package(Gint 2.9 REQUIRED)
 
 set(SOURCES
 	src/main.cpp
-	#src/tests.cpp
 	src/sudoSolver.cpp
 	src/shared/bFile.cpp
 	src/shared/keyboard.cpp

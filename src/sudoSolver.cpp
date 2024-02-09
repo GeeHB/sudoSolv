@@ -175,9 +175,9 @@ void sudoSolver::run(void)
 
                     // Activate or deactivate screen capture
                     case KEY_CODE_CAPTURE:
-                        if (MOD_SHIFT == (action.modifier & MOD_SHIFT)){
+                        //if (MOD_SHIFT == (action.modifier & MOD_SHIFT)){
                             _onCapture();
-                        }
+                        //}
                         break;
 
                     default:
