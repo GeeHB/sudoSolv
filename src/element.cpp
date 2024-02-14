@@ -17,6 +17,15 @@ element::element(int value){
     hypotheseColour_ = HYP_NO_COLOUR; // No hypothese by default
 }
 
+// Assignment
+//
+element& element::operator=(const element& right){
+    status_ = right.status_;
+    value_ = right.value_;
+    hypotheseColour_ = right.hypotheseColour_;
+    return *this;
+}
+
 // setValue() : Set or modify a value
 //
 //  @value : new value for the object

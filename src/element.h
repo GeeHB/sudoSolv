@@ -49,6 +49,9 @@ public:
     // Destrcution
     ~element(){}
 
+    // Assignment
+    element& operator=(const element& right);
+    
     //
     // Element's value
     //

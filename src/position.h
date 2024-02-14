@@ -32,7 +32,6 @@ class position{
 public:
     // Constructions
     position(uint8_t index = INDEX_MIN, bool gameMode = true);
-
     position(position& other){
         set(other);
     }
@@ -95,9 +94,16 @@ public:
         forward(inc);
         return *this;
     }
-    position& operator++(int){
+    //prefix ++a
+    position& operator++(){
         forward(1);
         return *this;
+    }
+    // postfix : a++
+    position operator++(int){
+        position old = *this;
+        operator++();  // prefix increment
+        return old;
     }
     uint8_t forward(uint8_t inc = 1);
 
@@ -105,9 +111,16 @@ public:
         backward(dec);
         return *this;
     }
-    position& operator--(int){
+    // prefix : --a
+    position& operator--(){
         backward(1);
         return *this;
+    }
+    // postfix : a--
+    position operator--(int){
+        position old = *this;
+        operator--();
+        return old;
     }
     uint8_t backward(uint8_t dec = 1);
 
@@ -120,6 +133,20 @@ public:
     //
     void decLine(uint8_t dec = 1);
     void incLine(uint8_t inc = 1);
+
+    //
+    // Comparisons
+    //
+
+    bool operator==(position& right){
+        return (POS_VALID == status_ && POS_VALID == right.status_
+                && index_ == right.index_);
+    }
+    
+    bool operator<(position& right){
+        return (POS_VALID == status_ && POS_VALID == right.status_
+                && index_ < right.index_);
+    }
 
 private:
     // _whereAmI() : Updating coordinates according to (new) index

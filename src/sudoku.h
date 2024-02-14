@@ -46,8 +46,11 @@ extern "C" {
 class sudoku{
 public:
 
-    // Construction & destruction
+    // Constructions
     sudoku();
+    sudoku(sudoku& original);
+
+    // Destruction
     ~sudoku(){}
 
     // setScreenRect() : Screen dimensions
@@ -68,7 +71,9 @@ public:
 
     // revert : Return to the original state
     //
-    void revert();
+    void revert(){
+        _revertFrom(INDEX_MIN);
+    }
 
     //
     // io
@@ -112,12 +117,40 @@ public:
 
     // resolve() : Find a solution for the current grid
     //
-    //  mDuration : points to an int that will receive duration
+    //  The algorithm will go forward to seek value and backward each
+    //  time a value can't be found at a given pos.
+    //  We going backward, if position reaches sPos (if not NULL)
+    //  or exit the grid, the method end with no solution.
+    //
+    //  @mDuration : points to an int that will receive duration
     //              of solving process in ms. Can be NULL
     //
     //  @return : true if a solution was found
     //
     bool resolve(int* mDuration = NULL);
+
+    // multipleSolutions() : Check wether a grid has one or many solutions
+    //
+    //  This method doesn't seek for all possible solutions since it stops
+    //  when no soluce is found or at the second one
+    //
+    //  @return : 0 if the grid has no solution, 1 if a unique solution has
+    //            been found -1 if many solutions may be founded (2 at least)
+    //
+    int multipleSolutions();
+
+    // findNextStartPos() : Find the next "starting" postion
+    //
+    //  This enables to search for another solution or check wether
+    //  a found solution is unique or not
+    //
+    //  @start : Position to search from
+    //          @start will point to the new position has been found
+    //  @startVal : New starting value
+    //
+    //  @return : true if a valid position has been found
+    //
+    bool findNextStartPos(position &start, int8_t& currentVal);
 
 private:
 
@@ -200,6 +233,20 @@ private:
     //   Search for obvious values
     //
 
+    // _resolve() : Find a solution for the current grid
+    //
+    //  The algorithm will go forward to seek value and backward each
+    //  time a value can't be found at a given pos.
+    //  We going backward, if position reaches sPos (if not NULL)
+    //  or exit the grid, the method end with no solution.
+    //
+    //  @sPos : Start position. If NULL the method will start
+    //          from the first empty pos found in the grid
+    //
+    //  @return : true if a solution was found
+    //
+    bool _resolve(position* sPos);
+
     // _findObviousValues() :
     //  Search and set all the possible obvious values in the grid
     //
@@ -276,6 +323,10 @@ private:
     //
     void _createEditMenu(menuBar& menu, uint8_t editMode);
 
+    //
+    // Coloured hypotheses
+    //
+
     // _elementTxtColour() : Get element's text colour for edition
     //
     //  @pos : Element's position
@@ -299,14 +350,10 @@ private:
     static bool _ownMenuItemsDrawings(PMENUBAR const bar,
             PMENUITEM const  item, RECT* const anchor, int style);
 
-    //
-    // Coloured hypotheses
-    //
-
     // _acceptHypothese() : Accept all the hypothese's values
     //
     //  When accepted, all elements with the given hyp. colour
-    //  will be merged with non coloured elements 
+    //  will be merged with non coloured elements
     //  and have their hyp. colour removed.
     //
     //  @colour : Hypothese's colour
@@ -337,6 +384,28 @@ private:
     //
     bool _onChangeHypothese(menuBar& menu, int newHypID,
                                     int& currentID, int& currentCol);
+
+    //
+    // Utilities
+    //
+
+    // _revertFrom : Return to the "original" state
+    //
+    //  All values "after" @from prosition will be set to 0 if
+    //  nor 'original'
+    //
+    //  @from : starting position (included)
+    //
+    void _revertFrom(uint8_t from);
+
+    //  _copyElements() : Create a copy of current elements table
+    //
+    //  Elements values will be : > 0 for orignal values, 0 for empty
+    //  values et < 0 for 'found' values
+    //
+    //  @dest : destination table
+    //
+    void _copyElements(int8_t* dest);
 
     // Members
 private:

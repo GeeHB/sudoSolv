@@ -32,6 +32,18 @@ sudoku::sudoku(){
     empty();    // Start with an empty grid
 }
 
+// sudoku() : "copy" constructor
+//
+//  Construct a copy of original elements
+//
+//  @original : source to copy
+//
+sudoku::sudoku(sudoku& original){
+    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
+        elements_[index] = original.elements_[index];
+    }
+}
+
 // setScreenRect() : Screen dimensions
 //
 //  rect : pointer to rect containing new dimensions
@@ -65,10 +77,10 @@ void sudoku::display(bool update){
     position pos(0, false);
     element* pElement(NULL);
     char car;
-    for (uint8_t line = 0; line < LINE_COUNT; line++){
+    for (uint8_t line(0); line < LINE_COUNT; line++){
         cout << "\t";
 
-        for (uint8_t row = 0; row < ROW_COUNT; row++){
+        for (uint8_t row(0); row < ROW_COUNT; row++){
             pElement = &elements_[pos];
             car = '0';
             if (!pElement->isEmpty()){
@@ -102,18 +114,8 @@ void sudoku::display(bool update){
 // empty() : Empties the grid
 //
 void sudoku::empty(){
-    for (uint8_t index=0; index <= INDEX_MAX ; index++){
+    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX ; index++){
         elements_[index].empty();
-    }
-}
-
-// revert : Return to the original state
-//
-void sudoku::revert(){
-    for (uint8_t index=0; index <= INDEX_MAX ; index++){
-        if (!elements_[index].isOriginal()){
-            elements_[index].empty();
-        }
     }
 }
 
@@ -519,81 +521,142 @@ bool sudoku::edit(uint8_t mode){
 //  @return : #obvious values found
 //
 uint8_t sudoku::findObviousValues(){
-    uint8_t found(0);
-    uint values(0);
+    uint8_t found(0), values(0);
     do{
         values = _findObviousValues();
         found += values;
-    } while(values);    // since we put value(s), we'll search new ones
+    } while(values);    // since we found value(s), we'll search new ones
 
     return found;
 }
 
 // resolve() : Find a solution for the current grid
 //
-//  mDuration : points to an int that will receive duration
+//  The algorithm will go forward to seek value and backward each
+//  time a value can't be found at a given pos.
+//  We going backward, if position reaches sPos (if not NULL)
+//  or exit the grid, the method end with no solution.
+//
+//  @mDuration : points to an int that will receive duration
 //              of solving process in ms. Can be NULL
 //
 //  @return : true if a solution was found
 //
 bool sudoku::resolve(int* mDuration){
     clock_t start(0);
-    uint8_t candidate(0);
-    position pos(0, true);
-    uint8_t status(_findFirstEmptyPos(pos));
 
     if (mDuration){
         (*mDuration) = 0;
         start = clock();
     }
 
-    // All the elements "before" the current position - pos -
-    // are set with possible/allowed values
-    // we'll try to put the "candidate" value
-    // (ie. the smallest possible value) at the current position
-    while (POS_VALID == status){
-        candidate++;   // Next possible value
+    bool found(_resolve(INDEX_MIN)); // Try to find the first solution
 
-        if (candidate > VALUE_MAX){
-            // No possible value found at this position
-            // we'll have to go backward, to the last value setted
-            // when no position can be found (ie. all possibles values
-            // have  been previously tested), the next pos has an
-            // invalid index, -1, and status = POS_INDEX_ERROR
-            // no soluton can be found
-            if (POS_VALID == (status = _previousPos(pos))){
-                // next candidate value is the currently used value + 1
-                candidate = elements_[pos].empty();
-            }
-        }
-        else{
-            // Try to put the "candidate" value at current position
-            //
-            if (_checkValue(pos, candidate)){
-                // Possible => put this candidate value
-                elements_[pos].setValue(candidate);
-
-                // Go to the next "empty" position
-                // if the grid is completed, the next pos is
-                // out of range ! (status = POS_END_OF_LIST)
-                status = _findFirstEmptyPos(pos);
-
-                // At the next pos.,
-                // we'll use (again) the lowest possible value
-                candidate = 0;
-            }
-        }
-    } // while (!status)
-
-    if (POS_END_OF_LIST == status){
-        if (mDuration){
-            (*mDuration) = ((clock() - start) * 1000 / CLOCKS_PER_SEC);
-        }
-        return true;    // Found a solution
+    if (mDuration){
+        (*mDuration) = ((clock() - start) * 1000 / CLOCKS_PER_SEC);
     }
 
-    // No solution
-    return false;
+    return found;
+}
+
+// findNextStartPos() : Find the next "starting" postion
+//
+//  This enables to search for another solution or check wether
+//  a found solution is unique or not
+//
+//  @start : Position to search from
+//          @start will point to the new position has been found
+//  @startVal : New starting value
+//
+//  @return : true if a valid position has been found
+//
+bool sudoku::findNextStartPos(position &start, int8_t& startVal){
+    int8_t elements[INDEX_MAX+1];
+    _copyElements(elements);       // Keep a copy of current completed grid
+
+    bool found(false);
+    startVal = -1; // Error
+
+    if (POS_VALID == start.status()){
+        position next(start);
+        int8_t oValue(elements_[next].value());
+        int8_t value(oValue + 1);   // Next value
+
+        _revertFrom(next);
+
+        while (!found && next < INDEX_MAX){
+            if (value <= VALUE_MAX){
+                if (false == (found = _checkValue(next, value))){
+                    // Try next value
+                    value++;
+                }
+            }
+            else{
+                // Put back previous val.
+                elements_[next].setValue(oValue);
+
+                // Try next pos (ie. next "set" value)
+                while (++next < INDEX_MAX){
+                    if (elements[next] < 0){
+                        value = -1 * elements[next] + 1;
+                    }
+                }
+            }
+        }
+
+        if (found){
+            start = next;    // (new or not) stating pos.
+            startVal = value;   // New starting value
+        }
+    }
+
+    return found;   // ?
+}
+
+// multipleSolutions() : Check wether a grid has one or many solutions
+//
+//  This method doesn't seek for all possible solutions since it stops
+//  when no soluce is found or at the second one.
+//
+//  @return : 0 if the grid has no solution, 1 if a unique solution has
+//            been found -1 if many solutions may be founded (2 at least).
+//
+int sudoku::multipleSolutions(){
+    int count(0);
+    position start(INDEX_MIN), valid(INDEX_MIN);
+    int8_t newVal(0);
+    bool finished(false);
+
+    while (!finished && _resolve(&start)){
+
+#ifndef DEST_CASIO_CALC
+        cout << (int)(1 +count) << endl;
+        display();
+#endif // #ifndef DEST_CASIO_CALC
+
+        if (count++){
+            // Found 2 solutions => stop searchning
+            return -1;
+        }
+
+        while (elements_[valid].isOriginal()){
+            valid++;
+        }
+        start = valid;
+
+        sudoku next(*this);
+        if (next.findNextStartPos(start, newVal)){
+            _revertFrom(start);   // remove previously founded vals
+            elements_[start].setValue(newVal, STATUS_SET);
+            valid = start;
+        }
+        else{
+            // No more starting pos.
+            finished = true;
+        }
+    }
+
+    return count;
 }
 
 //
@@ -1065,6 +1128,85 @@ uint8_t sudoku::_setObviousValueInRows(position& pos, uint8_t value){
 // Resolving
 //
 
+// _resolve() : Find a solution for the current grid
+//
+//  The algorithm will go forward to seek value and backward each
+//  time a value can't be found at a given pos.
+//  We going backward, if position reaches sPos (if not NULL)
+//  or exit the grid, the method end with no solution.
+//
+//  @sPos : Start position. If NULL the method will start
+//          from the first empty pos found in the grid
+//
+//  @return : true if a solution was found
+//
+bool sudoku::_resolve(position* sPos){
+    uint8_t candidate;
+    position pos(0, true);
+    uint8_t startIndex;
+    uint8_t status;
+
+    if (NULL == sPos){
+      status = _findFirstEmptyPos(pos);  // Start from beginning
+      startIndex = 0;
+      candidate = 0;
+    }
+    else{
+        pos = *sPos;    // Use given pos as start index
+        startIndex = pos;
+        status = pos.status();
+        candidate = elements_[pos].value() - 1; // ++ in the loop !
+        elements_[pos].setValue(0);
+    }
+
+    // All the elements "before" the current position - pos -
+    // are set with possible/allowed values
+    // we'll try to put the "candidate" value
+    // (ie. the smallest possible value) at the current position
+    while (POS_VALID == status){
+        candidate++;   // Next possible value
+
+        if (candidate > VALUE_MAX){
+            // No possible value found at this position
+            // we'll have to go backward, to the last value setted
+            // when no position can be found (ie. all possibles values
+            // have  been previously tested), the next pos has an
+            // invalid index, -1, and status = POS_INDEX_ERROR
+            // no soluton can be found
+            if (POS_VALID == (status = _previousPos(pos))){
+                if (pos >= startIndex){
+                    // next candidate value is the currently used value + 1
+                    candidate = elements_[pos].empty();
+                }
+                else{
+                    // return to start pos => no soluce
+                    status = POS_INDEX_ERROR;
+                }
+            }
+        }
+        else{
+            // Try to put the "candidate" value at current position
+            //
+            if (_checkValue(pos, candidate)){
+                // Possible => put this candidate value
+                elements_[pos].setValue(candidate);
+
+                // Go to the next "empty" position
+                // if the grid is completed, the next pos is
+                // out of range ! (status = POS_END_OF_LIST)
+                status = _findFirstEmptyPos(pos);
+
+                // At the next pos.,
+                // we'll use (again) the lowest possible value
+                candidate = 0;
+            }
+        }
+    } // while (!status)
+
+    // No solution
+    return (POS_END_OF_LIST == status);
+}
+
 // _findFirstEmptyPos() : Find the first empty pos.
 //
 //  @start : position where to start the search
@@ -1170,6 +1312,10 @@ void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
     }
 }
 
+//
+// Coloured hypotheses
+//
+
 // _elementTxtColour() : Get element's text colour for edition
 //
 //  @pos : Element's position
@@ -1253,10 +1399,6 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
     return true;
 }
 
-//
-// Coloured hypotheses
-//
-
 // _acceptHypothese() : Accept all the hypothese's values
 //
 //  When accepted, all elements with the given hyp. colour
@@ -1278,7 +1420,9 @@ uint8_t sudoku::_acceptHypothese(int colour){
         }
     }
 
+#ifdef DEST_CASIO_CALC
     display();
+#endif // #ifdef DEST_CASIO_CALC
     return count;
 }
 
@@ -1302,7 +1446,9 @@ uint8_t sudoku::_rejectHypothese(int colour){
         }
     }
 
+#ifdef DEST_CASIO_CALC
     display();
+#endif // #ifdef DEST_CASIO_CALC
     return count;
 }
 
@@ -1341,6 +1487,40 @@ bool sudoku::_onChangeHypothese(menuBar& menu, int newHypID,
     }
 
     return false;
+}
+
+//
+// Utilities
+//
+
+// _revertFrom : Return to the original state
+//
+//  All values "after" @from prosition will be set to 0 if
+//  not 'original'
+//
+//  @from : starting position (included)
+//
+void sudoku::_revertFrom(uint8_t from){
+    for (uint8_t index(from); index <= INDEX_MAX ; index++){
+        if (!elements_[index].isOriginal()){
+            elements_[index].empty();
+        }
+    }
+}
+
+//  _copyElements() : Create a copy of current elements table
+//
+//  Elements values will be : > 0 for orignal values, 0 for empty
+//  values et < 0 for 'found' values
+//
+//  @dest : destination table
+//
+void sudoku::_copyElements(int8_t* dest){
+    uint8_t value;
+    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
+        value = elements_[index].value();
+        dest[index] = value * (elements_[index].isOriginal()?1:-1);
+    }
 }
 
 // EOF

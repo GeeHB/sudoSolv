@@ -3,6 +3,7 @@
 /src/shared/bFileLocals.h
 /src/tests.cpp
 /assets-cg/base
+.DS_Store
 
 # Outputs
 /build-cg
