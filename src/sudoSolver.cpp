@@ -22,9 +22,18 @@ sudoSolver::sudoSolver(){
 // Create app. menu bar
 //
 void sudoSolver::createMenu(){
-    // "File" sub menu
+
+    // "File/New" sub-menu
+    menuBar newMenu;
+    newMenu.appendItem(IDM_NEW_EMPTY, IDS_NEW_EMPTY);
+    newMenu.appendItem(IDM_NEW_EASY, IDS_NEW_EASY);
+    newMenu.appendItem(IDM_NEW_MEDIUM, IDS_NEW_MEDIUM);
+    newMenu.appendItem(IDM_NEW_HARD, IDS_NEW_HARD);
+
+    // "File" sub-menu
     menuBar fileMenu;
-    fileMenu.appendItem(IDM_FILE_NEW, IDS_FILE_NEW);
+    fileMenu.appendSubMenu(&newMenu,
+                        IDM_FILE_NEW_SUBMENU, IDS_FILE_NEW_SUBMENU);
     fileMenu.appendItem(IDM_FILE_PREV, IDS_FILE_PREV, ITEM_STATE_INACTIVE);
     fileMenu.appendItem(IDM_FILE_NEXT, IDS_FILE_NEXT, ITEM_STATE_INACTIVE);
     fileMenu.appendItem(IDM_FILE_SAVE, IDS_FILE_SAVE, ITEM_STATE_INACTIVE);
@@ -33,7 +42,7 @@ void sudoSolver::createMenu(){
 
     menu_.appendItem(IDM_EDIT, IDS_EDIT);
 
-    // "Solve" sub menu
+    // "Solve" sub-menu
     menuBar sMenu;
     sMenu.appendItem(IDM_SOLVE_MANUAL_SUBMENU, IDS_SOLVE_MANUAL_SUBMENU);
     sMenu.appendItem(IDM_SOLVE_OBVIOUS, IDS_SOLVE_OBVIOUS);
@@ -104,8 +113,8 @@ void sudoSolver::run(void)
         if (ACTION_MENU == action.type){
             switch (action.value){
                 // (re)start with a new empty grid
-                case IDM_FILE_NEW:
-                    _onFileNew();
+                case IDM_NEW_EMPTY:
+                    _onNewEmpty();
                     break;
 
                 // Load previous file
@@ -196,9 +205,9 @@ void sudoSolver::run(void)
 // Menu
 //
 
-// _onFileNew() : Create a new empty grid
+// _onNewEmpty() : Create a new empty grid
 //
-void sudoSolver::_onFileNew(){
+void sudoSolver::_onNewEmpty(){
     game_.empty();
     game_.display();
     _initStats();
@@ -283,7 +292,7 @@ void sudoSolver::_onFileDelete(){
     // An error ?
     if (!done){
         FC_EMPTY(fileName_);    // There is no more open file
-        _onFileNew();
+        _onNewEmpty();
     }
 }
 

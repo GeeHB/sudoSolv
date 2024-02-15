@@ -45,9 +45,9 @@ public:
 
 private:
 
-    // _onFileNew() : Create a new empty grid
+    // _onNewEmpty() : Create a new empty grid
     //
-    void _onFileNew();
+    void _onNewEmpty();
 
     // _onFilePrevious() : Open previous file in the grid folder
     //

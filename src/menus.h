@@ -28,8 +28,8 @@ extern "C" {
 
 // "File" sub-menu bar
 //
-#define IDS_FILE_NEW        "New"
-#define IDM_FILE_NEW        11
+#define IDS_FILE_NEW_SUBMENU    "New"
+#define IDM_FILE_NEW_SUBMENU    11
 #define IDS_FILE_PREV       "Prev."
 #define IDM_FILE_PREV       12
 #define IDS_FILE_NEXT       "Next"
@@ -39,12 +39,24 @@ extern "C" {
 #define IDS_FILE_DELETE     "Delete"
 #define IDM_FILE_DELETE     15
 
+// File/New submenu
+#define IDS_NEW_EMPTY       "Empty"
+#define IDM_NEW_EMPTY       111
+#define IDS_NEW_EASY        "Easy"
+#define IDM_NEW_EASY        112
+#define IDS_NEW_MEDIUM      "Medium"
+#define IDM_NEW_MEDIUM      113
+#define IDS_NEW_HARD        "Hard"
+#define IDM_NEW_HARD        114
+
 // Edit - Creation mode
 //
 #define IDS_EDIT_OK         "Ok"
-#define IDM_EDIT_OK          21
+#define IDM_EDIT_OK         21
+#define IDS_EDIT_CHECK      "Check"
+#define IDM_EDIT_CHECK      22
 #define IDS_EDIT_CANCEL     "Cancel"
-#define IDM_EDIT_CANCEL      22
+#define IDM_EDIT_CANCEL     24
 
 // "Solve" sub-menu bar
 //

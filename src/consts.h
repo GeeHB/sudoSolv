@@ -27,7 +27,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolver"
-#define APP_VERSION  "0.4.1"
+#define APP_VERSION  "0.4.2"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -68,6 +68,19 @@ extern "C" {
 #define FILE_LINE_SIZE  ROW_COUNT * 2   // (value & separator) * ROW_COUNT
 #define FILE_SIZE       LINE_COUNT * FILE_LINE_SIZE
 
+// Grid's solution(s)
+//
+
+// Window size & pos.
+#define WIN_SOL_Y            10
+#define WIN_SOL_W            190
+#define WIN_SOL_H            60
+
+// Comments
+#define STR_NO_SOL          "No solution"
+#define STR_ONE_SOL         "A unique sol."
+#define STR_MULTIPLE_SOL    "More than one sol."
+
 // Display
 //
 
@@ -84,7 +97,8 @@ extern "C" {
 
 #define HYP_SQUARE_SIZE         5
 
-// Colors
+// Colours
+//
 #define EXT_BORDER_COLOUR       C_RGB(10, 19, 23)   // Large ext. borders
 #define INT_BORDER_COLOUR       C_RGB(12, 12, 31)   // Thin int. borders
 #define SCREEN_BK_COLOUR        C_RGB(28, 28, 30)

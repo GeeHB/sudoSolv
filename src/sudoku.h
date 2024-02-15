@@ -75,6 +75,12 @@ public:
         _revertFrom(INDEX_MIN);
     }
 
+    // create() : Create a new sudoku
+    //
+    //  @complexity : Complexity level in {}
+    //
+    void create();
+
     //
     // io
     //
@@ -280,6 +286,10 @@ private:
     //  @return : count (0 or 1) of value set
     //
     uint8_t _setObviousValueInRows(position& pos, uint8_t value);
+
+    // _onEditCheck() : Check wether grid can be solved
+    //
+    void _onEditCheck();
 
     //
     // Resolving

@@ -6,17 +6,19 @@ include(Fxconv)
 find_package(Gint 2.9 REQUIRED)
 
 set(SOURCES
-	src/main.cpp
-	src/sudoSolver.cpp
 	src/shared/bFile.cpp
 	src/shared/keyboard.cpp
 	src/shared/menuBar.cpp
 	src/shared/scrCapture.cpp
+	src/shared/window.cpp
+	src/main.cpp
+	src/sudoSolver.cpp
 	src/position.cpp
 	src/element.cpp
 	src/tinySquare.cpp
 	src/grids.cpp
 	src/sudoku.cpp
+	src/sudokuShuffler.cpp
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
 set(ASSETS

@@ -9,7 +9,10 @@
 
 #include "sudoku.h"
 #include "shared/bFile.h"
+#include "shared/window.h"
 #include "shared/keyboard.h"
+
+#include "sudokuShuffler.h"
 
 #include <time.h>
 #include <math.h>
@@ -108,6 +111,8 @@ void sudoku::display(bool update){
             pos++;  // next position
         }
     }
+
+    cout << endl;
 #endif // #ifdef DEST_CASIO_CALC
 }
 
@@ -117,6 +122,40 @@ void sudoku::empty(){
     for (uint8_t index(INDEX_MIN); index <= INDEX_MAX ; index++){
         elements_[index].empty();
     }
+}
+
+// create() : Create a new sudoku
+//
+//  @complexity : Complexity level in {}
+//
+void sudoku::create(){
+    sudokuShuffler shuffler(elements_);
+
+    // step 1 : start from a complete grid
+    resolve();
+    //display();
+
+    // step 2 : shuffles values
+    shuffler.shuffleValues();
+
+    // step 3 : rearrange columns
+    shuffler.shuffleColumns();
+
+    // step 4: rearrange rows
+    shuffler.shuffleRows();
+
+    // step 5 : rearrange block of columns
+    shuffler.shuffleColumnBlocks();
+
+    // step 6 : rearrange block of lines
+    shuffler.shuffleRowBlocks();
+
+    // step 7 : all elements are "original"
+    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
+        elements_[index].setStatus(STATUS_ORIGINAL | STATUS_SET);
+    }
+
+    //display();
 }
 
 // load() : Load a new grid
@@ -427,6 +466,12 @@ bool sudoku::edit(uint8_t mode){
         case IDM_EDIT_CANCEL:
             revert();
             cont = modified = false;
+            break;
+
+        // Check grid
+        //
+        case IDM_EDIT_CHECK:
+            _onEditCheck();
             break;
 
         // Exit from "edit" mode
@@ -757,6 +802,51 @@ int sudoku::_checkAndSet(position& pos, uint8_t value,
     }
 
     return -1;  // Not set
+}
+
+// _onEditCheck() : Check wether grid can be solved
+//
+void sudoku::_onEditCheck(){
+    int count = multipleSolutions();
+    revert();   // return to 'original' grid
+
+#ifdef DEST_CASIO_CALC
+    window output;
+    window::winInfo wInf;
+    wInf.title = (char*)"Check";
+    wInf.style = WIN_STYLE_DBORDER | WIN_STYLE_HCENTER;
+    wInf.pos.y = WIN_SOL_Y;
+    wInf.pos.w = WIN_SOL_W;
+    wInf.pos.h = WIN_SOL_H;
+    wInf.bkColour = COLOUR_LT_GREY;
+    output.create(wInf);
+
+    switch (count){
+        case -1:
+            output.drawText(STR_MULTIPLE_SOL, -1, -1, COLOUR_RED);
+            break;
+
+         case 1:
+            output.drawText(STR_ONE_SOL, -1, -1, COLOUR_RED);
+            break;
+
+        case 0:
+        default:
+            output.drawText(STR_NO_SOL, -1, -1, COLOUR_RED);
+            break;
+    }
+
+    output.update();
+
+     // Wait for any key to be pressed
+    getkey();
+
+    output.close();
+
+    display();
+#else
+    cout << "Check : " << (int)count << endl;
+#endif // #ifdef DEST_CASIO_CALC
 }
 
 //
@@ -1267,8 +1357,9 @@ int sudoku::__callbackTick(volatile int *pTick){
 //
 void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
     if (EDIT_MODE_CREATION == editMode){
-        menu.addItem(1, IDM_EDIT_OK, IDS_EDIT_OK);
-        menu.addItem(2, IDM_EDIT_CANCEL, IDS_EDIT_CANCEL);
+        menu.appendItem(IDM_EDIT_OK, IDS_EDIT_OK);
+        menu.appendItem(IDM_EDIT_CHECK, IDS_EDIT_CHECK);
+        menu.addItem(MENU_POS_RIGHT - 1, IDM_EDIT_CANCEL, IDS_EDIT_CANCEL);
     }
     else{
         // Some items should be drawn by this class

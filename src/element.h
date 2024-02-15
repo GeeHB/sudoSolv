@@ -51,7 +51,15 @@ public:
 
     // Assignment
     element& operator=(const element& right);
-    
+
+
+    // 'Fast' access to value
+    //
+    element& operator=(uint8_t right);
+    bool operator==(uint8_t right){
+        return (value_ == right);
+    }
+
     //
     // Element's value
     //
@@ -87,6 +95,14 @@ public:
     //
     uint8_t status(){
         return status_;
+    }
+
+    // setStatus() : Set element's status
+    //
+    //  @nStatus : element's status
+    //
+    void setStatus(uint8_t nStatus){
+        status_ = nStatus;
     }
 
     // isEmpty() : Check wether element is empty

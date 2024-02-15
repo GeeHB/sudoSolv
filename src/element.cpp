@@ -26,6 +26,14 @@ element& element::operator=(const element& right){
     return *this;
 }
 
+// Fast access to value
+//
+element& element::operator=(uint8_t right){
+    value_ = right;
+    return *this;
+}
+
+
 // setValue() : Set or modify a value
 //
 //  @value : new value for the object
