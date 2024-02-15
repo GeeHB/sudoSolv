@@ -117,6 +117,20 @@ void sudoSolver::run(void)
                     _onNewEmpty();
                     break;
 
+                // Create new sudokus
+                case IDM_NEW_EASY:
+                    game_.create(COMPLEXITY_EASY);
+                    game_.display();
+                    break;
+                case IDM_NEW_MEDIUM:
+                    game_.create(COMPLEXITY_MEDIUM);
+                    game_.display();
+                    break;
+                case IDM_NEW_HARD:
+                    game_.create(COMPLEXITY_HARD);
+                    game_.display();
+                    break;
+
                 // Load previous file
                 case IDM_FILE_PREV:
                     _onFilePrevious();

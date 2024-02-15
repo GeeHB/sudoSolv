@@ -31,11 +31,23 @@
 // The value can't be set at this position
 #define FILE_VALUE_ERROR        (BFILE_LAST_ERROR_CODE + 13)
 
-//
 // Edition modes
 //
-#define EDIT_MODE_CREATION    0       // Creation of a grid
-#define EDIT_MODE_MANUAL      1       // Try to solve the grid
+enum EDIT_MODE{
+    EDIT_MODE_CREATION = 0, // Creation of a grid
+    EDIT_MODE_MANUAL = 1    // Try to solve the grid
+};
+
+// Compelxity for created sudoku grids
+//  nimber correspond to the count of clues
+//
+enum GRID_COMPLEXITTY{
+    COMPLEXITY_EASY = 33,
+    COMPLEXITY_MEDIUM = 26,
+    COMPLEXITY_HARD = 22
+};
+
+#define COMPLEXITY_BLOCKED_MAX  10
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,9 +89,10 @@ public:
 
     // create() : Create a new sudoku
     //
-    //  @complexity : Complexity level in {}
+    //  @complexity : Complexity level in
+    //      {COMPLEXITY_EASY; COMPLEXITY_MEDIUM, COMPLEXITY_HARD}
     //
-    void create();
+    void create(uint8_t complexity);
 
     //
     // io

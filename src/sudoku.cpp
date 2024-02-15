@@ -128,12 +128,11 @@ void sudoku::empty(){
 //
 //  @complexity : Complexity level in {}
 //
-void sudoku::create(){
+void sudoku::create(uint8_t complexity){
     sudokuShuffler shuffler(elements_);
 
     // step 1 : start from a complete grid
     resolve();
-    //display();
 
     // step 2 : shuffles values
     shuffler.shuffleValues();
@@ -152,10 +151,42 @@ void sudoku::create(){
 
     // step 7 : all elements are "original"
     for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
-        elements_[index].setStatus(STATUS_ORIGINAL | STATUS_SET);
+        if (!elements_[index].isEmpty()){
+            elements_[index].setStatus(STATUS_ORIGINAL | STATUS_SET);
+        }
     }
 
-    //display();
+    // step 8 : remove values according to expected compelxity
+    uint8_t maxIndex = ROW_COUNT * LINE_COUNT;
+    uint8_t clues(maxIndex);  // Starting with full grid
+    bool stop(false);
+    uint8_t val, blocked(true);
+    position index;
+
+    while (!stop && clues > complexity){
+        index.moveTo(rand() % LINE_COUNT, rand() % ROW_COUNT);
+
+        if (!elements_[index].isEmpty()){
+            elements_[index] = 0;
+            val = elements_[index].value();
+
+            // Still a unique sol ?
+            if (1 == multipleSolutions()){
+                // Yes => continue
+                elements_[index].empty();
+                clues--;
+            }
+            else{
+                // return to previous stats
+                elements_[index].setValue(val, STATUS_ORIGINAL, true);
+
+                // Try to many times => accept this solution
+                if (++blocked > COMPLEXITY_BLOCKED_MAX){
+                    stop = true;
+                }
+            }
+        }
+    }
 }
 
 // load() : Load a new grid
@@ -674,11 +705,6 @@ int sudoku::multipleSolutions(){
 
     while (!finished && _resolve(&start)){
 
-#ifndef DEST_CASIO_CALC
-        cout << (int)(1 +count) << endl;
-        display();
-#endif // #ifndef DEST_CASIO_CALC
-
         if (count++){
             // Found 2 solutions => stop searchning
             return -1;
@@ -701,6 +727,7 @@ int sudoku::multipleSolutions(){
         }
     }
 
+    revert();
     return count;
 }
 

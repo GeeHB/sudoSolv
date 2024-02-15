@@ -74,7 +74,7 @@ extern "C" {
 // Window size & pos.
 #define WIN_SOL_Y            10
 #define WIN_SOL_W            190
-#define WIN_SOL_H            60
+#define WIN_SOL_H            80
 
 // Comments
 #define STR_NO_SOL          "No solution"
