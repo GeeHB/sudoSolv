@@ -732,7 +732,7 @@ uint8_t sudoku::_create(uint8_t complexity){
     cout << " <<<<<<< ";
 #endif // #ifndef DEST_CASIO_CALC
 
-    // step 8 : remove values according to expected compelxity
+    // step 8 : remove values according to expected complexity
     uint8_t maxIndex = ROW_COUNT * LINE_COUNT;
     uint8_t clues(maxIndex);  // Starting with full grid
     bool stop(false);
@@ -756,7 +756,7 @@ uint8_t sudoku::_create(uint8_t complexity){
             }
             else{
                 // return to previous stats
-                elements_[index].setValue(val, STATUS_ORIGINAL, true);
+                elements_[index].setValue(val, true);
 
                 // Try to many times => accept this solution
                 if (++blocked > COMPLEXITY_BLOCKED_MAX){
@@ -856,8 +856,7 @@ int sudoku::_checkAndSet(position& pos, uint8_t value,
         (_checkLine(pos, value) && _checkRow(pos, value) &&
         _checkTinySquare(pos, value))){
         // Set new value and colour
-        elements_[pos.index()].setValue(value,
-            (editGrid?STATUS_ORIGINAL:STATUS_SET), editGrid);
+        elements_[pos.index()].setValue(value, editGrid);
         elements_[pos.index()].setHypColour(hypColour);
         return (oValue?0:1);
     }
@@ -1155,10 +1154,12 @@ uint8_t sudoku::_setObviousValueInLines(position& pos, uint8_t value){
     //
     bool found(false);
     position candidatePos(0, true), foundPos;
-    candidatePos.moveTo(candidateLine, tSquares_[candidate].topRow());   // First row ID
+    candidatePos.moveTo(candidateLine,
+                        tSquares_[candidate].topRow());   // First row ID
 
     for (uint8_t row = 0; row < TINY_ROW_COUNT; row++){
-        if (elements_[candidatePos].isEmpty() && _checkValue(candidatePos, value)){
+        if (elements_[candidatePos].isEmpty() &&
+            _checkValue(candidatePos, value)){
             // found a valid pos. in the line for the value
             if (found){
                 // Already a candiate

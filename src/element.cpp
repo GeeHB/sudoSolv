@@ -38,19 +38,14 @@ element& element::operator=(uint8_t right){
 // setValue() : Set or modify a value
 //
 //  @value : new value for the object
-//  @ status : new status
 //  @editMode : true if the grid is currently in edit mode
 //
-void element::setValue(uint8_t value, uint8_t status, bool editMode){
+void element::setValue(uint8_t value, bool editMode){
     if (!editMode){
         if (!_isStatusBitSet(STATUS_ORIGINAL)){
             if (value != EMPTY_VALUE){
                 value_ = value;
                 status_ = STATUS_SET;
-
-                if (status != STATUS_EMPTY){
-                    status_ |= status;
-                }
             }
             else{
                 status_ = STATUS_EMPTY;
@@ -59,7 +54,7 @@ void element::setValue(uint8_t value, uint8_t status, bool editMode){
     }
     else{
         value_ = value;
-        status_ = (value <= 0 || STATUS_EMPTY == status )?
+        status_ = (EMPTY_VALUE == value)?
                     STATUS_EMPTY : STATUS_SET | STATUS_ORIGINAL;
     }
 }

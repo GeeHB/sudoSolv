@@ -3,7 +3,7 @@
 //--    tinySquare.h
 //--
 //--    Definition of tinySquare object
-//--    A tiny-square is one of the 9 3x3 matrix composing the whole grid
+//--    A tiny-square is one of the 9 3x3 matrix composing the grid
 //--
 //----------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ private:
 private:
     uint8_t id_;            // ID
 
-    uint8_t topLine_;       // Position of top left orner of the square
+    uint8_t topLine_;       // Position of top left corner of the square
     uint8_t topRow_;
 
     uint8_t ids_[TINY_LINE_COUNT][TINY_ROW_COUNT];   // Indexes of elements in the square

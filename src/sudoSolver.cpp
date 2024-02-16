@@ -119,16 +119,13 @@ void sudoSolver::run(void)
 
                 // Create new sudokus
                 case IDM_NEW_EASY:
-                    game_.create(COMPLEXITY_EASY);
-                    game_.display();
+                    _onNewSudoku(COMPLEXITY_EASY);
                     break;
                 case IDM_NEW_MEDIUM:
-                    game_.create(COMPLEXITY_MEDIUM);
-                    game_.display();
+                    _onNewSudoku(COMPLEXITY_MEDIUM);
                     break;
                 case IDM_NEW_HARD:
-                    game_.create(COMPLEXITY_HARD);
-                    game_.display();
+                    _onNewSudoku(COMPLEXITY_HARD);
                     break;
 
                 // Load previous file
@@ -224,8 +221,8 @@ void sudoSolver::run(void)
 void sudoSolver::_onNewEmpty(){
     game_.empty();
     game_.display();
-    _initStats();
 
+    _initStats();
     _updateFileItemsState();
 }
 
@@ -234,7 +231,6 @@ void sudoSolver::_onNewEmpty(){
 //  @compelxity : complexity of the grid to create
 //
 void sudoSolver::_onNewSudoku(uint8_t complexity){
-#ifdef DEST_CASIO_CALC
     window waitWindow;
     window::winInfo wInf;
     wInf.style = WIN_STYLE_DEFAULT;
@@ -245,15 +241,15 @@ void sudoSolver::_onNewSudoku(uint8_t complexity){
     waitWindow.create(wInf);
     waitWindow.drawText("Generating ...", -1, -1);
     waitWindow.update();
-#endif // #ifdef DEST_CASIO_CALC
 
     game_.create(complexity);   // do the job ...
 
-#ifdef DEST_CASIO_CALC
-    waitWindow.close();
-#endif // #ifdef DEST_CASIO_CALC
-    
+
+    waitWindow.close(); // Close the window    
     game_.display();
+
+    _initStats();
+    _updateFileItemsState();
 }
 
 // _onFilePrevious() : Open previous file in the grid folder

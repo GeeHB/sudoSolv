@@ -50,7 +50,7 @@ public:
     ~element(){}
 
     //
-    // Operator overloads
+    // Operators overloads
     //
 
     // Assignments
@@ -69,11 +69,9 @@ public:
     // setValue() : Set or modify a value
     //
     //  @value : new value for the object
-    //  @ status : new status
     //  @editMode : true if the grid is currently in edit mode
     //
-    void setValue(uint8_t value, uint8_t status = STATUS_EMPTY,
-                    bool editMode = false);
+    void setValue(uint8_t value, bool editMode = false);
 
     // Access
     //
