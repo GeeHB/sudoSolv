@@ -24,7 +24,7 @@
 using namespace std;
 #endif // #ifdef DEST_CASIO_CALC
 
-// Construction
+// Constructions
 //
 sudoku::sudoku(){
     // Initializes tinySquares
@@ -35,15 +35,20 @@ sudoku::sudoku(){
     empty();    // Start with an empty grid
 }
 
-// sudoku() : "copy" constructor
+// Copy constructor
 //
-//  Construct a copy of original elements
+sudoku::sudoku(sudoku& original)
+:sudoku(){
+    setElements(original.elements_);
+}
+
+// setElments() : set elements of the grid
 //
-//  @original : source to copy
+//  @elements : list of elements
 //
-sudoku::sudoku(sudoku& original){
+void sudoku::setElements(element* elements){
     for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
-        elements_[index] = original.elements_[index];
+        elements_[index] = elements[index];
     }
 }
 
@@ -128,65 +133,21 @@ void sudoku::empty(){
 //
 //  @complexity : Complexity level in {}
 //
-void sudoku::create(uint8_t complexity){
-    sudokuShuffler shuffler(elements_);
+//  @return : # of clues (ie of non empty elements) or -1 on error
+//
+int sudoku::create(uint8_t complexity){
+    if (complexity < INDEX_MAX){
+        uint8_t clues(0);
+        while ((clues = _create(complexity)) > COMPLEXITY_EASY){}
 
-    // step 1 : start from a complete grid
-    resolve();
+#ifndef DEST_CASIO_CALC
+        cout << endl << "Clues : " << (int)clues << endl;
+#endif // #ifndef DEST_CASIO_CALC
 
-    // step 2 : shuffles values
-    shuffler.shuffleValues();
-
-    // step 3 : rearrange columns
-    shuffler.shuffleColumns();
-
-    // step 4: rearrange rows
-    shuffler.shuffleRows();
-
-    // step 5 : rearrange block of columns
-    shuffler.shuffleColumnBlocks();
-
-    // step 6 : rearrange block of lines
-    shuffler.shuffleRowBlocks();
-
-    // step 7 : all elements are "original"
-    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
-        if (!elements_[index].isEmpty()){
-            elements_[index].setStatus(STATUS_ORIGINAL | STATUS_SET);
-        }
+        return clues;
     }
 
-    // step 8 : remove values according to expected compelxity
-    uint8_t maxIndex = ROW_COUNT * LINE_COUNT;
-    uint8_t clues(maxIndex);  // Starting with full grid
-    bool stop(false);
-    uint8_t val, blocked(true);
-    position index;
-
-    while (!stop && clues > complexity){
-        index.moveTo(rand() % LINE_COUNT, rand() % ROW_COUNT);
-
-        if (!elements_[index].isEmpty()){
-            elements_[index] = 0;
-            val = elements_[index].value();
-
-            // Still a unique sol ?
-            if (1 == multipleSolutions()){
-                // Yes => continue
-                elements_[index].empty();
-                clues--;
-            }
-            else{
-                // return to previous stats
-                elements_[index].setValue(val, STATUS_ORIGINAL, true);
-
-                // Try to many times => accept this solution
-                if (++blocked > COMPLEXITY_BLOCKED_MAX){
-                    stop = true;
-                }
-            }
-        }
-    }
+    return -1;
 }
 
 // load() : Load a new grid
@@ -703,8 +664,10 @@ int sudoku::multipleSolutions(){
     int8_t newVal(0);
     bool finished(false);
 
-    while (!finished && _resolve(&start)){
+    //int8_t values[INDEX_MAX+1];
+    //_copyElements(values);       // Keep a copy of current grid
 
+    while (!finished && _resolve(&start)){
         if (count++){
             // Found 2 solutions => stop searchning
             return -1;
@@ -727,13 +690,89 @@ int sudoku::multipleSolutions(){
         }
     }
 
-    revert();
+    // Return to initial state
+    //_setElements(values);
+
     return count;
 }
 
 //
 // Internal methods
 //
+
+// create() : Create a new sudoku
+//
+//  @complexity : Complexity level in {}
+//
+//  @return : # of clues (ie of non empty elements)
+//
+uint8_t sudoku::_create(uint8_t complexity){
+    // step 1 : start from a complete grid
+    empty();
+    resolve();
+
+    // step 2 : shuffles elements
+    sudokuShuffler shuffler(elements_);
+    shuffler.shuffleValues();
+
+    // step 3 : rearrange columns
+    shuffler.shuffleColumns();
+
+    // step 4: rearrange rows
+    shuffler.shuffleRows();
+
+    // step 5 : rearrange block of columns
+    shuffler.shuffleColumnBlocks();
+
+    // step 6 : rearrange block of lines
+    shuffler.shuffleRowBlocks();
+
+    // step 7 : all elements are "original"
+    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
+        elements_[index].setStatus(STATUS_ORIGINAL | STATUS_SET);
+    }
+
+#ifndef DEST_CASIO_CALC
+    display();
+    cout << " <<<<<<< ";
+#endif // #ifndef DEST_CASIO_CALC
+
+    // step 8 : remove values according to expected compelxity
+    uint8_t maxIndex = ROW_COUNT * LINE_COUNT;
+    uint8_t clues(maxIndex);  // Starting with full grid
+    bool stop(false);
+    uint8_t val, blocked(true);
+    uint8_t index;
+    sudoku tester;
+
+    while (!stop && clues > complexity){
+        //index.moveTo(rand() % LINE_COUNT, rand() % ROW_COUNT);
+        index = (rand() % maxIndex);
+
+        if (!(elements_[index] == 0)){
+            val = elements_[index].empty();
+
+            // Still a unique sol ?
+            tester.setElements(elements_);
+            if (1 == tester.multipleSolutions()){
+                // Yes => continue
+                elements_[index].empty();
+                clues--;
+            }
+            else{
+                // return to previous stats
+                elements_[index].setValue(val, STATUS_ORIGINAL, true);
+
+                // Try to many times => accept this solution
+                if (++blocked > COMPLEXITY_BLOCKED_MAX){
+                    stop = true;
+                }
+            }
+        }
+    }
+
+    return clues;
+}
 
 //
 // Checks
@@ -834,8 +873,8 @@ int sudoku::_checkAndSet(position& pos, uint8_t value,
 // _onEditCheck() : Check wether grid can be solved
 //
 void sudoku::_onEditCheck(){
-    int count = multipleSolutions();
-    revert();   // return to 'original' grid
+    sudoku tester(*this);
+    int count = tester.multipleSolutions();
 
 #ifdef DEST_CASIO_CALC
     window output;
@@ -1641,4 +1680,31 @@ void sudoku::_copyElements(int8_t* dest){
     }
 }
 
+//  _setElements() : Set elements from a previous copy
+//
+//  Elements values are > 0 for orignal values, 0 for empty
+//  values et < 0 for 'found' values
+//
+//  @src : source table
+//
+/*
+void sudoku::_setElements(int8_t* src){
+    int8_t value;
+    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
+        value = src[index];
+
+        if (0 == value){
+            elements_[index].empty();
+        }
+        else{
+            if (value > 0){
+                elements_[index].setValue(value, STATUS_ORIGINAL | STATUS_SET, true);
+            }
+            else{
+                elements_[index].setValue(-1 * value, STATUS_SET, true);
+            }
+        }
+    }
+}
+*/
 // EOF

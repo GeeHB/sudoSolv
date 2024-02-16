@@ -39,7 +39,7 @@ enum EDIT_MODE{
 };
 
 // Compelxity for created sudoku grids
-//  nimber correspond to the count of clues
+//  The value correspond to the count of clues
 //
 enum GRID_COMPLEXITTY{
     COMPLEXITY_EASY = 33,
@@ -47,7 +47,7 @@ enum GRID_COMPLEXITTY{
     COMPLEXITY_HARD = 22
 };
 
-#define COMPLEXITY_BLOCKED_MAX  10
+#define COMPLEXITY_BLOCKED_MAX  5
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,6 +64,12 @@ public:
 
     // Destruction
     ~sudoku(){}
+
+    // setElments() : set elements of the grid
+    //
+    //  @elements : list of elements
+    //
+    void setElements(element* elements);
 
     // setScreenRect() : Screen dimensions
     //
@@ -89,10 +95,11 @@ public:
 
     // create() : Create a new sudoku
     //
-    //  @complexity : Complexity level in
-    //      {COMPLEXITY_EASY; COMPLEXITY_MEDIUM, COMPLEXITY_HARD}
+    //  @complexity : Complexity level in {}
     //
-    void create(uint8_t complexity);
+    //  @return : # of clues (ie of non empty elements) or -1 on error
+    //
+    int create(uint8_t complexity);
 
     //
     // io
@@ -172,6 +179,14 @@ public:
     bool findNextStartPos(position &start, int8_t& currentVal);
 
 private:
+
+    // _create() : Create a new sudoku
+    //
+    //  @complexity : Complexity level in {}
+    //
+    //  @return : # of clues (ie of non empty elements)
+    //
+    uint8_t _create(uint8_t complexity);
 
     //
     // Checks
@@ -429,6 +444,15 @@ private:
     //  @dest : destination table
     //
     void _copyElements(int8_t* dest);
+
+    //  _setElements() : Set elements from a previous copy
+    //
+    //  Elements values are > 0 for orignal values, 0 for empty
+    //  values et < 0 for 'found' values
+    //
+    //  @src : source table
+    //
+    //void _setElements(int8_t* src);
 
     // Members
 private:
