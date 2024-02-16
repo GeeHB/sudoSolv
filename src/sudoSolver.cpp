@@ -9,13 +9,13 @@
 #ifdef DEST_CASIO_CALC
 
 #include "sudoSolver.h"
+#include "shared/window.h"
 
 extern bopti_image_t g_homeScreen;  // Background image
 
 // Construction
 //
 sudoSolver::sudoSolver(){
-    // Initialize members
     _initStats();
 }
 
@@ -227,6 +227,33 @@ void sudoSolver::_onNewEmpty(){
     _initStats();
 
     _updateFileItemsState();
+}
+
+// _onNewSudoku() : Create a new sudoku grid
+//
+//  @compelxity : complexity of the grid to create
+//
+void sudoSolver::_onNewSudoku(uint8_t complexity){
+#ifdef DEST_CASIO_CALC
+    window waitWindow;
+    window::winInfo wInf;
+    wInf.style = WIN_STYLE_DEFAULT;
+    wInf.pos.y = WIN_SOL_Y;
+    wInf.pos.w = WIN_SOL_W;
+    wInf.pos.h = WIN_SOL_H;
+    wInf.bkColour = COLOUR_LT_GREY;
+    waitWindow.create(wInf);
+    waitWindow.drawText("Generating ...", -1, -1);
+    waitWindow.update();
+#endif // #ifdef DEST_CASIO_CALC
+
+    game_.create(complexity);   // do the job ...
+
+#ifdef DEST_CASIO_CALC
+    waitWindow.close();
+#endif // #ifdef DEST_CASIO_CALC
+    
+    game_.display();
 }
 
 // _onFilePrevious() : Open previous file in the grid folder

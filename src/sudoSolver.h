@@ -49,6 +49,12 @@ private:
     //
     void _onNewEmpty();
 
+    // _onNewSudoku() : Create a new sudoku grid
+    //
+    //  @compelxity : complexity of the grid to create
+    //
+    void _onNewSudoku(uint8_t complexity);
+
     // _onFilePrevious() : Open previous file in the grid folder
     //
     void _onFilePrevious();

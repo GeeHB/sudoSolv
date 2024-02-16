@@ -445,15 +445,6 @@ private:
     //
     void _copyElements(int8_t* dest);
 
-    //  _setElements() : Set elements from a previous copy
-    //
-    //  Elements values are > 0 for orignal values, 0 for empty
-    //  values et < 0 for 'found' values
-    //
-    //  @src : source table
-    //
-    //void _setElements(int8_t* src);
-
     // Members
 private:
     element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one-dim. table

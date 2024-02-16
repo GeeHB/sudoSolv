@@ -17,7 +17,11 @@ element::element(int value){
     hypotheseColour_ = HYP_NO_COLOUR; // No hypothese by default
 }
 
-// Assignment
+//
+// Overloads
+//
+
+// Assignments
 //
 element& element::operator=(const element& right){
     status_ = right.status_;
@@ -26,13 +30,10 @@ element& element::operator=(const element& right){
     return *this;
 }
 
-// Fast access to value
-//
 element& element::operator=(uint8_t right){
     value_ = right;
     return *this;
 }
-
 
 // setValue() : Set or modify a value
 //

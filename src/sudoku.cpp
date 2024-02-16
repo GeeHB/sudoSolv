@@ -664,15 +664,13 @@ int sudoku::multipleSolutions(){
     int8_t newVal(0);
     bool finished(false);
 
-    //int8_t values[INDEX_MAX+1];
-    //_copyElements(values);       // Keep a copy of current grid
-
     while (!finished && _resolve(&start)){
         if (count++){
             // Found 2 solutions => stop searchning
             return -1;
         }
 
+        // Search next element to change
         while (elements_[valid].isOriginal()){
             valid++;
         }
@@ -689,9 +687,6 @@ int sudoku::multipleSolutions(){
             finished = true;
         }
     }
-
-    // Return to initial state
-    //_setElements(values);
 
     return count;
 }
@@ -1680,31 +1675,4 @@ void sudoku::_copyElements(int8_t* dest){
     }
 }
 
-//  _setElements() : Set elements from a previous copy
-//
-//  Elements values are > 0 for orignal values, 0 for empty
-//  values et < 0 for 'found' values
-//
-//  @src : source table
-//
-/*
-void sudoku::_setElements(int8_t* src){
-    int8_t value;
-    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
-        value = src[index];
-
-        if (0 == value){
-            elements_[index].empty();
-        }
-        else{
-            if (value > 0){
-                elements_[index].setValue(value, STATUS_ORIGINAL | STATUS_SET, true);
-            }
-            else{
-                elements_[index].setValue(-1 * value, STATUS_SET, true);
-            }
-        }
-    }
-}
-*/
 // EOF

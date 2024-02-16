@@ -49,13 +49,15 @@ public:
     // Destrcution
     ~element(){}
 
-    // Assignment
-    element& operator=(const element& right);
-
-
-    // 'Fast' access to value
     //
+    // Operator overloads
+    //
+
+    // Assignments
+    element& operator=(const element& right);
     element& operator=(uint8_t right);
+
+    // Comparison
     bool operator==(uint8_t right){
         return (value_ == right);
     }
