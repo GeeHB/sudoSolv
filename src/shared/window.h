@@ -18,7 +18,7 @@
 #include <iostream>
 #endif // #ifdef DEST_CASIO_CALC
 
-#define _GEEHB_WINDOW_VER_      "0.1.2"
+#define _GEEHB_WINDOW_VER_      "0.1.3"
 
 #define WIN_BORDER_WIDTH        2
 

@@ -82,8 +82,8 @@ typedef struct __point {
         y = py;
     }
 
-    uint16_t    x;
-    uint16_t    y;
+    int16_t    x;
+    int16_t    y;
 } POINT;
 
 // A simple rect. struct

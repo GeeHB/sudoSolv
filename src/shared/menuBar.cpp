@@ -396,7 +396,7 @@ bool menuBar::defDrawItem(PMENUBAR const bar, PMENUITEM const item,
         }
     } // if (item)
 
-    if (isBitSet(style, MENU_DRAW_BORDERS && !selected)){
+    if (isBitSet(style, MENU_DRAW_BORDERS) && !selected){
         dline(anchor->x, anchor->y,
                 anchor->x + anchor->w -1, anchor->y,
                 bar->colours[ITEM_BORDER]);

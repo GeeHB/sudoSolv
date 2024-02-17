@@ -72,9 +72,9 @@ extern "C" {
 //
 
 // Window size & pos.
-#define WIN_SOL_Y            10
-#define WIN_SOL_W            190
-#define WIN_SOL_H            80
+#define WIN_SOL_Y            30
+#define WIN_SOL_W            200
+#define WIN_SOL_H            70
 
 // Comments
 #define STR_NO_SOL          "No solution"

@@ -147,7 +147,7 @@ bool window::create(winInfo& info){
         }
 
         // Center the title (or part of the title that fit window size)
-        dtext_opt(client_.x + (client_.w - width)/2 + WIN_BORDER_WIDTH,
+        dtext_opt(client_.x + (client_.w - width)/2,
                     client_.y + WIN_BORDER_WIDTH, infos_.textColour,
                     infos_.bkColour, DTEXT_LEFT, DTEXT_TOP,
                     infos_.title, nLen);
@@ -205,23 +205,20 @@ void window::update(){
 //
 void window::drawText(const char* text, int x, int y, int tCol, int bCol){
     if (activated_){
-        /*
+#ifdef DEST_CASIO_CALC
         POINT dest;
-        if (x < 0 ){
-
-        }
-        else{
-            dest.x = x;
+        int w(0), h(0);
+        if (x < 0 || y < 0){
+            dsize(text, NULL, &w, &h);  // Need text dims to center
         }
 
-        if (y < 0){
-        }
-        else{
-            dest.y = y;
-        }
-        */
-        POINT dest(x, y);
+        // Center text (or not ...)
+        dest.x = (x<0)?(client_.x + (client_.w - w)/2):x;
+        dest.y = (y<0)?(client_.y + (client_.h - h)/2):y;
+                
         win2Screen(dest);   // Change origin
+#endif // #ifdef DEST_CASIO_CALC
+
         if (text && text[0]){
 #ifdef DEST_CASIO_CALC
             dtext_opt(dest.x, dest.y, (
