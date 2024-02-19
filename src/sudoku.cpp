@@ -32,7 +32,8 @@ sudoku::sudoku(){
         tSquares_[index].setIndex(index);
     }
 
-    empty();    // Start with an empty grid
+    empty();        // Start with an empty grid
+    soluce_ = NULL; // No soluce
 }
 
 // Copy constructor
@@ -515,17 +516,6 @@ bool sudoku::edit(uint8_t mode){
             prevPos = currentPos;
             reDraw = false;
         }
-
-        /*
-        if (modified){
-            dprint_opt(CASIO_WIDTH - 100, CASIO_HEIGHT - 12 - MENUBAR_DEF_HEIGHT,
-                C_BLACK, SCREEN_BK_COLOUR,
-                DTEXT_LEFT, DTEXT_TOP,
-                " Elements : %d     ", elements);
-            dupdate();
-        }
-        */
-
     } // while (cont)
 
     if (timerID >= 0){
@@ -576,10 +566,12 @@ uint8_t sudoku::findObviousValues(){
 //
 //  @mDuration : points to an int that will receive duration
 //              of solving process in ms. Can be NULL
+//  @soluce : Pointer to a table to copy the solution into. If NULL
+//              or if no soluce is found no copy is done
 //
 //  @return : true if a solution was found
 //
-bool sudoku::resolve(int* mDuration){
+bool sudoku::resolve(int* mDuration, int8_t** soluce){
     clock_t start(0);
 
     if (mDuration){
@@ -589,8 +581,17 @@ bool sudoku::resolve(int* mDuration){
 
     bool found(_resolve(INDEX_MIN)); // Try to find the first solution
 
+    // Copy duration
     if (mDuration){
         (*mDuration) = ((clock() - start) * 1000 / CLOCKS_PER_SEC);
+    }
+
+    // Copy soluce ?
+    if (found && soluce){
+        (*soluce) = (int8_t*)malloc(sizeof(int8_t) * LINE_COUNT * ROW_COUNT);
+        if ((*soluce)){
+            _copyElements(*soluce);
+        }
     }
 
     return found;
@@ -1673,6 +1674,15 @@ void sudoku::_copyElements(int8_t* dest){
     for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
         value = elements_[index].value();
         dest[index] = value * (elements_[index].isOriginal()?1:-1);
+    }
+}
+
+//  _freeSoluce() : Free memory allocated for solution
+//
+void sudoku::_freeSoluce(void){
+    if (soluce_){
+        free(soluce_);
+        soluce_ = NULL;
     }
 }
 

@@ -63,7 +63,9 @@ public:
     sudoku(sudoku& original);
 
     // Destruction
-    ~sudoku(){}
+    ~sudoku(){
+        _freeSoluce();
+    }
 
     // setElments() : set elements of the grid
     //
@@ -150,10 +152,12 @@ public:
     //
     //  @mDuration : points to an int that will receive duration
     //              of solving process in ms. Can be NULL
+    //  @soluce : Pointer to a table to copy the solution into. If NULL
+    //              or if no soluce is found no copy is done
     //
     //  @return : true if a solution was found
     //
-    bool resolve(int* mDuration = NULL);
+    bool resolve(int* mDuration = NULL, int8_t** soluce = NULL);
 
     // multipleSolutions() : Check wether a grid has one or many solutions
     //
@@ -445,10 +449,15 @@ private:
     //
     void _copyElements(int8_t* dest);
 
+    //  _freeSoluce() : Free memory allocated for solution
+    //
+    void _freeSoluce(void);
+
     // Members
 private:
     element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one-dim. table
     tinySquare tSquares_[TINY_COUNT];	// Access to elements in tinySquares
+    int *soluce_;   // Solution for the current grid
 
     // Position & dims of screen
     // {x Grid, yGrid, "screen" width , "screen" height}
