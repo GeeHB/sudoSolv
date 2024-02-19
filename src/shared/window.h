@@ -18,7 +18,7 @@
 #include <iostream>
 #endif // #ifdef DEST_CASIO_CALC
 
-#define _GEEHB_WINDOW_VER_      "0.1.3"
+#define _GEEHB_WINDOW_VER_      "0.1.4"
 
 #define WIN_BORDER_WIDTH        2
 
@@ -99,7 +99,7 @@ public:
     //  @bCol : background colour. If is equal to -1,
     //          the default ground colour will be used
     //
-    void drawText(const char* text, int x, int y,
+    void drawText(const char* text, int x = -1, int y = -1,
                 int tCol = -1, int bCol = -1);
 
     // win2Screen() : Convert window (x, y) into screen (x,y)

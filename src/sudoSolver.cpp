@@ -11,7 +11,8 @@
 #include "sudoSolver.h"
 #include "shared/window.h"
 
-extern bopti_image_t g_homeScreen;  // Background image
+extern bopti_image_t g_about;
+//extern bopti_image_t g_pause;
 
 // Construction
 //
@@ -60,7 +61,7 @@ void sudoSolver::createMenu(){
 //
 void sudoSolver::showHomeScreen(){
     drect(0, 0, CASIO_WIDTH, CASIO_HEIGHT - menu_.getHeight(), C_WHITE);
-    dimage(0, 0, &g_homeScreen);
+    dimage(0, 0, &g_about);
 
     char copyright[255];
     strcpy(copyright, APP_NAME);
@@ -239,11 +240,11 @@ void sudoSolver::_onNewSudoku(uint8_t complexity){
     wInf.pos.h = WIN_SOL_H;
     wInf.bkColour = COLOUR_LT_GREY;
     waitWindow.create(wInf);
-    waitWindow.drawText("Generating ...", 40, 25);
+    //waitWindow.drawText("Generating ...", 40, 25);
+    waitWindow.drawText("Generating ...");  // Centered
     waitWindow.update();
 
     game_.create(complexity);   // do the job ...
-
 
     waitWindow.close(); // Close the window    
     game_.display();

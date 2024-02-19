@@ -1,6 +1,10 @@
 about.png:
   type: bopti-image
-  name: g_homeScreen
+  name: g_about
+  
+#pause.png:
+#  type: bopti-image
+#  name: g_pause
 
 menu.png:
   type: bopti-image

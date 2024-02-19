@@ -204,7 +204,7 @@ void window::update(){
 //          the default ground colour will be used
 //
 void window::drawText(const char* text, int x, int y, int tCol, int bCol){
-    if (activated_){
+    if (activated_ && text && text[0]){
 #ifdef DEST_CASIO_CALC
         POINT dest;
         int w(0), h(0);
@@ -213,21 +213,17 @@ void window::drawText(const char* text, int x, int y, int tCol, int bCol){
         }
 
         // Center text (or not ...)
-        dest.x = (x<0)?(client_.x + (client_.w - w)/2):x;
-        dest.y = (y<0)?(client_.y + (client_.h - h)/2):y;
-                
-        win2Screen(dest);   // Change origin
-#endif // #ifdef DEST_CASIO_CALC
+        dest.x = client_.x + ((x<0)?((client_.w - w)/2):x);
+        dest.y = client_.y + ((y<0)?((client_.h - h)/2):y);
 
-        if (text && text[0]){
-#ifdef DEST_CASIO_CALC
-            dtext_opt(dest.x, dest.y, (
-                tCol==-1)?infos_.textColour:tCol, (bCol==-1)?
-                infos_.bkColour:bCol, DTEXT_LEFT, DTEXT_TOP, text);
+        dtext_opt(dest.x, dest.y,
+            (tCol==-1)?infos_.textColour:tCol,
+            (bCol==-1)?infos_.bkColour:bCol,
+            DTEXT_LEFT, DTEXT_TOP,
+            text);
 #else
-            std::cout << "\t- " << text << std::endl;
+        std::cout << "\t- " << text << std::endl;
 #endif // #ifdef DEST_CASIO_CALC
-        }
     } // if (activated_)
 }
 
