@@ -394,26 +394,27 @@ private:
 
     // _acceptHypothese() : Accept all the hypothese's values
     //
-    //  When accepted, all elements with the given hyp. colour
-    //  will be merged with non coloured elements
-    //  and have their hyp. colour removed.
+    //  When accepted, all elements with the @colFrom colour
+    //  will have their colour changed to @colTo.
     //
-    //  @colour : Hypothese's colour
+    //  @colFrom : Hypothese's colour to accept
+    //  @colTo : New colour to apply
     //
     //  @return : Count of elements concerned
     //
-    uint8_t _acceptHypothese(int colour);
+    uint8_t _acceptHypothese(int colFrom, int colTo = HYP_NO_COLOUR);
 
     // _rejectHypothese() : Reject all the hypothese's values
     //
     //  When rejectedted, all elements with the given hyp. colour
-    //  will be cleared (emptied with no more hyp. colour)
+    //  will be cleared and set with the @colTo colour
     //
-    //  @colour : Hypothese's colour
+    //  @colFrom : Hypothese's colour to reject
+    //  @colTo : Dest. colour
     //
     //  @return : Count of elements concerned
     //
-    uint8_t _rejectHypothese(int colour);
+    uint8_t _rejectHypothese(int colFrom, int colTo = HYP_NO_COLOUR);
 
     // _onChangeHypothese() : Change coloured hyp.
     //

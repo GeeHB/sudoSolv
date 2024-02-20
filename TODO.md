@@ -1,7 +1,10 @@
 #### Ajouts
 - [x] Création / génération d'une grille avec choix du niveau / complexité
-- [ ] Résolution manuelle : mode "help" avec proposition d'une ou plusieurs valeurs
+- [ ] Résolution manuelle :
+    - [ ] mode "help" avec proposition d'une ou plusieurs valeurs
+    - [ ] Liste ordonnée des hyptohèses
 - [ ] Mode "pause" (cacher la grille)
-- [ ] Liste ordonnée des hyptohèses
+- [ ] menuBar
+    - [ ] Gestion des cases à cocher inactives
 #### Corrections
-- [x] Text centré dans les objets de type 'window'
+- [x] Texte centré dans les objets de type 'window'

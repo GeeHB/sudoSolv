@@ -1555,20 +1555,20 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 
 // _acceptHypothese() : Accept all the hypothese's values
 //
-//  When accepted, all elements with the given hyp. colour
-//  will be merged with non coloured elements
-//  and have their hyp. colour removed.
+//  When accepted, all elements with the @colFrom colour
+//  will have their colour changed to @colTo.
 //
-//  @colour : Hypothese's colour
+//  @colFrom : Hypothese's colour to accept
+//  @colTo : New colour to apply
 //
 //  @return : Count of elements concerned
 //
-uint8_t sudoku::_acceptHypothese(int colour){
+uint8_t sudoku::_acceptHypothese(int colFrom, int colTo){
     int count(0);
-    if (colour != HYP_NO_COLOUR){
+    if (colTo != colFrom && colFrom != HYP_NO_COLOUR){
         for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
-            if (colour == elements_[index].hypColour()){
-                elements_[index].setHypColour(HYP_NO_COLOUR);
+            if (colFrom == elements_[index].hypColour()){
+                elements_[index].setHypColour(colTo);
                 count++;
             }
         }
@@ -1583,18 +1583,20 @@ uint8_t sudoku::_acceptHypothese(int colour){
 // _rejectHypothese() : Reject all the hypothese's values
 //
 //  When rejectedted, all elements with the given hyp. colour
-//  will be cleared (emptied with no more hyp. colour)
+//  will be cleared and set with the @colTo colour
 //
-//  @colour : Hypothese's colour
+//  @colFrom : Hypothese's colour to reject
+//  @colTo : Dest. colour
 //
 //  @return : Count of elements concerned
 //
-uint8_t sudoku::_rejectHypothese(int colour){
+uint8_t sudoku::_rejectHypothese(int colFrom, int colTo){
     int count(0);
-    if (colour != HYP_NO_COLOUR){
+    if (colTo != colFrom && colFrom != HYP_NO_COLOUR){
         for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
-            if (colour == elements_[index].hypColour()){
+            if (colFrom == elements_[index].hypColour()){
                 elements_[index].empty();
+                elements_[index].setHypColour(colTo);
                 count++;
             }
         }
