@@ -125,6 +125,7 @@ void sudoku::display(bool update){
 // empty() : Empties the grid
 //
 void sudoku::empty(){
+    _freeSoluce();
     for (uint8_t index(INDEX_MIN); index <= INDEX_MAX ; index++){
         elements_[index].empty();
     }
@@ -434,13 +435,17 @@ bool sudoku::edit(uint8_t mode){
             break;
 
         //
-        // Hyptoheses
+        // Hyptoheses & manual solving
         //
         case IDM_MANUAL_ACCEPT:
             if (_acceptHypothese(hypColour)){
                 // At least one element's colour has changed => redraw
                 display();
             }
+            break;
+
+        case IDM_MANUAL_HELP:
+            _onManualHelp();
             break;
 
         case IDM_MANUAL_REJECT:
@@ -1462,12 +1467,13 @@ void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
 
         menu.appendItem(IDM_MANUAL_ACCEPT, IDS_MANUAL_ACCEPT);
         menu.appendItem(IDM_MANUAL_REJECT, IDS_MANUAL_REJECT);
+        menu.appendItem(IDM_MANUAL_HELP, IDS_MANUAL_HELP);
         menu.addItem(MENU_POS_RIGHT, IDM_MANUAL_END, IDS_MANUAL_END);
     }
 }
 
 //
-// Coloured hypotheses
+// Coloured hypotheses & manual solving process
 //
 
 // _elementTxtColour() : Get element's text colour for edition
@@ -1643,6 +1649,50 @@ bool sudoku::_onChangeHypothese(menuBar& menu, int newHypID,
     }
 
     return false;
+}
+
+// _onManualHelp() : Help thue user to solve the current grid
+//
+//  A new clue element is shown
+//
+void sudoku::_onManualHelp(){
+    // No sol. in memory ?
+    if (NULL == soluce_){
+        srand((unsigned int)clock());   // Set root
+
+        sudoku solver(*this);
+        if (!solver.resolve(NULL, &soluce_)){
+            // Unable to find a solution (???)
+            return;
+        }
+    }
+
+    // # of free items
+    uint8_t freeItems(ROW_COUNT * LINE_COUNT);
+    int8_t index;
+    for (index = INDEX_MIN; index < INDEX_MIN; index++){
+        if (elements_[index].isEmpty()){
+            freeItems--;
+        }
+    }
+
+    if (0==freeItems){
+        return; // No clue to give, the whole grid is visible
+    }
+
+    // Randomly select an item in the free ones
+    uint8_t clueID(rand() % freeItems);
+    index = 0;
+    while (clueID){
+        if (elements_[index++].isEmpty()){
+            clueID--;
+        }
+    }
+
+    // Found one !
+    index--;
+    elements_[index].setValue(soluce_[index], true);
+    display();
 }
 
 //

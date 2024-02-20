@@ -73,12 +73,14 @@ extern "C" {
 //
 #define IDS_MANUAL_HYP_SUBMENU  "Col."
 #define IDM_MANUAL_HYP_SUBMENU  311
-#define IDS_MANUAL_ACCEPT   "Accept"
-#define IDM_MANUAL_ACCEPT   312
-#define IDS_MANUAL_REJECT   "Reject"
-#define IDM_MANUAL_REJECT   313
-#define IDS_MANUAL_END      "End"
-#define IDM_MANUAL_END      IDM_EDIT_OK
+#define IDS_MANUAL_ACCEPT       "Accept"
+#define IDM_MANUAL_ACCEPT       312
+#define IDS_MANUAL_REJECT       "Reject"
+#define IDM_MANUAL_REJECT       313
+#define IDS_MANUAL_HELP         "Help"
+#define IDM_MANUAL_HELP         314
+#define IDS_MANUAL_END          "End"
+#define IDM_MANUAL_END          IDM_EDIT_OK
 
 #define IDM_MANUAL_COLOUR_FIRST   3111      // MANUAL_HYP submenu
 #define IDS_MANUAL_NO_COLOUR    "None"      // maybe in a future version

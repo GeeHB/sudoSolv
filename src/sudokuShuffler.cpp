@@ -10,9 +10,6 @@
 #include "sudokuShuffler.h"
 #include "position.h"
 
-#include <cstdlib>
-#include <ctime>
-
 // Construction
 //
 sudokuShuffler::sudokuShuffler(element* source){

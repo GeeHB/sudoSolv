@@ -12,7 +12,7 @@
 #include "casioCalcs.h"
 #include "keyboard.h"
 
-#define _GEEHB_MENU_VER_        "0.5.2"
+#define _GEEHB_MENU_VER_        "0.5.3"
 
 #define MENU_MAX_ITEM_COUNT     6   // ie. "F" buttons count
 
@@ -448,14 +448,10 @@ public:
     // Item access and modifications
     //
 
-    bool getItem(int searchID, int searchMode, PMENUITEM* pItem);
-    bool setItem(int searchID, int searchMode, PMENUITEM pItem, int Mask);
-
-    //  findItem() : Find an item in the menu bar and its submenus
+    //  getItem() : Find an item in the menu bar and its submenus
     //
     //  @searchedID : id or index of the searched item
     //  @searchMode : Type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
-    //
     //  @containerBar : pointer to a PMENUBAR. when not NULL,
     //          if item is found, containerBar will point to the bar
     //          containing the item
@@ -463,11 +459,32 @@ public:
     //
     //  @return : pointer to the item if found or NULL
     //
-    PMENUITEM findItem(int searchedID, int searchMode,
+    PMENUITEM getItem(int searchedID, int searchMode,
                 PMENUBAR* containerBar = NULL,
                 uint8_t* pIndex = NULL){
         return _findItem(&current_, searchedID, searchMode,
                         containerBar, pIndex);
+    }
+
+    //  setItem() : Modify an item in the menu bar and its submenus
+    //
+    //  @pItem : Pointer to the modified menu item
+    //  @searchedID : id or index of the searched item
+    //  @searchMode : Type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+    //  @mask : Mask to identify modified fields in the MENUITEM struct
+    //
+    //  @return : true if successfully applied
+    //
+    bool setItem(PMENUITEM pItem, int searchID, int searchMode, int Mask);
+
+    //  findItem() : Find an item in the menu bar and its submenus
+    //
+    //  Use getItem
+    //
+    PMENUITEM findItem(int searchedID, int searchMode,
+                PMENUBAR* containerBar = NULL,
+                uint8_t* pIndex = NULL){
+        return getItem(searchedID, searchMode, containerBar, pIndex);
     }
 
     //  freeMenuItem() : Free memory used by a menu item

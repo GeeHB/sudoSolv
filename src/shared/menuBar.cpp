@@ -17,7 +17,6 @@
 using namespace std;
 #else
 // Background image
-//
 extern bopti_image_t g_menuImgs;
 
 // Images index in the image

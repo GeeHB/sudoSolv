@@ -366,7 +366,7 @@ private:
     void _createEditMenu(menuBar& menu, uint8_t editMode);
 
     //
-    // Coloured hypotheses
+    // Coloured hypotheses & manual solving process
     //
 
     // _elementTxtColour() : Get element's text colour for edition
@@ -428,6 +428,12 @@ private:
     bool _onChangeHypothese(menuBar& menu, int newHypID,
                                     int& currentID, int& currentCol);
 
+    // _onHelp() : Help thue user to solve the current grid
+    //
+    //  A new clue element is shown
+    //
+    void _onManualHelp();
+
     //
     // Utilities
     //
@@ -458,7 +464,7 @@ private:
 private:
     element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one-dim. table
     tinySquare tSquares_[TINY_COUNT];	// Access to elements in tinySquares
-    int *soluce_;   // Solution for the current grid
+    int8_t *soluce_;   // A solution for the current grid
 
     // Position & dims of screen
     // {x Grid, yGrid, "screen" width , "screen" height}
