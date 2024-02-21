@@ -97,7 +97,14 @@ extern "C" {
 #define TEXT_Y                  30
 #define TEXT_V_OFFSET           20
 
-#define HYP_SQUARE_SIZE         5
+// Hypotheses
+//
+#define HYP_SQUARE_SIZE         5   // Square over lement
+
+// List
+#define HYP_LIST_SIZE           (HYP_SQUARE_SIZE + 1)
+#define HYP_LIST_X              
+#define HYP_LIST_Y
 
 // Colours
 //

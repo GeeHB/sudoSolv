@@ -23,6 +23,9 @@
 
 // Element's coloured hypothese
 //
+
+#define HYP_COUNT   4       // Max. count of hyp.
+
 #ifdef DEST_CASIO_CALC
 enum HYP_COLOUR{
     HYP_NO_COLOUR = GRID_BK_COLOUR,

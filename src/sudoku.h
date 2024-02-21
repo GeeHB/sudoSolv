@@ -47,7 +47,7 @@ enum GRID_COMPLEXITTY{
     COMPLEXITY_HARD = 22
 };
 
-#define COMPLEXITY_BLOCKED_MAX  5
+#define COMPLEXITY_BLOCKED_MAX  4
 
 #ifdef __cplusplus
 extern "C" {
@@ -238,12 +238,11 @@ private:
     //
     //  @pos : position
     //  @value : value to put
-    //  @hypoCol : Hypothese's colour
     //  @mode : edition mode
     //
     //  @return : -1 if can't be changed, 0 if changed an existing value,
     //          1 if new value set
-    int _checkAndSet(position& pos, uint8_t value, int hypColour, uint8_t mode);
+    int _checkAndSet(position& pos, uint8_t value, uint8_t mode);
 
     //
     // Drawings
@@ -266,6 +265,10 @@ private:
     //  @txtColour : text colour
     //
     void _drawSingleElement(position pos, int bkColour, int txtColour);
+
+    // _drawHypotheses() : Draw hypotheses list
+    //
+    void _drawHypotheses();
 
     //
     //   Search for obvious values
@@ -319,13 +322,19 @@ private:
     //
     uint8_t _setObviousValueInRows(position& pos, uint8_t value);
 
-    // _onEditCheck() : Check wether grid can be solved
+    // _onEditCheckSudoku() : Check wether grid can be solved
     //
-    void _onEditCheck();
+    void _onEditCheckSudoku();
 
     //
     // Resolving
     //
+
+    // _onHelp() : Help the user to solve the current grid
+    //
+    //  A new clue element is shown
+    //
+    void _onManualHelp();
 
     // _findFirstEmptyPos() : Find the first empty pos.
     //
@@ -392,47 +401,41 @@ private:
     static bool _ownMenuItemsDrawings(PMENUBAR const bar,
             PMENUITEM const  item, RECT* const anchor, int style);
 
-    // _acceptHypothese() : Accept all the hypothese's values
+    // _onManualAccept() : Accept all the hypothese's values
     //
-    //  When accepted, all elements with the @colFrom colour
-    //  will have their colour changed to @colTo.
+    //  When accepted, all elements with the current hyp. colour
+    //  will have their colour changed to the previous selected col.
     //
-    //  @colFrom : Hypothese's colour to accept
-    //  @colTo : New colour to apply
+    //  @menu : Edit submenu
     //
     //  @return : Count of elements concerned
     //
-    uint8_t _acceptHypothese(int colFrom, int colTo = HYP_NO_COLOUR);
+    uint8_t _onManualAccept(menuBar& menu);
 
-    // _rejectHypothese() : Reject all the hypothese's values
+    // _onManualReject() : Reject all the hypothese's values
     //
-    //  When rejectedted, all elements with the given hyp. colour
+    //  When rejected, all elements with the given hyp. colour
     //  will be cleared and set with the @colTo colour
     //
-    //  @colFrom : Hypothese's colour to reject
     //  @colTo : Dest. colour
     //
     //  @return : Count of elements concerned
     //
-    uint8_t _rejectHypothese(int colFrom, int colTo = HYP_NO_COLOUR);
+    uint8_t _onManualReject(int colTo = HYP_NO_COLOUR);
 
     // _onChangeHypothese() : Change coloured hyp.
     //
     //  @menu : Hyp. colours menu
     //  @newHypID : New colour index (in menu)
-    //  @currentID : Current colour index
-    //  @currentCol : Current col. value
     //
-    //  @return : true if successfully changed the hyp. colour
-    //
-    bool _onChangeHypothese(menuBar& menu, int newHypID,
-                                    int& currentID, int& currentCol);
+    void _onChangeHypothese(menuBar& menu, int newHypID);
 
-    // _onHelp() : Help thue user to solve the current grid
+    // _updateHypMenu() : Update submenu (and checkboxes)
     //
-    //  A new clue element is shown
+    //  @menu : Edit submenu
+    //  @redraw : true if submenu should be redrawn
     //
-    void _onManualHelp();
+    //void _updateHypMenu(menuBar& menu, bool redraw);
 
     //
     // Utilities
@@ -456,7 +459,7 @@ private:
     //
     void _copyElements(int8_t* dest);
 
-    //  _freeSoluce() : Free memory allocated for solution
+    //  _freeSoluce() : Free the memory allocated for a solution
     //
     void _freeSoluce(void);
 
@@ -469,6 +472,15 @@ private:
     // Position & dims of screen
     // {x Grid, yGrid, "screen" width , "screen" height}
     RECT screen_;
+
+    // Hypotheses
+    typedef struct{
+        uint8_t id; // ID in the menu
+        int colour; // Colour
+    }HYPOTHESE;
+
+    HYPOTHESE hypotheses_[HYP_COUNT];
+    int hypID_; // Current hyp. index in the table
 };
 
 #ifdef __cplusplus

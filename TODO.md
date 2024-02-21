@@ -6,6 +6,7 @@
 - [ ] Mode "pause" (cacher la grille)
 - [ ] menuBar
     - [ ] Gestion des cases à cocher inactives
+    - [ ] get/findITem retourne une copie !!!
     - [ ] set/getItem => mask (Text, status, state)
 #### Corrections
 - [x] Texte centré dans les objets de type 'window'
