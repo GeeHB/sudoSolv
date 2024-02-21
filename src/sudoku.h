@@ -430,13 +430,6 @@ private:
     //
     void _onChangeHypothese(menuBar& menu, int newHypID);
 
-    // _updateHypMenu() : Update submenu (and checkboxes)
-    //
-    //  @menu : Edit submenu
-    //  @redraw : true if submenu should be redrawn
-    //
-    //void _updateHypMenu(menuBar& menu, bool redraw);
-
     //
     // Utilities
     //

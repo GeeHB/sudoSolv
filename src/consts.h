@@ -99,12 +99,15 @@ extern "C" {
 
 // Hypotheses
 //
-#define HYP_SQUARE_SIZE         5   // Square over lement
+#define HYP_SQUARE_SIZE         5   // Square over element
 
 // List
-#define HYP_LIST_SIZE           (HYP_SQUARE_SIZE + 1)
-#define HYP_LIST_X              
-#define HYP_LIST_Y
+#define HYP_LIST_TEXT           "Hyp. :"
+#define HYP_LIST_X              (TEXT_X +  50) 
+#define HYP_LIST_Y              (TEXT_Y + 3* TEXT_V_OFFSET)
+#define HYP_LIST_W              20
+#define HYP_LIST_H              (HYP_SQUARE_SIZE + 1)
+#define HYP_LIST_OFFSET         4   // dx and dy
 
 // Colours
 //
