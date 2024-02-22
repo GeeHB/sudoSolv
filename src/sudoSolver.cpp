@@ -11,6 +11,7 @@
 #include "sudoSolver.h"
 #include "shared/window.h"
 
+//extern bopti_image_t g_appImgs;     // 2 images in a file
 extern bopti_image_t g_about;
 //extern bopti_image_t g_pause;
 
@@ -62,7 +63,11 @@ void sudoSolver::createMenu(){
 void sudoSolver::showHomeScreen(){
     drect(0, 0, CASIO_WIDTH, CASIO_HEIGHT - menu_.getHeight(), C_WHITE);
     dimage(0, 0, &g_about);
-
+    /*
+    dsubimage(0, 0, &g_appImgs,
+                0, 0, IMG_ABOUT_W, IMG_ABOUT_H, DIMAGE_NOCLIP);
+    */
+    
     char copyright[255];
     strcpy(copyright, APP_NAME);
     strcat(copyright, " by ");

@@ -4,6 +4,7 @@
 /src/tests.cpp
 /assets-cg/base
 .DS_Store
+*-base.*
 
 # Outputs
 /build-cg

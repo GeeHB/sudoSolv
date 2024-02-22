@@ -32,6 +32,14 @@ extern "C" {
 #define APP_VERSION  "0.4.7"
 #define APP_AUTHOR   "GeeHB"
 
+// "Internal" images
+//
+#define IMG_ABOUT_W     202
+#define IMG_ABOUT_H     216
+
+#define IMG_PAUSE_W     384
+#define IMG_PAUSE_H     216
+
 // Grids folder
 //
 #ifdef DEST_CASIO_CALC
