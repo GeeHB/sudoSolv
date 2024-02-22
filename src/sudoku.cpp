@@ -1407,12 +1407,12 @@ void sudoku::_onManualHelp(){
         }
     }
 
-    if (0==freeItems){
-        return; // No clue to give, the whole grid is visible
+    if (freeItems <= MIN_CLUE_COUNT){
+        return; // No need to help the use, the grid is nearly full
     }
 
     // Randomly select an item in the free ones
-    uint8_t clueID(rand() % freeItems);
+    uint8_t clueID(1 + (rand() % freeItems));
     index = 0;
     while (clueID){
         if (elements_[index++].isEmpty()){

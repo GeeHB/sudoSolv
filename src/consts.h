@@ -83,6 +83,9 @@ extern "C" {
 #define STR_ONE_SOL         "A unique sol."
 #define STR_MULTIPLE_SOL    "More than one sol."
 
+#define MIN_CLUE_COUNT      10      // No help if fewer items to find
+#define MAX_HELP_CLUES      3       // # of help clues 
+
 // Display
 //
 
