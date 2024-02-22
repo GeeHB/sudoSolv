@@ -35,12 +35,15 @@ sudoku::sudoku(){
     empty();        // Start with an empty grid
     soluce_ = NULL; // No soluce
 
-    // No hyp.
+    // No hypothese
     for (uint index(0); index < HYP_COUNT; index++){
-        hypotheses_[index].id = 0;
+        hypotheses_[index].menuID = 0;
         hypotheses_[index].colour = HYP_NO_COLOUR;
     }
     hypID_ = -1;
+
+    // No help (yet)
+    helpClues_ = MAX_HELP_CLUES;
 }
 
 // Copy constructor
@@ -447,7 +450,10 @@ bool sudoku::edit(uint8_t mode){
             break;
 
         case IDM_MANUAL_HELP:
-            _onManualHelp();
+            if (-1 != (index = _onManualHelp(menu))){
+                // Select added-element
+                currentPos = index;
+            }
             break;
 
         case IDM_MANUAL_REJECT:
@@ -483,10 +489,10 @@ bool sudoku::edit(uint8_t mode){
 
         // Other messages
         default:
-            if ((index = (action.value - IDM_MANUAL_COLOUR_FIRST)) >=0 &&
-                        index < HYP_COUNT){
+            if (action.value >= IDM_MANUAL_COLOUR_FIRST &&
+                action.value < (IDM_MANUAL_COLOUR_FIRST + HYP_COUNT)){
                 // User choose a checkbox
-                _onChangeHypothese(menu, index);
+                _onChangeHypothese(menu, action.value);
             }
 
             break;
@@ -1386,7 +1392,16 @@ bool sudoku::_resolve(position* sPos){
 //
 //  A new clue element is shown
 //
-void sudoku::_onManualHelp(){
+//  @menu : Edit sub-menu
+//
+//  @return : index of added element or -1 if none were added
+//
+int8_t sudoku::_onManualHelp(menuBar& menu){
+    if (!helpClues_){
+        // Already helped, ... too many times
+        return -1;
+    }
+
     // No sol. in memory ?
     if (NULL == soluce_){
         srand((unsigned int)clock());   // Set root
@@ -1394,7 +1409,7 @@ void sudoku::_onManualHelp(){
         sudoku solver(*this);
         if (!solver.resolve(NULL, &soluce_)){
             // Unable to find a solution (???)
-            return;
+            return -1;
         }
     }
 
@@ -1408,23 +1423,28 @@ void sudoku::_onManualHelp(){
     }
 
     if (freeItems <= MIN_CLUE_COUNT){
-        return; // No need to help the use, the grid is nearly full
+        return -1; // No need to help the use, the grid is nearly full
     }
 
     // Randomly select an item in the free ones
     uint8_t clueID(1 + (rand() % freeItems));
-    index = 0;
+    index = -1;
     while (clueID){
-        if (elements_[index++].isEmpty()){
+        if (elements_[++index].isEmpty()){
             clueID--;
         }
     }
 
     // Found one !
     int8_t helpValue(soluce_[index] * -1);  // found value is < 0
-    index--;
     elements_[index].setValue(helpValue, true);
     display();
+
+    if (!(--helpClues_)){
+        menu.activateItem(IDM_MANUAL_HELP, SEARCH_BY_ID, false);
+    }
+
+    return index;
 }
 
 // _findFirstEmptyPos() : Find the first empty pos.
@@ -1487,6 +1507,7 @@ int sudoku::__callbackTick(volatile int *pTick){
 //
 void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
     if (EDIT_MODE_CREATION == editMode){
+        // Just 3 buttons on edit mode
         menu.appendItem(IDM_EDIT_OK, IDS_EDIT_OK);
         menu.appendItem(IDM_EDIT_CHECK, IDS_EDIT_CHECK);
         menu.addItem(MENU_POS_RIGHT - 1, IDM_EDIT_CANCEL, IDS_EDIT_CANCEL);
@@ -1499,9 +1520,9 @@ void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
         // Coloured hyp. submenu
         //  each colour is stored in the ownerData member ot item struct
         menuBar hypMenu;
-        PMENUITEM item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST,
+        PMENUITEM item(hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST,
                                 NULL, ITEM_STATE_DEFAULT,
-                                ITEM_STATUS_OWNERDRAWN);
+                                ITEM_STATUS_OWNERDRAWN));
         item->ownerData = HYP_COLOUR_YELLOW;
 
         item = hypMenu.appendCheckbox(IDM_MANUAL_COLOUR_FIRST + 1,
@@ -1634,10 +1655,9 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 //  @return : Count of elements concerned
 //
 uint8_t sudoku::_onManualAccept(menuBar& menu){
-
     int colFrom(hypotheses_[hypID_--].colour);  // Current col.
     int colTo(hypID_>=0?hypotheses_[hypID_].colour:HYP_NO_COLOUR);
-        
+
     if (colFrom == colTo){
         return 0;   // ???
     }
@@ -1695,8 +1715,7 @@ uint8_t sudoku::_onManualReject(int colTo){
 //  @newHypID : New colour index (in menu)
 //
 void sudoku::_onChangeHypothese(menuBar& menu, int newHypID){
-    PMENUITEM item = menu.findItem(newHypID + IDM_MANUAL_COLOUR_FIRST,
-                                    SEARCH_BY_ID);
+    PMENUITEM item(menu.findItem(newHypID, SEARCH_BY_ID));
     if (item){
         int newCol, oldCol(HYP_NO_COLOUR);
 
@@ -1704,13 +1723,13 @@ void sudoku::_onChangeHypothese(menuBar& menu, int newHypID){
             // deactivate previous col.
             if (hypID_ > 0){
                 menu.activateItem(
-                    hypotheses_[hypID_].id + IDM_MANUAL_COLOUR_FIRST,
+                    hypotheses_[hypID_].menuID,
                     SEARCH_BY_ID, false);
                 oldCol = hypotheses_[hypID_].colour;
             }
 
             hypotheses_[++hypID_].colour = newCol = item->ownerData;
-            hypotheses_[hypID_].id = newHypID;
+            hypotheses_[hypID_].menuID = newHypID;
         }
         else{
             // Unchecked => reject current hyp
@@ -1719,7 +1738,7 @@ void sudoku::_onChangeHypothese(menuBar& menu, int newHypID){
             // => return to previous col. (if any)
             if (hypID_ > 0){
                 menu.activateItem(
-                    hypotheses_[--hypID_].id + IDM_MANUAL_COLOUR_FIRST,
+                    hypotheses_[--hypID_].menuID,
                     SEARCH_BY_ID, true);
                 newCol = hypotheses_[hypID_].colour;
                 oldCol = hypID_>0?hypotheses_[hypID_-1].colour:HYP_NO_COLOUR;
@@ -1733,13 +1752,13 @@ void sudoku::_onChangeHypothese(menuBar& menu, int newHypID){
 
         // Update menus
         menu.showParentBar(false);   // Return to "manual" menubar
-        PMENUITEM item(menu.getItem(IDM_MANUAL_HYP_SUBMENU, SEARCH_BY_ID));
+        item = menu.getItem(IDM_MANUAL_HYP_SUBMENU, SEARCH_BY_ID);
         if (item){
-            item->ownerData = newCol;
+            item->ownerData = newCol;   // Current hyp's col.
         }
 
         if ((item = menu.getItem(IDM_MANUAL_ACCEPT, SEARCH_BY_ID))){
-            item->ownerData = oldCol;
+            item->ownerData = oldCol;   // Previous hyp's col
         }
 
         menu.update();

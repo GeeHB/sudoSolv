@@ -334,7 +334,11 @@ private:
     //
     //  A new clue element is shown
     //
-    void _onManualHelp();
+    //  @menu : Edit sub-menu
+    //
+    //  @return : index of added element or -1 if none were added
+    //
+    int8_t _onManualHelp(menuBar& menu);
 
     // _findFirstEmptyPos() : Find the first empty pos.
     //
@@ -466,14 +470,16 @@ private:
     // {x Grid, yGrid, "screen" width , "screen" height}
     RECT screen_;
 
-    // Hypotheses
+    // Hypotheses & help
+    //
     typedef struct{
-        uint8_t id; // ID in the menu
-        int colour; // Colour
+        uint8_t menuID; // ID in the menu
+        int colour;     // Associated colour
     }HYPOTHESE;
 
     HYPOTHESE hypotheses_[HYP_COUNT];
     int hypID_; // Current hyp. index in the table
+    uint8_t helpClues_;
 };
 
 #ifdef __cplusplus

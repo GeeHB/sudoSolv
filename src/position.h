@@ -170,7 +170,7 @@ private:
     uint8_t status_;
 
     uint8_t row_, line_;    // Position in the "matrix"
-    uint8_t squareID_;      //tiny-square ID
+    uint8_t squareID_;      // tiny-square ID
     bool gameMode_;         // In game mode ?
 };  // class position
 

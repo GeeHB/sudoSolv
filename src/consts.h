@@ -29,7 +29,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolver"
-#define APP_VERSION  "0.4.6"
+#define APP_VERSION  "0.4.7"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -52,7 +52,7 @@ extern "C" {
 #define INDEX_MAX   (ROW_COUNT * LINE_COUNT - 1)
 
 #define VALUE_MIN   1
-#define VALUE_MAX   9
+#define VALUE_MAX   ROW_COUNT
 
 // Blinking
 //
@@ -70,7 +70,7 @@ extern "C" {
 #define FILE_LINE_SIZE  ROW_COUNT * 2   // (value & separator) * ROW_COUNT
 #define FILE_SIZE       LINE_COUNT * FILE_LINE_SIZE
 
-// Grid's solution(s)
+// Grid's solution(s) and help
 //
 
 // Window size & pos.
