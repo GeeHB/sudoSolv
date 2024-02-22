@@ -421,12 +421,6 @@ bool menuBar::defDrawItem(PMENUBAR const bar, PMENUITEM const item,
             cout << "[no text]";
         }
 
-        /*
-        if (item->ownerData){
-            cout << "[" << (int)item->ownerData << "]";
-        }
-        */
-
         cout << (isBitSet(item->state,ITEM_STATE_SELECTED)?"<" : " ");
         cout << "|";
     }

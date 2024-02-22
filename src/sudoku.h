@@ -473,7 +473,7 @@ private:
     // Hypotheses & help
     //
     typedef struct{
-        uint8_t menuID; // ID in the menu
+        int menuID;     // ID in the menu
         int colour;     // Associated colour
     }HYPOTHESE;
 

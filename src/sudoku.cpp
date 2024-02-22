@@ -32,8 +32,8 @@ sudoku::sudoku(){
         tSquares_[index].setIndex(index);
     }
 
-    empty();        // Start with an empty grid
     soluce_ = NULL; // No soluce
+    empty();        // Start with an empty grid
 
     // No hypothese
     for (uint index(0); index < HYP_COUNT; index++){
@@ -875,12 +875,12 @@ int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
 //
 void sudoku::_onEditCheckSudoku(){
     sudoku tester(*this);
-    int count = tester.multipleSolutions();
+    int count = tester.multipleSolutions(); // try to find solution(s)
 
 #ifdef DEST_CASIO_CALC
     window output;
     window::winInfo wInf;
-    wInf.title = (char*)"Check";
+    wInf.title = (char*)WIN_SOL_TITLE;
     wInf.style = WIN_STYLE_DBORDER | WIN_STYLE_HCENTER;
     wInf.pos.y = WIN_SOL_Y;
     wInf.pos.w = WIN_SOL_W;
@@ -894,7 +894,7 @@ void sudoku::_onEditCheckSudoku(){
             break;
 
          case 1:
-            output.drawText(STR_ONE_SOL, -1, -1, COLOUR_RED);
+            output.drawText(STR_ONE_SOL);
             break;
 
         case 0:
@@ -905,9 +905,8 @@ void sudoku::_onEditCheckSudoku(){
 
     output.update();
 
-     // Wait for any key to be pressed
+    // Wait for any key to be pressed
     getkey();
-
     output.close();
 
     display();
@@ -1044,9 +1043,9 @@ void sudoku::_drawHypotheses(){
     drect(HYP_LIST_X, HYP_LIST_Y,
             HYP_LIST_X + HYP_LIST_W + HYP_COUNT * HYP_LIST_OFFSET,
             HYP_LIST_Y + HYP_LIST_H + HYP_COUNT * HYP_LIST_OFFSET,
-            SCREEN_BK_COLOUR); 
+            SCREEN_BK_COLOUR);
 
-    int x(HYP_LIST_X), y(HYP_LIST_Y); 
+    int x(HYP_LIST_X), y(HYP_LIST_Y);
     for (uint8_t index(0); index <= hypID_; index++){
         drect(x, y, x + HYP_LIST_W, y + HYP_LIST_H,
                 hypotheses_[index].colour);
@@ -1551,7 +1550,7 @@ void sudoku::_createEditMenu(menuBar& menu, uint8_t editMode){
         item = menu.appendItem(IDM_MANUAL_ACCEPT, IDS_MANUAL_ACCEPT,
                     ITEM_STATE_DEFAULT, ITEM_STATUS_OWNERDRAWN);
         item->ownerData = HYP_NO_COLOUR;
-        
+
         menu.appendItem(IDM_MANUAL_REJECT, IDS_MANUAL_REJECT);
         menu.appendItem(IDM_MANUAL_HELP, IDS_MANUAL_HELP);
         menu.addItem(MENU_POS_RIGHT, IDM_MANUAL_END, IDS_MANUAL_END);

@@ -73,6 +73,8 @@ extern "C" {
 // Grid's solution(s) and help
 //
 
+#define WIN_SOL_TITLE       "Check"
+
 // Window size & pos.
 #define WIN_SOL_Y            30
 #define WIN_SOL_W            200
