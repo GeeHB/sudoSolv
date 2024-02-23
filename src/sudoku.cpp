@@ -286,7 +286,8 @@ bool sudoku::edit(uint8_t mode){
     bool cont(true);
     bool showSelected(true);
     bool reDraw(false);
-    int eStatus, index;
+    int eStatus;
+    int8_t index;
 
     position currentPos(0, false);
     position prevPos(0, false);
@@ -309,7 +310,7 @@ bool sudoku::edit(uint8_t mode){
 
     // # elements in the grid
     uint8_t elements(0);
-    for (uint8_t index(INDEX_MIN); index<=INDEX_MAX ; index++){
+    for (index = INDEX_MIN; index<=INDEX_MAX ; index++){
         if (!elements_[index].isEmpty()){
             elements++;
         }
@@ -1612,7 +1613,8 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 
             drect(x, y,
                 anchor->x + anchor->w -3, y + HYP_SQUARE_SIZE - 1,
-                item->ownerData);
+                menuBar::isBitSet(item->state, ITEM_STATE_INACTIVE)?
+                    COLOUR_DK_GREY:item->ownerData);
         }
         else{
             // Draw background

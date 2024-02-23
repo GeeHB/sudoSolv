@@ -174,6 +174,18 @@ bool menuBar::activateItem(int searchedID, int searchMode, bool activated){
     return false;
 }
 
+// isMenuItemActivated() : Check wether an item is activated or not
+//
+//  @id : item id
+//  @searchMode : type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+//
+//  return : true if the item is activted
+//
+bool menuBar::isMenuItemActivated(int id, int searchMode){
+    PMENUITEM item(_findItem(&current_, id, searchMode));
+    return (item && !isBitSet(item->state, ITEM_STATE_INACTIVE));
+}
+
 //  freeMenuItem() : Free memory used by a menu item
 //
 //  @item : Pointer to the menu item to be released

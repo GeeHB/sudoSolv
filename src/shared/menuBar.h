@@ -444,6 +444,15 @@ public:
         return activateItem(searchedID, searchMode, activated);
     }
 
+    // isMenuItemActivated() : Check wether an item is activated or not
+    //
+    //  @id : item id
+    //  @searchMode : type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
+    //
+    //  return : true if the item is activted
+    //
+    bool isMenuItemActivated(int id, int searchMode = SEARCH_BY_ID);
+
     //
     // Item access and modifications
     //
