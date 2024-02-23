@@ -448,7 +448,9 @@ bool sudoku::edit(uint8_t mode){
         // Hyptoheses & manual solving
         //
         case IDM_MANUAL_ACCEPT:
-            _onManualAccept(menu);
+            if (_onManualAccept(menu)){
+                display();
+            }
             break;
 
         case IDM_MANUAL_HELP:
@@ -1657,26 +1659,24 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 //  @return : Count of elements concerned
 //
 uint8_t sudoku::_onManualAccept(menuBar& menu){
-    int colFrom(hypotheses_[hypID_--].colour);  // Current col.
-    int colTo(hypID_>=0?hypotheses_[hypID_].colour:HYP_NO_COLOUR);
+    int colFrom(hypotheses_[hypID_].colour);  // Current col.
+    int colTo(hypID_>=0?hypotheses_[hypID_-1].colour:HYP_NO_COLOUR);
 
     if (colFrom == colTo){
         return 0;   // ???
     }
 
     // Change selected col. to previous hyp. (if any)
-    int count(0);
-    if (colTo != colFrom && colFrom != HYP_NO_COLOUR){
-        for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
-            if (colFrom == elements_[index].hypColour()){
-                elements_[index].setHypColour(colTo);
-                count++;
-            }
+    uint8_t count(0);
+    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
+        if (colFrom == elements_[index].hypColour()){
+            elements_[index].setHypColour(colTo);
+            count++;
         }
     }
-
-    // Remove hyp. info.
-    hypotheses_[hypID_+1] = {0, HYP_NO_COLOUR};
+    
+    // Uncheck current colour (and return to previous one in the list)
+    menu.activateItem(hypotheses_[hypID_].menuID, SEARCH_BY_ID, false);
     _onChangeHypothese(menu, hypID_);
 
     return count;
@@ -1749,6 +1749,9 @@ void sudoku::_onChangeHypothese(menuBar& menu, int newHypID){
                 hypID_ = -1;
                 newCol = oldCol = HYP_NO_COLOUR;
             }
+
+            // Remove hyp. info.
+            hypotheses_[hypID_+1] = {0, HYP_NO_COLOUR};
         }
 
         // Update menus
