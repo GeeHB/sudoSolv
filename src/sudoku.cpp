@@ -28,7 +28,8 @@ using namespace std;
 //
 sudoku::sudoku(){
     // Initializes tinySquares
-    for (uint8_t index=0; index<TINY_COUNT; index++){
+    uint8_t index;
+    for (index = 0; index < TINY_COUNT; index++){
         tSquares_[index].setIndex(index);
     }
 
@@ -36,7 +37,7 @@ sudoku::sudoku(){
     empty();        // Start with an empty grid
 
     // No hypothese
-    for (uint index(0); index < HYP_COUNT; index++){
+    for (index = 0; index < HYP_COUNT; index++){
         hypotheses_[index].menuID = 0;
         hypotheses_[index].colour = HYP_NO_COLOUR;
     }
@@ -50,7 +51,7 @@ sudoku::sudoku(){
 //
 sudoku::sudoku(sudoku& original)
 :sudoku(){
-    setElements(original.elements_);
+    setElements(original.elements_);    // copy the grid
 }
 
 // setElments() : set elements of the grid
@@ -1614,7 +1615,7 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
             drect(x, y,
                 anchor->x + anchor->w -3, y + HYP_SQUARE_SIZE - 1,
                 menuBar::isBitSet(item->state, ITEM_STATE_INACTIVE)?
-                    COLOUR_DK_GREY:item->ownerData);
+                    GRID_BK_COLOUR:item->ownerData);
         }
         else{
             // Draw background
@@ -1717,12 +1718,11 @@ uint8_t sudoku::_onManualReject(int colTo){
 //
 void sudoku::_onChangeHypothese(menuBar& menu, int newHypID){
     PMENUITEM item(menu.findItem(newHypID, SEARCH_BY_ID));
-    if (item){
+    if (item){        
         int newCol, oldCol(HYP_NO_COLOUR);
-
         if (menu.isBitSet(item->state, ITEM_STATE_CHECKED)){
-            // deactivate previous col.
-            if (hypID_ > 0){
+            // deactivate previous colour (if valid)
+            if (hypID_ >= 0){
                 menu.activateItem(
                     hypotheses_[hypID_].menuID,
                     SEARCH_BY_ID, false);
@@ -1734,7 +1734,7 @@ void sudoku::_onChangeHypothese(menuBar& menu, int newHypID){
         }
         else{
             // Unchecked => reject current hyp
-            _onManualReject();
+            //_onManualReject();
 
             // => return to previous col. (if any)
             if (hypID_ > 0){

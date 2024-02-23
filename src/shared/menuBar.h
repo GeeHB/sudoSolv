@@ -118,7 +118,7 @@ typedef struct _menuItem{
     int status;
     char text[ITEM_NAME_LEN + 1];
     void* subMenu;  // if item is a submenu, points to the submenu
-    int ownerData;  // Can ba anything ...
+    int ownerData;  // Can be anything ...
 } MENUITEM,* PMENUITEM;
 
 // A menu bar

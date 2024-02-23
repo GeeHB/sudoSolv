@@ -478,7 +478,7 @@ private:
     }HYPOTHESE;
 
     HYPOTHESE hypotheses_[HYP_COUNT];
-    int hypID_; // Current hyp. index in the table
+    int8_t hypID_; // Current hyp. index in the table
     uint8_t helpClues_;
 };
 
