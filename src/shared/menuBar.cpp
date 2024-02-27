@@ -75,7 +75,6 @@ int menuBar::setColour(uint8_t index, int colour){
     return actual;
 }
 
-
 //
 // Dimensions
 //
@@ -238,11 +237,6 @@ MENUACTION menuBar::handleKeyboard(){
                         showParentBar();
                     }
                     else{
-                        // a selectable item ...
-                        ret.value = item->id;
-                        ret.type = ACTION_MENU;
-                        readKeyboard = false;
-
                         // select the item
                         if (kID != visible_->selIndex){
                             _selectByIndex(kID, true, true);
@@ -257,6 +251,12 @@ MENUACTION menuBar::handleKeyboard(){
                                 setBit(item->state, ITEM_STATE_CHECKED);
                             }
                         }
+
+                        // a selectable item ...
+                        ret.value = item->id;
+                        ret.type = ACTION_MENU;
+                        ret.state = item->state;
+                        readKeyboard = false;
                     }
                 }
             }

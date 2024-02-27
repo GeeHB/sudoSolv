@@ -136,9 +136,19 @@ typedef struct _menuBar{
 //
 typedef struct _menuAction{
     int value;
-    uint modifier;
+    union {
+        uint modifier;
+        int state;
+    };
     uint8_t type;
 } MENUACTION;
+
+// Types of actions
+//
+enum MENU_ACTION{
+    ACTION_MENU = 0,    // value is a menu ID
+    ACTION_KEYBOARD = 1 // value is a keycode
+};
 
 // Ownerdraw's function prototype
 //
@@ -148,12 +158,6 @@ typedef bool (*MENUDRAWINGCALLBACK)(
             RECT* const,        // Drawing rect for item
             int style);         // Elements (in item) to draw
 
-// Types of actions
-//
-enum MENU_ACTION{
-    ACTION_MENU = 0,    // value is a menu ID
-    ACTION_KEYBOARD = 1 // value is a keycode
-};
 
 // Types of search modes
 //

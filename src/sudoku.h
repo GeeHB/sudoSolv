@@ -410,29 +410,76 @@ private:
     //  When accepted, all elements with the current hyp. colour
     //  will have their colour changed to the previous selected col.
     //
-    //  @menu : Edit submenu
-    //
     //  @return : Count of elements concerned
     //
-    uint8_t _onManualAccept(menuBar& menu);
+    uint8_t _onManualAccept(){
+        // Change selected col. to previous hyp. (if any)
+        return _hypAccept(_hypColour(hypID_), _hypColour(hypID_-1));
+    }
 
     // _onManualReject() : Reject all the hypothese's values
     //
     //  When rejected, all elements with the given hyp. colour
-    //  will be cleared and set with the @colTo colour
-    //
-    //  @colTo : Dest. colour
+    //  will be cleared
     //
     //  @return : Count of elements concerned
     //
-    uint8_t _onManualReject(int colTo = HYP_NO_COLOUR);
+    uint8_t _onManualReject();
 
-    // _onChangeHypothese() : Change coloured hyp.
+    // _hypAccept() : Accept all the hypothese's values
+    //
+    //  All elements with the @colFrom colour
+    //  will have their colour changed to the @colTo colour
+    //
+    //  @colFrom : Original hyp. col.
+    //  @colTo : Drest. hyp. colour
+    //
+    //  @return : Count of elements whose colour have changed
+    //
+    uint8_t _hypAccept(int colFrom, int colTo);
+
+    // _hypReject() : Reject all the hypothese's values
+    //
+    //  When rejected, all elements with the @colFrom  hyp. colour
+    //  will be cleared
+    //
+    //  @colFrom : Colour of rejected elements
+    //
+    //  @return : Count of elements concerned
+    //
+    uint8_t _hypReject(int colFrom);
+
+    // _hypPush() : Push a new coloured hypothese on top of stack
     //
     //  @menu : Hyp. colours menu
-    //  @newHypID : New colour index (in menu)
+    //  @menuID : ID of menu colour
+    //  @newColour : new colour
     //
-    void _onChangeHypothese(menuBar& menu, int newHypID);
+    //  @return : previous ID (or -1 on error)
+    //
+    int8_t _hypPush(menuBar& menu, int menuID, int newColour);
+
+    // _hypPop() : Remove the hypothese from the top of the stack
+    //
+    //  @return : previous ID
+    //
+    int8_t _hypPop(menuBar& menu);
+
+    // _hypUpdateMenu() : Update menu according to new selected colour
+    //
+    //  @menu : menubar
+    //  @curCol : New 'currrent' colour
+    //  @prevCol : previous col
+    //
+    void _hypUpdateMenu(menuBar& menu, int curCol, int prevCol);
+    
+    // _onHypChanged() : Change coloured hyp.
+    //
+    //  @menu : Hyp. colours menu
+    //  @newHypID : Menu ID
+    //  @checked : true if item is checked
+    //
+    void _onHypChanged(menuBar& menu, int newHypID, bool checked);
 
     //
     // Utilities
@@ -460,6 +507,11 @@ private:
     //
     void _freeSoluce(void);
 
+    // Helper ...
+    int _hypColour(int hypID){
+        return (hypID < 0? HYP_NO_COLOUR:hypotheses_[hypID].colour);
+    }
+
     // Members
 private:
     element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one-dim. table
@@ -476,7 +528,7 @@ private:
         int menuID;     // ID in the menu
         int colour;     // Associated colour
     }HYPOTHESE;
-
+    
     HYPOTHESE hypotheses_[HYP_COUNT];
     int8_t hypID_; // Current hyp. index in the table
     uint8_t helpClues_;

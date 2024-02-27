@@ -38,8 +38,7 @@ sudoku::sudoku(){
 
     // No hypothese
     for (index = 0; index < HYP_COUNT; index++){
-        hypotheses_[index].menuID = 0;
-        hypotheses_[index].colour = HYP_NO_COLOUR;
+        hypotheses_[index] = {0, HYP_NO_COLOUR};
     }
     hypID_ = -1;
 
@@ -448,7 +447,7 @@ bool sudoku::edit(uint8_t mode){
         // Hyptoheses & manual solving
         //
         case IDM_MANUAL_ACCEPT:
-            if (_onManualAccept(menu)){
+            if (_onManualAccept()){
                 display();
             }
             break;
@@ -496,7 +495,8 @@ bool sudoku::edit(uint8_t mode){
             if (action.value >= IDM_MANUAL_COLOUR_FIRST &&
                 action.value < (IDM_MANUAL_COLOUR_FIRST + HYP_COUNT)){
                 // User choose a checkbox
-                _onChangeHypothese(menu, action.value);
+                _onHypChanged(menu, action.value,
+                        menuBar::isBitSet(action.state, ITEM_STATE_CHECKED));
             }
 
             break;
@@ -1649,122 +1649,166 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
     return true;
 }
 
-// _onManualAccept() : Accept all the hypothese's values
+// _onManualReject() : Reject all the hypothese's values
 //
-//  When accepted, all elements with the current hyp. colour
-//  will have their colour changed to the previous selected col.
-//
-//  @menu : Edit submenu
+//  When rejected, all elements with the given hyp. colour
+//  will be cleared
 //
 //  @return : Count of elements concerned
 //
-uint8_t sudoku::_onManualAccept(menuBar& menu){
-    int colFrom(hypotheses_[hypID_].colour);  // Current col.
-    int colTo(hypID_>=0?hypotheses_[hypID_-1].colour:HYP_NO_COLOUR);
-
-    if (colFrom == colTo){
-        return 0;   // ???
-    }
-
-    // Change selected col. to previous hyp. (if any)
+uint8_t sudoku::_onManualReject(){
     uint8_t count(0);
-    for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
-        if (colFrom == elements_[index].hypColour()){
-            elements_[index].setHypColour(colTo);
-            count++;
-        }
+    if (hypID_>=0){
+        count = _hypReject(hypotheses_[hypID_].colour);
+        // _hypPop(menu);
     }
-    
-    // Uncheck current colour (and return to previous one in the list)
-    menu.activateItem(hypotheses_[hypID_].menuID, SEARCH_BY_ID, false);
-    _onChangeHypothese(menu, hypID_);
 
     return count;
 }
 
-// _onManualReject() : Reject all the hypothese's values
+// _hypAccept() : Accept all the hypothese's values
 //
-//  When rejected, all elements with the given hyp. colour
-//  will be cleared and set with the @colTo colour
+//  All elements with the @colFrom colour
+//  will have their colour changed to the @colTo colour
 //
-//  @colTo : Dest. colour
+//  @colFrom : Original hyp. col.
+//  @colTo : Drest. hyp. colour
 //
-//  @return : Count of elements concerned
+//  @return : Count of elements whose colour have changed
 //
-uint8_t sudoku::_onManualReject(int colTo){
-    int count(0);
-    int colFrom((hypID_>=0)?hypotheses_[hypID_].colour:HYP_NO_COLOUR);
-    if (colTo != colFrom && colFrom != HYP_NO_COLOUR){
+uint8_t sudoku::_hypAccept(int colFrom, int colTo){
+    uint8_t count(0);
+    if (colFrom != colTo){
         for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
             if (colFrom == elements_[index].hypColour()){
-                elements_[index].empty();
                 elements_[index].setHypColour(colTo);
                 count++;
             }
         }
     }
-
-#ifdef DEST_CASIO_CALC
-    _drawHypotheses();
-    display();
-#endif // #ifdef DEST_CASIO_CALC
+    
     return count;
 }
 
-// _onChangeHypothese() : Change coloured hyp.
+// _hypReject() : Reject all the hypothese's values
+//
+//  When rejected, all elements with the @colFrom  hyp. colour
+//  will be cleared
+//
+//  @colFrom : Colour of rejected elements
+//
+//  @return : Count of elements concerned
+//
+uint8_t sudoku::_hypReject(int colFrom){
+    uint8_t count(0);
+    if (colFrom != HYP_NO_COLOUR){
+        for (uint8_t index(INDEX_MIN); index <= INDEX_MAX; index++){
+            if (colFrom == elements_[index].hypColour()){
+                elements_[index].empty();
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+// _hypPush() : Push a new coloured hypthese on top of stack
 //
 //  @menu : Hyp. colours menu
-//  @newHypID : New colour index (in menu)
+//  @menuID : ID of menu colour
+//  @newColour : new colour
 //
-void sudoku::_onChangeHypothese(menuBar& menu, int newHypID){
-    PMENUITEM item(menu.findItem(newHypID, SEARCH_BY_ID));
-    if (item){        
-        int newCol, oldCol(HYP_NO_COLOUR);
-        if (menu.isBitSet(item->state, ITEM_STATE_CHECKED)){
-            // deactivate previous colour (if valid)
-            if (hypID_ >= 0){
-                menu.activateItem(
-                    hypotheses_[hypID_].menuID,
-                    SEARCH_BY_ID, false);
-                oldCol = hypotheses_[hypID_].colour;
-            }
+//  @return : previous ID (or -1 on error)
+//
+int8_t sudoku::_hypPush(menuBar& menu, int menuID, int newColour){
+    int8_t prev(hypID_);
 
-            hypotheses_[++hypID_].colour = newCol = item->ownerData;
-            hypotheses_[hypID_].menuID = newHypID;
-        }
-        else{
-            // Unchecked => reject current hyp
-            //_onManualReject();
+    // Add to stack
+    hypotheses_[++hypID_].colour = newColour;
+    hypotheses_[hypID_].menuID = menuID;
 
-            // => return to previous col. (if any)
-            if (hypID_ > 0){
-                menu.activateItem(
-                    hypotheses_[--hypID_].menuID,
-                    SEARCH_BY_ID, true);
-                newCol = hypotheses_[hypID_].colour;
-                oldCol = hypID_>0?hypotheses_[hypID_-1].colour:HYP_NO_COLOUR;
-            }
-            else{
-                // No more hyp.
-                hypID_ = -1;
-                newCol = oldCol = HYP_NO_COLOUR;
-            }
+    // Update menus
+    _hypUpdateMenu(menu, newColour, _hypColour(hypID_-1));
 
-            // Remove hyp. info.
-            hypotheses_[hypID_+1] = {0, HYP_NO_COLOUR};
-        }
+    return prev;
+}
+
+// _hypPop() : Remove the hypothese from the top of the stack
+//
+//  @return : previous ID
+//
+int8_t sudoku::_hypPop(menuBar& menu){
+    int8_t prev(-1);
+    if (hypID_ >= 0){
+        prev = hypID_;
+
+        // remove from top
+        hypotheses_[hypID_--] = {0, HYP_NO_COLOUR};
 
         // Update menus
-        menu.showParentBar(false);   // Return to "manual" menubar
-        item = menu.getItem(IDM_MANUAL_HYP_SUBMENU, SEARCH_BY_ID);
-        if (item){
-            item->ownerData = newCol;   // Current hyp's col.
+        _hypUpdateMenu(menu, _hypColour(hypID_), _hypColour(hypID_-1));
+    }
+
+    return prev;
+}
+
+// _hypUpdateMenu() : Update menu according to new selected colour
+//
+//  @menu : menubar
+//  @curCol : New 'currrent' colour
+//  @prevCol : previous col
+//
+void sudoku::_hypUpdateMenu(menuBar& menu, int curCol, int prevCol){
+    if (curCol == prevCol){
+        return;
+    }
+    
+    // Update menus
+    PMENUITEM item(menu.getItem(IDM_MANUAL_HYP_SUBMENU, SEARCH_BY_ID));
+    if (item){
+        item->ownerData = curCol;   // Current hyp's col.
+    }
+
+    if ((item = menu.getItem(IDM_MANUAL_ACCEPT, SEARCH_BY_ID))){
+        // Previous hyp's col
+        item->ownerData = prevCol;
+    }
+}
+
+// _onHypChanged() : Change coloured hyp.
+//
+//  @menu : Hyp. colours menu
+//  @newHypID : Menu ID
+//  @checked : true if item is checked
+//
+void sudoku::_onHypChanged(menuBar& menu, int newHypID, bool checked){
+
+    if (newHypID == hypID_){
+        return; // No change
+    }
+
+    PMENUITEM item(menu.findItem(newHypID, SEARCH_BY_ID));
+    if (item){
+        int8_t prev;
+
+        if (checked){
+            prev = _hypPush(menu, newHypID, item->ownerData);
+        }
+        else{
+            prev = _hypPop(menu);
+
+            // Reject values associated with the color
+            _hypReject(_hypColour(prev));
         }
 
-        if ((item = menu.getItem(IDM_MANUAL_ACCEPT, SEARCH_BY_ID))){
-            item->ownerData = oldCol;   // Previous hyp's col
+        // "previous" item's state
+        if (prev >= 0){
+            menu.activateItem(hypotheses_[prev].menuID,
+                SEARCH_BY_ID, !checked);
         }
 
+        // menu.showParentBar(false);   // Return to "manual" menubar
         menu.update();
         display();
     }
