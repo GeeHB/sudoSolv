@@ -455,15 +455,15 @@ private:
     //  @menuID : ID of menu colour
     //  @newColour : new colour
     //
-    //  @return : previous ID (or -1 on error)
+    //  @return : previous menu ID (or -1 on error)
     //
-    int8_t _hypPush(menuBar& menu, int menuID, int newColour);
+    int _hypPush(menuBar& menu, int menuID, int newColour);
 
     // _hypPop() : Remove the hypothese from the top of the stack
     //
-    //  @return : previous ID
+    //  @return : previous menu ID
     //
-    int8_t _hypPop(menuBar& menu);
+    int _hypPop(menuBar& menu);
 
     // _hypUpdateMenu() : Update menu according to new selected colour
     //
@@ -479,7 +479,9 @@ private:
     //  @newHypID : Menu ID
     //  @checked : true if item is checked
     //
-    void _onHypChanged(menuBar& menu, int newHypID, bool checked);
+    //  @return : current col.
+    //
+    int _onHypChanged(menuBar& menu, int newHypID, bool checked);
 
     //
     // Utilities

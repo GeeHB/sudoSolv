@@ -861,7 +861,7 @@ int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
 
     // Check value at the given pos.
     //  New allowed value or same value with diff. hyp. colour
-    int hypColour((hypID_>=0?hypotheses_[hypID_].colour:HYP_NO_COLOUR));
+    int hypColour(_hypColour(hypID_));
     if ((oValue == value && elements_[pos.index()].hypColour() != hypColour)
         ||
         (_checkLine(pos, value) && _checkRow(pos, value) &&
@@ -1721,7 +1721,7 @@ uint8_t sudoku::_hypReject(int colFrom){
 //
 //  @return : previous ID (or -1 on error)
 //
-int8_t sudoku::_hypPush(menuBar& menu, int menuID, int newColour){
+int sudoku::_hypPush(menuBar& menu, int menuID, int newColour){
     int8_t prev(hypID_);
 
     // Add to stack
@@ -1731,17 +1731,17 @@ int8_t sudoku::_hypPush(menuBar& menu, int menuID, int newColour){
     // Update menus
     _hypUpdateMenu(menu, newColour, _hypColour(hypID_-1));
 
-    return prev;
+    return hypotheses_[prev].menuID;
 }
 
 // _hypPop() : Remove the hypothese from the top of the stack
 //
 //  @return : previous ID
 //
-int8_t sudoku::_hypPop(menuBar& menu){
-    int8_t prev(-1);
+int sudoku::_hypPop(menuBar& menu){
+    int prev(-1);
     if (hypID_ >= 0){
-        prev = hypID_;
+        prev = (hypID_?hypotheses_[hypID_-1].menuID:-1);
 
         // remove from top
         hypotheses_[hypID_--] = {0, HYP_NO_COLOUR};
@@ -1782,36 +1782,46 @@ void sudoku::_hypUpdateMenu(menuBar& menu, int curCol, int prevCol){
 //  @newHypID : Menu ID
 //  @checked : true if item is checked
 //
-void sudoku::_onHypChanged(menuBar& menu, int newHypID, bool checked){
+//  @return : current col.
+//
+int sudoku::_onHypChanged(menuBar& menu, int newHypID, bool checked){
 
     if (newHypID == hypID_){
-        return; // No change
+        return hypotheses_[hypID_].colour; // No change
     }
 
     PMENUITEM item(menu.findItem(newHypID, SEARCH_BY_ID));
     if (item){
-        int8_t prev;
-
+        int prev;
         if (checked){
             prev = _hypPush(menu, newHypID, item->ownerData);
         }
         else{
+            // Reject values associated with the previous colour
+            // ie. accept with the prev. colour
+            // _hypReject(_hypColour(prev));
+            _hypAccept(_hypColour(hypID_), _hypColour(hypID_-1));
+ 
             prev = _hypPop(menu);
-
-            // Reject values associated with the color
-            _hypReject(_hypColour(prev));
         }
 
         // "previous" item's state
         if (prev >= 0){
-            menu.activateItem(hypotheses_[prev].menuID,
-                SEARCH_BY_ID, !checked);
+            menu.activateItem(prev, SEARCH_BY_ID, !checked);
         }
+
+        // Activate current hyp. col in menu
+        menu.selectByIndex(checked?hypotheses_[hypID_].menuID:prev, true);
 
         // menu.showParentBar(false);   // Return to "manual" menubar
         menu.update();
         display();
+
+        return item->ownerData;
     }
+
+    // error ?
+    return HYP_NO_COLOUR;
 }
 
 //

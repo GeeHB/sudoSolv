@@ -29,7 +29,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolver"
-#define APP_VERSION  "0.4.8"
+#define APP_VERSION  "0.4.9"
 #define APP_AUTHOR   "GeeHB"
 
 // "Internal" images

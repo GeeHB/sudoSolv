@@ -28,7 +28,7 @@
 #define MENU_IMG_WIDTH          12
 #define MENU_IMG_HEIGHT         12
 
-#define ITEM_ROUNDED_DIM         4
+#define ITEM_ROUNDED_DIM        4
 
 //
 // Item pos is a menu bar
@@ -136,10 +136,8 @@ typedef struct _menuBar{
 //
 typedef struct _menuAction{
     int value;
-    union {
-        uint modifier;
-        int state;
-    };
+    int state;
+    uint modifier;
     uint8_t type;
 } MENUACTION;
 
@@ -379,11 +377,11 @@ public:
     //  @searchMode : type of search (SEARCH_BY_ID or SEARCH_BY_INDEX)
     //  @checkState : ITEM_CHECKED if item should be checked or ITEM_UNCHECKED
     //
-    //  return : ITEM_CHECKED it item is checked, ITEM_UNCHECKED if not checked
+    //  return : ITEM_CHECKED if item is checked, ITEM_UNCHECKED if not checked
     //           and ITEM_ERROR on error
     //
     int checkMenuItem(int id, int searchMode = SEARCH_BY_ID,
-                    int check = ITEM_CHECKED);
+                    int checkState = ITEM_CHECKED);
 
     //  removeItem() : Remove an item from the current menu bar
     //      Remove the item menu or the submenu
