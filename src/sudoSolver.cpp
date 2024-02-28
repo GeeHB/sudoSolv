@@ -11,9 +11,7 @@
 #include "sudoSolver.h"
 #include "shared/window.h"
 
-//extern bopti_image_t g_appImgs;     // 2 images in a file
 extern bopti_image_t g_about;
-//extern bopti_image_t g_pause;
 
 // Construction
 //

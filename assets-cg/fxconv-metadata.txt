@@ -2,13 +2,9 @@ about.png:
   type: bopti-image
   name: g_about
   
-#app.png:
-#  type: bopti-image
-#  name: g_appImgs
-
-#pause.png:
-#  type: bopti-image
-#  name: g_pause
+pause.png:
+  type: bopti-image
+  name: g_pause
 
 menuBar.png:
   type: bopti-image

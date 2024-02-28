@@ -5,6 +5,7 @@
 /assets-cg/base
 .DS_Store
 *-base.*
+*.xcf
 
 # Outputs
 /build-cg

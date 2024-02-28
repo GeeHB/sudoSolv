@@ -20,6 +20,9 @@
 #ifdef DEST_CASIO_CALC
 #include <gint/timer.h>
 #include <gint/clock.h>
+
+extern bopti_image_t g_pause;
+
 #else
 using namespace std;
 #endif // #ifdef DEST_CASIO_CALC
