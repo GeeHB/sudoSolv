@@ -32,14 +32,6 @@ extern "C" {
 #define APP_VERSION  "0.4.10"
 #define APP_AUTHOR   "GeeHB"
 
-// "Internal" images
-//
-#define IMG_ABOUT_W     202
-#define IMG_ABOUT_H     216
-
-#define IMG_PAUSE_W     384
-#define IMG_PAUSE_H     216
-
 // Grids folder
 //
 #ifdef DEST_CASIO_CALC
@@ -99,7 +91,16 @@ extern "C" {
 // Display
 //
 
-// Dimensions in pixels
+// "Internal" images
+#define IMG_ABOUT_W         202
+#define IMG_ABOUT_H         216     // Menu is visible !
+
+#define IMG_PAUSE_W         CASIO_WIDTH
+#define IMG_PAUSE_H         70
+#define IMG_PAUSE_COPY_Y    46
+#define IMG_PAUSE_LINES     (CASIO_HEIGHT - IMG_PAUSE_H)
+
+// Grid dimensions in pixels
 #define GRID_HORZ_OFFSET        20
 #define SQUARE_SIZE             20
 #define INT_SQUARE_SIZE         (SQUARE_SIZE - 2 * BORDER_THICK)
@@ -154,6 +155,7 @@ enum GAME_KEY{
     KEY_CODE_8 = KEY_8,
     KEY_CODE_9 = KEY_9,
     KEY_CODE_CAPTURE = KEY_7,
+    KEY_CODE_PAUSE = KEY_OPTN,
     KEY_CODE_EXIT = KEY_EXIT,
     KEY_CODE_EXE = KEY_EXE
 };

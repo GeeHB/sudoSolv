@@ -145,6 +145,45 @@ void sudoku::empty(){
     }
 }
 
+// pause() : Show pause screen
+//
+void sudoku::pause(){
+#ifdef DEST_CASIO_CALC
+    // Top of image
+    dsubimage(0, 0, &g_pause,
+            0, 0, IMG_PAUSE_W, IMG_PAUSE_COPY_Y, DIMAGE_NOCLIP);
+
+    // "middle"
+    uint16_t y;
+    for (y = IMG_PAUSE_COPY_Y;
+        y < (IMG_PAUSE_COPY_Y + IMG_PAUSE_LINES); y++){
+        dsubimage(0, y, &g_pause,
+            0, IMG_PAUSE_COPY_Y,
+            IMG_PAUSE_W, 1, DIMAGE_NOCLIP);
+    }
+    
+    // bottom
+    y = CASIO_HEIGHT - IMG_PAUSE_H + IMG_PAUSE_COPY_Y - 1;
+    dsubimage(0, y, &g_pause,
+            0, IMG_PAUSE_COPY_Y + 1,
+            IMG_PAUSE_W, IMG_PAUSE_H - IMG_PAUSE_COPY_Y - 1,
+            DIMAGE_NOCLIP);
+
+    dupdate();
+
+    uint car(KEY_CODE_NONE);
+    keyboard myKeyboard;
+    do{
+        car = myKeyboard.getKey();
+    }while (KEY_CODE_PAUSE != car && KEY_CODE_EXIT != car);
+
+    if (KEY_CODE_EXIT == car){
+        // Close app.
+        gint_osmenu();
+    }
+#endif // #ifdef DEST_CASIO_CALC
+}
+
 // create() : Create a new sudoku
 //
 //  @complexity : Complexity level in {}
@@ -444,6 +483,13 @@ bool sudoku::edit(uint8_t mode){
                 modified = true;
                 elements+=eStatus;
             }
+            break;
+
+        // Pause
+        case KEY_CODE_PAUSE:
+            pause();
+            display();
+            menu.update();
             break;
 
         //
@@ -1044,7 +1090,6 @@ void sudoku::_drawSingleElement(position pos, int bkColour, int txtColour){
 //
 void sudoku::_drawHypotheses(){
 #ifdef DEST_CASIO_CALC
-    dtext(TEXT_X, HYP_LIST_Y, C_BLACK, HYP_LIST_TEXT);
 
     // Erase previous list
     drect(HYP_LIST_X, HYP_LIST_Y,
@@ -1052,12 +1097,17 @@ void sudoku::_drawHypotheses(){
             HYP_LIST_Y + HYP_LIST_H + HYP_COUNT * HYP_LIST_OFFSET,
             SCREEN_BK_COLOUR);
 
-    int x(HYP_LIST_X), y(HYP_LIST_Y);
-    for (uint8_t index(0); index <= hypID_; index++){
-        drect(x, y, x + HYP_LIST_W, y + HYP_LIST_H,
-                hypotheses_[index].colour);
-        x+=HYP_LIST_OFFSET;
-        y+=HYP_LIST_OFFSET;
+    // Draw hypotheses' stack
+    if (hypID_ >= 0){
+        dtext(TEXT_X, HYP_LIST_Y, C_BLACK, HYP_LIST_TEXT);
+
+        int x(HYP_LIST_X), y(HYP_LIST_Y);
+        for (uint8_t index(0); index <= hypID_; index++){
+            drect(x, y, x + HYP_LIST_W, y + HYP_LIST_H,
+                    hypotheses_[index].colour);
+            x+=HYP_LIST_OFFSET;
+            y+=HYP_LIST_OFFSET;
+        }
     }
 #endif // #ifdef DEST_CASIO_CALC
 }

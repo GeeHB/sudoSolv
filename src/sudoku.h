@@ -95,6 +95,10 @@ public:
         _revertFrom(INDEX_MIN);
     }
 
+    // pause() : Show pause screen
+    //
+    static void pause();
+
     // create() : Create a new sudoku
     //
     //  @complexity : Complexity level in {}
