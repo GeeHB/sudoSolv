@@ -246,8 +246,7 @@ void sudoSolver::_onNewSudoku(uint8_t complexity){
     wInf.pos.h = WIN_SOL_H;
     wInf.bkColour = COLOUR_LT_GREY;
     waitWindow.create(wInf);
-    //waitWindow.drawText("Generating ...", 40, 25);
-    waitWindow.drawText("Generating ...");  // Centered
+    waitWindow.drawText(WIN_GEN_TXT);  // Centered
     waitWindow.update();
 
     game_.create(complexity);   // do the job ...

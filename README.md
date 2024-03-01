@@ -15,7 +15,7 @@ L'application est organisée autour d'une barre de menu horizontale; la navigati
 
 ### Informations de version
 
-| Dépôt          | https://gitea.planet-casio.com/Jhb/sudoSolv |
+| Dépôt          | https://gitea.planet-casio.com/Jhb/sudoSolv |
 |----------------|---------------------------------------------|
 | **Date**           | 18 février 2024                             |
 | **Version stable** | **0\.4.6** - branche `master`                      |
@@ -67,8 +67,7 @@ Par exemple, avec le choix de la couleur verte :
 
 Le sous-menu offre les possiblités suivantes :
 
-* *Col.* : Choix d'une hypothèse, marquée par une couleur.
-  En choisissant cette option, un sous menu-menu est affiché (encore un ...) permettant de choisir une couleur en cochant la case associée. Lorsque toutes les cases sont décochées (position par défaut), aucune hypothèse n'est en place.
+* *Col.* : Choix d'une hypothèse, marquée par une couleur. En choisissant cette option, un sous menu-menu est affiché (encore un ...) permettant de choisir une couleur en cochant la case associée. Lorsque toutes les cases sont décochées (position par défaut), aucune hypothèse n'est en place.
 * *Accept* : Tous les éléments d'une hypothèse (ie. tous les éléments marqués par la couleur) sont intégrés à la grille et donc se voient retirer leur couleur,
 * 'Reject' : Tous les éléments d'une hypothèse sont rejetés. Ces éléments sont donc retirés de la grille.
 * *End* permet de sortir du mode résolution manuelle et de retourner au msous-menu *Solve*.

@@ -639,6 +639,19 @@ bool sudoku::resolve(int* mDuration, int8_t** soluce){
         start = clock();
     }
 
+#ifdef DEST_CASIO_CALC
+    window waitWindow;
+    window::winInfo wInf;
+    wInf.style = WIN_STYLE_DEFAULT;
+    wInf.pos.y = WIN_SOL_Y;
+    wInf.pos.w = WIN_SOL_W;
+    wInf.pos.h = WIN_SOL_H;
+    wInf.bkColour = COLOUR_LT_GREY;
+    waitWindow.create(wInf);
+    waitWindow.drawText(WIN_SEARCH_TXT);
+    waitWindow.update();
+#endif // #ifdef DEST_CASIO_CALC
+
     bool found(_resolve(INDEX_MIN)); // Try to find the first solution
 
     // Copy duration
@@ -653,6 +666,10 @@ bool sudoku::resolve(int* mDuration, int8_t** soluce){
             _copyElements(*soluce);
         }
     }
+
+#ifdef DEST_CASIO_CALC
+    waitWindow.close(); // Close the window    
+#endif // #ifdef DEST_CASIO_CALC
 
     return found;
 }
@@ -946,7 +963,7 @@ void sudoku::_onEditCheckSudoku(){
             output.drawText(STR_MULTIPLE_SOL, -1, -1, COLOUR_RED);
             break;
 
-         case 1:
+        case 1:
             output.drawText(STR_ONE_SOL);
             break;
 
