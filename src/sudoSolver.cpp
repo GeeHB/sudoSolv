@@ -305,8 +305,8 @@ void sudoSolver::_onFileSave(){
             _updateFileItemsState();
         }   // save
         else{
-            dprint(TEXT_X, TEXT_V_OFFSET, C_RED,
-                    "Error saving : %d", error);
+            dprint(FILE_TEXT_X, FILE_TEXT_ERROR_Y, C_RED,
+                    FILE_ERROR_SAVE_TEXT, error);
             dupdate();
         }
     }
@@ -434,7 +434,7 @@ bool sudoSolver::_loadFile(FONTCHARACTER fName){
         return true;
     }
 
-    dprint(TEXT_X, TEXT_V_OFFSET, C_RED, "Error loading file : %d",
+    dprint(FILE_TEXT_X, FILE_TEXT_ERROR_Y, C_RED, FILE_ERROR_LOAD_TEXT,
         (int)error);
     dupdate();
     return false;
@@ -500,28 +500,25 @@ void sudoSolver::_newFileName(FONTCHARACTER fName){
 //
 void sudoSolver::_displayStats(){
     if (sFileName_[0]){
-        dprint(TEXT_X, TEXT_Y, C_BLACK, "File : %s", sFileName_);
+        dprint(FILE_TEXT_X, FILE_TEXT_Y, C_BLACK, FILE_TEXT, sFileName_);
     }
 
     if (obviousVals_ != -1){
         if (obviousVals_){
-            dprint(TEXT_X, TEXT_Y + TEXT_V_OFFSET, C_BLACK,
-                    "%d obvious values", obviousVals_);
+            dprint(OBV_TEXT_X, OBV_TEXT_Y, C_BLACK,
+                    OBV_TEXT, obviousVals_);
         }
         else{
-            dtext(TEXT_X, TEXT_Y + TEXT_V_OFFSET, C_BLACK,
-                    "No obvious value");
+            dtext(OBV_TEXT_X, OBV_TEXT_Y, C_BLACK, OBV_NONE_TEXT);
         }
     }
 
     if (duration_ != -1){
         if (duration_){
-            dprint(TEXT_X, TEXT_Y + 2*TEXT_V_OFFSET, C_BLACK,
-                    "Solved in %d ms", duration_);
+            dprint(SOL_X, SOL_Y, C_BLACK, SOL_TEXT, duration_);
         }
         else{
-            dprint(TEXT_X, TEXT_Y + 2*TEXT_V_OFFSET, C_BLACK,
-                    "No solution found");
+            dprint(SOL_X, SOL_Y, C_BLACK, SOL_NONE_TEXT);
         }
     }
 

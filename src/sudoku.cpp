@@ -572,6 +572,18 @@ bool sudoku::edit(uint8_t mode){
                     _elementTxtColour(currentPos, mode, false));
             }
 
+            // # values
+            /*
+            drect(VALUES_X, VALUES_Y,
+                CASIO_WIDTH - 1,
+                VALUES_Y + TEXT_V_OFFSET - 1,
+                SCREEN_BK_COLOUR);
+            */
+            dprint_opt(VALUES_X, VALUES_Y,
+                C_BLACK, SCREEN_BK_COLOUR,
+                DTEXT_LEFT, DTEXT_TOP,
+                VALUES_TEXT, elements, ROW_COUNT * LINE_COUNT);
+           
             dupdate();
             prevPos = currentPos;
             reDraw = false;
@@ -1116,7 +1128,7 @@ void sudoku::_drawHypotheses(){
 
     // Draw hypotheses' stack
     if (hypID_ >= 0){
-        dtext(TEXT_X, HYP_LIST_Y, C_BLACK, HYP_LIST_TEXT);
+        dtext(HYP_LIST_TEXT_X, HYP_LIST_TEXT_Y, C_BLACK, HYP_LIST_TEXT);
 
         int x(HYP_LIST_X), y(HYP_LIST_Y);
         for (uint8_t index(0); index <= hypID_; index++){

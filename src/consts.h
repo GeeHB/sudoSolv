@@ -29,7 +29,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolver"
-#define APP_VERSION  "0.4.11"
+#define APP_VERSION  "0.4.12"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -74,8 +74,8 @@ extern "C" {
 //
 
 #define WIN_SOL_TITLE       "Check"
-#define WIN_GEN_TXT         "Generating ..."
-#define WIN_SEARCH_TXT      "Finding a solution ..."
+#define WIN_GEN_TXT         "Generating..."
+#define WIN_SEARCH_TXT      "Resolving in progress..."
 
 // Window size & pos.
 #define WIN_SOL_Y            30
@@ -109,27 +109,51 @@ extern "C" {
 #define GRID_SIZE               SQUARE_SIZE * ROW_COUNT
 #define BORDER_THICK            2   // Thickness of external border
 
-#define TEXT_X                  (2*GRID_HORZ_OFFSET + GRID_SIZE)
-#define TEXT_Y                  30
+// Texts (stats and hypotheses)
+//
+#define TEXT_V_BASE             10
 #define TEXT_V_OFFSET           20
 
-// Hypotheses
-//
-#define HYP_SQUARE_SIZE         5   // Square over element
+#define TEXT_BASE_X             (2*GRID_HORZ_OFFSET + GRID_SIZE)
+#define TEXT_BASE_Y             (TEXT_V_OFFSET + TEXT_V_BASE)
 
-// List
-#define HYP_LIST_TEXT           "Hyp. :"
-#define HYP_LIST_X              (TEXT_X +  50) 
-#define HYP_LIST_Y              (TEXT_Y + 4* TEXT_V_OFFSET)
-#define HYP_LIST_W              20
-#define HYP_LIST_H              (HYP_SQUARE_SIZE + 1)
-#define HYP_LIST_OFFSET         4   // dx and dy
+// File
+#define FILE_TEXT               "File : %s"
+#define FILE_ERROR_SAVE_TEXT    "Error saving : %d"
+#define FILE_ERROR_LOAD_TEXT    "Error loading : %d"
+#define FILE_TEXT_X             TEXT_BASE_X
+#define FILE_TEXT_Y             TEXT_BASE_Y
+#define FILE_TEXT_ERROR_Y       TEXT_V_BASE
+
+// Obvious values
+#define OBV_TEXT                "%d obvious values"
+#define OBV_NONE_TEXT           "No obvious value"
+#define OBV_TEXT_X              TEXT_BASE_X
+#define OBV_TEXT_Y              (TEXT_BASE_Y + TEXT_V_OFFSET)
+
+// Solution
+#define SOL_TEXT                "Solved in %d ms"
+#define SOL_NONE_TEXT           "No solution found"
+#define SOL_X                   TEXT_BASE_X
+#define SOL_Y                   (TEXT_BASE_Y + 2 * TEXT_V_OFFSET)
 
 // # values
-//
-#define VALUES_TEXT             "Val. %d / %d"
-#define VALUES_X                TEXT_X 
-#define VALUES_Y                (HYP_LIST_Y + HYP_COUNT * HYP_LIST_H)
+#define VALUES_TEXT             "Val. %d / %d    "
+#define VALUES_X                TEXT_BASE_X 
+#define VALUES_Y                (TEXT_BASE_Y + 3 * TEXT_V_OFFSET)
+
+// Hypotheses
+#define HYP_SQUARE_SIZE         5   // Square over element
+#define HYP_H_OFFSET            50
+#define HYP_LIST_OFFSET         4   // dx and dy
+
+#define HYP_LIST_TEXT           "Hyp. :"
+#define HYP_LIST_TEXT_X         TEXT_BASE_X
+#define HYP_LIST_TEXT_Y         (TEXT_BASE_Y + 4 * TEXT_V_OFFSET)
+#define HYP_LIST_X              (HYP_LIST_TEXT_X +  HYP_H_OFFSET)
+#define HYP_LIST_Y              HYP_LIST_TEXT_Y
+#define HYP_LIST_W              20
+#define HYP_LIST_H              (HYP_SQUARE_SIZE + 1)
 
 // Colours
 //
