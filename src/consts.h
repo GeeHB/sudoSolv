@@ -48,8 +48,10 @@ extern "C" {
 #define ROW_COUNT   9
 #define LINE_COUNT  ROW_COUNT
 
+#define VALUES_COUNT ROW_COUNT * LINE_COUNT
+
 #define INDEX_MIN   0
-#define INDEX_MAX   (ROW_COUNT * LINE_COUNT - 1)
+#define INDEX_MAX   (VALUES_COUNT - 1)
 
 #define VALUE_MIN   1
 #define VALUE_MAX   ROW_COUNT

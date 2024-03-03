@@ -350,13 +350,15 @@ bool sudoku::edit(uint8_t mode){
                     _elementTxtColour(currentPos, mode, false));
     dupdate();
 
-    // # elements in the grid
-    uint8_t elements(0);
+    // # Values in the grid
+    uint8_t values(0), oValues;
     for (index = INDEX_MIN; index<=INDEX_MAX ; index++){
         if (!elements_[index].isEmpty()){
-            elements++;
+            values++;
         }
     }
+
+    oValues = values;
 
     // Timer for blinking effect
     int tickCount(BLINK_TICKCOUNT);
@@ -416,7 +418,7 @@ bool sudoku::edit(uint8_t mode){
         case KEY_CODE_0:
             // Remove the value
             if (elements_[currentPos].empty()){
-                elements--; // one less element
+                values--; // one less element
                  modified = true;
             }
 
@@ -425,63 +427,63 @@ bool sudoku::edit(uint8_t mode){
         case KEY_CODE_1:
             if ((eStatus = _checkAndSet(currentPos, 1, mode)) >= 0){
                 modified = true;
-                elements+=eStatus;
+                values+=eStatus;
             }
             break;
 
         case KEY_CODE_2:
             if ((eStatus = _checkAndSet(currentPos, 2, mode)) >= 0){
                 modified = true;
-                elements+=eStatus;
+                values+=eStatus;
             }
             break;
 
         case KEY_CODE_3:
             if ((eStatus = _checkAndSet(currentPos, 3, mode)) >= 0){
                 modified = true;
-                elements+=eStatus;
+                values+=eStatus;
             }
             break;
 
         case KEY_CODE_4:
             if ((eStatus = _checkAndSet(currentPos, 4, mode)) >= 0){
                 modified = true;
-                elements+=eStatus;
+                values+=eStatus;
             }
             break;
 
         case KEY_CODE_5:
             if ((eStatus = _checkAndSet(currentPos, 5, mode)) >= 0){
                 modified = true;
-                elements+=eStatus;
+                values+=eStatus;
             }
             break;
 
         case KEY_CODE_6:
             if ((eStatus = _checkAndSet(currentPos, 6, mode)) >= 0){
                 modified = true;
-                elements+=eStatus;
+                values+=eStatus;
             }
             break;
 
         case KEY_CODE_7:
             if ((eStatus = _checkAndSet(currentPos, 7, mode)) >= 0){
                 modified = true;
-                elements+=eStatus;
+                values+=eStatus;
             }
             break;
 
         case KEY_CODE_8:
             if ((eStatus = _checkAndSet(currentPos, 8, mode)) >= 0){
                 modified = true;
-                elements+=eStatus;
+                values+=eStatus;
             }
             break;
 
         case KEY_CODE_9:
             if ((eStatus = _checkAndSet(currentPos, 9, mode)) >= 0){
                 modified = true;
-                elements+=eStatus;
+                values+=eStatus;
             }
             break;
 
@@ -512,7 +514,7 @@ bool sudoku::edit(uint8_t mode){
         {
             uint8_t count;
             if ((count = _onManualReject())){
-                elements-=count;
+                values-=count;
 
                 // At least one element's colour has changed => redraw
                 display();
@@ -573,16 +575,24 @@ bool sudoku::edit(uint8_t mode){
             }
 
             // # values
-            /*
-            drect(VALUES_X, VALUES_Y,
-                CASIO_WIDTH - 1,
-                VALUES_Y + TEXT_V_OFFSET - 1,
-                SCREEN_BK_COLOUR);
-            */
-            dprint_opt(VALUES_X, VALUES_Y,
-                C_BLACK, SCREEN_BK_COLOUR,
-                DTEXT_LEFT, DTEXT_TOP,
-                VALUES_TEXT, elements, ROW_COUNT * LINE_COUNT);
+            if (oValues != values){
+                /*
+                drect(VALUES_X, VALUES_Y,
+                    CASIO_WIDTH - 1,
+                    VALUES_Y + TEXT_V_OFFSET - 1,
+                    SCREEN_BK_COLOUR);
+                */
+                dprint_opt(VALUES_X, VALUES_Y,
+                    C_BLACK, SCREEN_BK_COLOUR,
+                    DTEXT_LEFT, DTEXT_TOP,
+                    VALUES_TEXT, values, ROW_COUNT * LINE_COUNT);
+
+                oValues = values;
+
+                if (values >= VALUES_COUNT){
+                    cont = false;   // No more value to find
+                }
+            }
            
             dupdate();
             prevPos = currentPos;
@@ -595,8 +605,23 @@ bool sudoku::edit(uint8_t mode){
     }
 
     // Completed ?
-    if (elements == (ROW_COUNT * LINE_COUNT)){
+    if (values >= VALUES_COUNT){
+        window popup;
+        window::winInfo wInf;
+        wInf.style = WIN_STYLE_DBORDER | WIN_STYLE_HCENTER;
+        wInf.pos.y = WIN_SOL_Y;
+        wInf.pos.w = WIN_SOL_W;
+        wInf.pos.h = WIN_SOL_H;
+        wInf.bkColour = COLOUR_LT_GREY;
+        popup.create(wInf);
 
+        popup.drawText(WIN_FOUND_TXT);
+        popup.update();
+
+        // Wait for any key to be pressed
+        getkey();
+        popup.close();
+        display();
     }
 
     // Remove all coloured hyp.
