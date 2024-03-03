@@ -594,6 +594,11 @@ bool sudoku::edit(uint8_t mode){
         timer_stop(timerID);    // stop the timer
     }
 
+    // Completed ?
+    if (elements == (ROW_COUNT * LINE_COUNT)){
+
+    }
+
     // Remove all coloured hyp.
     if (EDIT_MODE_MANUAL == mode){
         for (uint8_t index(INDEX_MIN); index<=INDEX_MAX ; index++){

@@ -30,7 +30,7 @@
 
 #ifndef DEST_CASIO_CALC
 // 24 bits RGB (for tests only on Windows and Linux)
-#define C_RGB(r,g,b)      ((uint32_t)(((uint8_t)(r)|((uint16_t)((uint8_t)(g))<<8))|(((uint32_t)(uint8_t)(b))<<16)))
+#define C_RGB(r,g,b)    ((uint32_t)(((uint8_t)(r)|((uint16_t)((uint8_t)(g))<<8))|(((uint32_t)(uint8_t)(b))<<16)))
 #endif // #ifndef DEST_CASIO_CALC
 
 #ifdef FX9860G
@@ -48,7 +48,7 @@ enum DEF_COLOUR{
     COLOUR_LT_GREY = C_LIGHT,
     COLOUR_GREY    = C_WHITE,
     COLOUR_DK_GREY = C_DARK,
-    NO_COLOR      = -1
+    NO_COLOR       = -1
 };
 #else
 enum DEF_COLOUR{
@@ -65,7 +65,7 @@ enum DEF_COLOUR{
     COLOUR_LT_GREY = C_RGB(29, 29, 29),
     COLOUR_GREY    = C_RGB(16, 16, 16),
     COLOUR_DK_GREY = C_RGB(8, 8, 8),
-    NO_COLOR      = -1
+    NO_COLOR       = -1
 };
 #endif // #ifdef FX9860G
 

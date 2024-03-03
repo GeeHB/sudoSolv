@@ -76,6 +76,7 @@ extern "C" {
 #define WIN_SOL_TITLE       "Check"
 #define WIN_GEN_TXT         "Generating..."
 #define WIN_SEARCH_TXT      "Resolving in progress..."
+#define WIN_FOUND_TXT       "Congratultation"
 
 // Window size & pos.
 #define WIN_SOL_Y            30
@@ -103,11 +104,11 @@ extern "C" {
 #define IMG_PAUSE_LINES     (CASIO_HEIGHT - IMG_PAUSE_H)
 
 // Grid dimensions in pixels
-#define GRID_HORZ_OFFSET        20
-#define SQUARE_SIZE             20
-#define INT_SQUARE_SIZE         (SQUARE_SIZE - 2 * BORDER_THICK)
-#define GRID_SIZE               SQUARE_SIZE * ROW_COUNT
-#define BORDER_THICK            2   // Thickness of external border
+#define GRID_HORZ_OFFSET    20
+#define SQUARE_SIZE         20
+#define INT_SQUARE_SIZE     (SQUARE_SIZE - 2 * BORDER_THICK)
+#define GRID_SIZE           SQUARE_SIZE * ROW_COUNT
+#define BORDER_THICK        2   // Thickness of external border
 
 // Texts (stats and hypotheses)
 //
