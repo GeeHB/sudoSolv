@@ -281,7 +281,7 @@ void sudoSolver::_onFileNext(){
 // _onFileSave() : Save current grid
 //
 void sudoSolver::_onFileSave(){
-    bool fileExists(sFileName_[0]);
+    bool fileExists(!FC_ISEMPTY(fileName_));
     int uid(-1);
     int error(FILE_NO_ERROR);
 
@@ -451,7 +451,7 @@ void sudoSolver::_initStats(bool whole){
         FC_EMPTY(fileName_);
     }
 
-    sFileName_[0] = '\0';
+    game_.emptyFileName();
     obviousVals_ = -1;
     duration_ = -1;
 }
@@ -488,8 +488,6 @@ void sudoSolver::_newFileName(FONTCHARACTER fName){
         bFile::FC_cpy(fileName_, fName);
         char fName[BFILE_MAX_PATH + 1];
         bFile::FC_FC2str(fileName_, fName);
-        char* name = strrchr(fName, CHAR_PATH_SEPARATOR);
-        strcpy(sFileName_, (name?++name:fName)); // No path ?
     }
 
     _displayStats();
@@ -499,10 +497,8 @@ void sudoSolver::_newFileName(FONTCHARACTER fName){
 //                   the solution if found any
 //
 void sudoSolver::_displayStats(){
-    if (sFileName_[0]){
-        dprint(FILE_TEXT_X, FILE_TEXT_Y, C_BLACK, FILE_TEXT, sFileName_);
-    }
-
+    game_.displayFileName();
+    
     if (obviousVals_ != -1){
         if (obviousVals_){
             dprint(OBV_TEXT_X, OBV_TEXT_Y, C_BLACK,

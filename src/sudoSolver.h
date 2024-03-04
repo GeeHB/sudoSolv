@@ -136,7 +136,6 @@ private:
 
     // Current file name
     uint16_t fileName_[BFILE_MAX_PATH + 1];
-    char sFileName_[BFILE_MAX_PATH + 1];    // short filename as char*
 
     // Resolution stats.
     int8_t obviousVals_;

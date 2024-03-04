@@ -29,7 +29,7 @@ extern "C" {
 // App. infos
 //
 #define APP_NAME     "sudoSolver"
-#define APP_VERSION  "0.4.12"
+#define APP_VERSION  "0.4.13"
 #define APP_AUTHOR   "GeeHB"
 
 // Grids folder
@@ -91,7 +91,7 @@ extern "C" {
 #define STR_MULTIPLE_SOL    "More than one sol."
 
 #define MIN_CLUE_COUNT      10      // No help if fewer items to find
-#define MAX_HELP_CLUES      3       // # of help clues 
+#define MAX_HELP_CLUES      3       // # of help clues
 
 // Display
 //
@@ -142,7 +142,7 @@ extern "C" {
 
 // # values
 #define VALUES_TEXT             "Val. %d / %d    "
-#define VALUES_X                TEXT_BASE_X 
+#define VALUES_X                TEXT_BASE_X
 #define VALUES_Y                (TEXT_BASE_Y + 3 * TEXT_V_OFFSET)
 
 // Hypotheses

@@ -85,6 +85,10 @@ public:
     //
     void display(bool update = true);
 
+    // displayFileName() : display current filename
+    //
+    void displayFileName();
+
     // empty() : Empties the grid
     //
     void empty();
@@ -110,6 +114,12 @@ public:
     //
     // io
     //
+
+    // emptyFileName() : Empty current file name
+    //
+    void emptyFileName(){
+        sFileName_[0] = '\0';
+    }
 
     // load() : Load a new grid
     //
@@ -491,6 +501,12 @@ private:
     // Utilities
     //
 
+    // _newFileName() : Set current file name
+    //
+    //  @fName : New FQN
+    //
+    void _newFileName(FONTCHARACTER fName);
+
     // _revertFrom : Return to the "original" state
     //
     //  All values "after" @from prosition will be set to 0 if
@@ -520,9 +536,11 @@ private:
 
     // Members
 private:
-    element elements_[LINE_COUNT * ROW_COUNT];  // grid as a one-dim. table
-    tinySquare tSquares_[TINY_COUNT];	// Access to elements in tinySquares
+    element elements_[LINE_COUNT * ROW_COUNT];
+    tinySquare tSquares_[TINY_COUNT];   // Access to elements in tinySquares
     int8_t *soluce_;   // A solution for the current grid
+
+    char sFileName_[BFILE_MAX_PATH + 1];    // current short filename
 
     // Position & dims of screen
     // {x Grid, yGrid, "screen" width , "screen" height}

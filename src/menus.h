@@ -82,7 +82,7 @@ extern "C" {
 #define IDS_MANUAL_END          "End"
 #define IDM_MANUAL_END          IDM_EDIT_OK
 
-#define IDM_MANUAL_COLOUR_FIRST   3111      // MANUAL_HYP submenu
+#define IDM_MANUAL_COLOUR_FIRST 3111        // MANUAL_HYP submenu
 #define IDS_MANUAL_NO_COLOUR    "None"      // maybe in a future version
 
 #ifdef __cplusplus

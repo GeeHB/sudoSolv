@@ -92,6 +92,7 @@ void sudoku::display(bool update){
 #ifdef DEST_CASIO_CALC
     _drawBackground();
     _drawContent();
+    displayFileName();
     _drawHypotheses();
     if (update){
         dupdate();
@@ -136,6 +137,16 @@ void sudoku::display(bool update){
 #endif // #ifdef DEST_CASIO_CALC
 }
 
+// displayFileName() : display current filename
+//
+void sudoku::displayFileName(){
+    if (sFileName_[0]){
+#ifdef DEST_CASIO_CALC
+        dprint(FILE_TEXT_X, FILE_TEXT_Y, C_BLACK, FILE_TEXT, sFileName_);
+#endif // #ifdef DEST_CASIO_CALC
+    }
+}
+
 // empty() : Empties the grid
 //
 void sudoku::empty(){
@@ -143,6 +154,8 @@ void sudoku::empty(){
     for (uint8_t index(INDEX_MIN); index <= INDEX_MAX ; index++){
         elements_[index].empty();
     }
+
+    emptyFileName();
 }
 
 // pause() : Show pause screen
@@ -212,6 +225,7 @@ int sudoku::create(uint8_t complexity){
 //  @return : 0 on success or an error code
 //
 uint8_t sudoku::load(const FONTCHARACTER fName){
+    emptyFileName();
     if (!fName || !fName[0]){
         return FILE_NO_FILENAME;
     }
@@ -256,6 +270,7 @@ uint8_t sudoku::load(const FONTCHARACTER fName){
     }
 
     // The new grid is valid
+    _newFileName(fName);
     return FILE_NO_ERROR;
 }
 
@@ -269,6 +284,7 @@ uint8_t sudoku::load(const FONTCHARACTER fName){
 //  @return : 0 on success or an error code
 //
 int sudoku::save(const FONTCHARACTER fName){
+    emptyFileName();
     if (!fName || !fName[0]){
         return FILE_NO_FILENAME;   // No valid file name
     }
@@ -306,7 +322,12 @@ int sudoku::save(const FONTCHARACTER fName){
     oFile.close();
 
     // Done ?
-    return (done?FILE_NO_ERROR:error);
+    if (done){
+        _newFileName(fName);
+        return FILE_NO_ERROR;
+    }
+
+    return error;
 }
 
 #ifdef DEST_CASIO_CALC
@@ -1939,6 +1960,22 @@ int sudoku::_onHypChanged(menuBar& menu, int newHypID, bool checked){
 //
 // Utilities
 //
+
+// _newFileName() : Set current file name
+//
+//  @fName : New FQN
+//
+void sudoku::_newFileName(FONTCHARACTER fName){
+    if (!FC_ISEMPTY(fName)){
+        char sName[BFILE_MAX_PATH + 1];
+        bFile::FC_FC2str(fName, sName); // convert to char*
+        char* name = strrchr(sName, CHAR_PATH_SEPARATOR);
+        strcpy(sFileName_, (name?++name:sName)); // No path ?
+    }
+    else{
+        emptyFileName();
+    }
+}
 
 // _revertFrom : Return to the original state
 //

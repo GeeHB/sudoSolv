@@ -4,7 +4,7 @@
 - [x] Résolution manuelle :
   - [x] mode "help" avec proposition d'une ou plusieurs valeurs
   - [x] Compter les éléments restants à découvrir
-  - [ ] Féliciter !
+  - [x] Féliciter !
 - [x] Liste ordonnée des hypothèses
 - [x] Popup 'Résolution en cours' lors de la résolution du Sudoku
 - [x] Mode "pause" (cacher la grille)
@@ -17,7 +17,7 @@
   - [ ] set/getItem => mask (Text, status, state)
 - [ ] Affichage de textes
   - [x] Aligner tous les affichages
-  - [ ] Centraliser les affichages de textte
+  - [ ] Centraliser les affichages des textes
 
 #### Corrections
 
