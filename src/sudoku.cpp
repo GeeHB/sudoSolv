@@ -372,13 +372,12 @@ bool sudoku::edit(uint8_t mode){
     dupdate();
 
     // # Values in the grid
-    uint8_t values(0), oValues;
+    uint8_t values(0), oValues(0);
     for (index = INDEX_MIN; index<=INDEX_MAX ; index++){
         if (!elements_[index].isEmpty()){
             values++;
         }
     }
-
     oValues = values;
 
     // Timer for blinking effect
@@ -443,8 +442,8 @@ bool sudoku::edit(uint8_t mode){
                  modified = true;
 
                  // First colored element ?
-                 if (hypID_ && hypotheses_[hypID_].first == currentPos){
-                    hypotheses_[hypID_].first = -1;
+                 if (hypID_ && hypotheses_[hypID_].firstPos == currentPos){
+                    hypotheses_[hypID_].firstPos = -1;
                  }
             }
 
@@ -541,6 +540,12 @@ bool sudoku::edit(uint8_t mode){
             uint8_t count;
             if ((count = _onManualReject())){
                 values-=count;
+
+                if (-1 != hypotheses_[hypID_].firstPos){
+                    // Move to  element at 'first' pos.
+                    currentPos = hypotheses_[hypID_].firstPos;
+                }
+                hypotheses_[hypID_].firstPos = -1; // No longer needed
 
                 // At least one element's colour has changed => redraw
                 display();
@@ -644,8 +649,8 @@ bool sudoku::edit(uint8_t mode){
         popup.drawText(WIN_FOUND_TXT);
         popup.update();
 
-        // Wait for any key to be pressed
-        getkey();
+        getkey();   // Wait for any key to be pressed
+        
         popup.close();
         display();
     }
@@ -1005,8 +1010,8 @@ int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
         elements_[pos.index()].setHypColour(hypColour);
 
         // First value with this hyp ?
-        if (hypotheses_[hypID_].first == -1){
-            hypotheses_[hypID_].first = pos.index();
+        if (-1 == hypotheses_[hypID_].firstPos){
+            hypotheses_[hypID_].firstPos = pos.index();
         }
 
         return (oValue?0:1);
@@ -1802,9 +1807,8 @@ bool sudoku::_ownMenuItemsDrawings(PMENUBAR const bar,
 //
 uint8_t sudoku::_onManualReject(){
     uint8_t count(0);
-    if (hypID_>=0){
+    if (hypID_>=0){        
         count = _hypReject(hypotheses_[hypID_].colour);
-        // _hypPop(menu);
     }
 
     return count;
@@ -1943,9 +1947,7 @@ int sudoku::_onHypChanged(menuBar& menu, int newHypID, bool checked){
         else{
             // Reject values associated with the previous colour
             // ie. accept with the prev. colour
-            // _hypReject(_hypColour(prev));
             _hypAccept(_hypColour(hypID_), _hypColour(hypID_-1));
- 
             prev = _hypPop(menu);
         }
 

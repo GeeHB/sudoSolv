@@ -551,12 +551,13 @@ private:
     typedef struct{
         int menuID;     // ID in the menu
         int colour;     // Associated colour
-        int8_t first;   // Index of the first value using this hypothese
+        int8_t firstPos;    // Index of the first value
     }HYPOTHESE;
     
-    HYPOTHESE hypotheses_[HYP_COUNT];
-    int8_t hypID_; // Current hyp. index
-    uint8_t helpClues_;
+    HYPOTHESE hypotheses_[HYP_COUNT];   // Hyps' stack
+    int8_t hypID_;                      // Current hyp. index
+
+    uint8_t helpClues_;                 // # of possible help clues left
 };
 
 #ifdef __cplusplus
