@@ -17,8 +17,8 @@ L'application est organisée autour d'une barre de menu horizontale; la navigati
 
 | Dépôt          | https://gitea.planet-casio.com/Jhb/sudoSolv |
 |----------------|---------------------------------------------|
-| **Date**           | 18 février 2024                             |
-| **Version stable** | **0\.4.6** - branche `master`                      |
+| **Date**           | 5 mars 2024                             |
+| **Version stable** | **0\.4.14** - branche `master`                      |
 
 ### Gestion des fichiers
 

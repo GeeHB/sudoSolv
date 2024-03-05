@@ -41,7 +41,7 @@ sudoku::sudoku(){
 
     // No hypothese
     for (index = 0; index < HYP_COUNT; index++){
-        hypotheses_[index] = {0, HYP_NO_COLOUR};
+        hypotheses_[index] = {0, HYP_NO_COLOUR, -1};
     }
     hypID_ = -1;
 
@@ -441,6 +441,11 @@ bool sudoku::edit(uint8_t mode){
             if (elements_[currentPos].empty()){
                 values--; // one less element
                  modified = true;
+
+                 // First colored element ?
+                 if (hypID_ && hypotheses_[hypID_].first == currentPos){
+                    hypotheses_[hypID_].first = -1;
+                 }
             }
 
             break;
@@ -989,7 +994,7 @@ int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
     uint8_t oValue(elements_[pos].value());  // current val
 
     // Check value at the given pos.
-    //  New allowed value or same value with diff. hyp. colour
+    //  New allowed value or same value with different hyp. colour
     int hypColour(_hypColour(hypID_));
     if ((oValue == value && elements_[pos.index()].hypColour() != hypColour)
         ||
@@ -998,6 +1003,12 @@ int sudoku::_checkAndSet(position& pos, uint8_t value, uint8_t mode){
         // Set new value and colour
         elements_[pos.index()].setValue(value, editGrid);
         elements_[pos.index()].setHypColour(hypColour);
+
+        // First value with this hyp ?
+        if (hypotheses_[hypID_].first == -1){
+            hypotheses_[hypID_].first = pos.index();
+        }
+
         return (oValue?0:1);
     }
 
@@ -1734,7 +1745,7 @@ int sudoku::_elementTxtColour(position& pos, uint8_t editMode, bool selected){
 //
 //  @return : False on error(s)
 //
- bool sudoku::_ownMenuItemsDrawings(PMENUBAR const bar,
+bool sudoku::_ownMenuItemsDrawings(PMENUBAR const bar,
             PMENUITEM const  item, RECT* const anchor, int style){
 #ifdef DEST_CASIO_CALC
     if (item){
@@ -1877,7 +1888,7 @@ int sudoku::_hypPop(menuBar& menu){
         prev = (hypID_?hypotheses_[hypID_-1].menuID:-1);
 
         // remove from top
-        hypotheses_[hypID_--] = {0, HYP_NO_COLOUR};
+        hypotheses_[hypID_--] = {0, HYP_NO_COLOUR, -1};
 
         // Update menus
         _hypUpdateMenu(menu, _hypColour(hypID_), _hypColour(hypID_-1));

@@ -15,9 +15,9 @@
   - [ ] get/findItem retourne une copie !!!
     - [ ] methode menuBar::freeItem
   - [ ] set/getItem => mask (Text, status, state)
-- [ ] Affichage de textes
+- [x] Affichage de textes
   - [x] Aligner tous les affichages
-  - [ ] Centraliser les affichages des textes
+  - [x] Centraliser les affichages des textes
 
 #### Corrections
 
