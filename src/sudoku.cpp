@@ -398,7 +398,7 @@ bool sudoku::edit(uint8_t mode){
             tick = 0;
 
             // Time to blink ?
-            if (!(tickCount--)){
+            if (!(--tickCount)){
                 // Blink
                 showSelected = !showSelected;
                 tickCount = BLINK_TICKCOUNT;
@@ -584,7 +584,7 @@ bool sudoku::edit(uint8_t mode){
             break;
         } // switch (action.value)
 
-        if (reDraw || (prevPos != currentPos)){
+        if (reDraw || prevPos != currentPos){
             // if sel. changed, erase previously selected element
             if (prevPos != currentPos){
                 _drawSingleElement(prevPos,

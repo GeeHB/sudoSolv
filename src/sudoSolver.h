@@ -27,7 +27,7 @@ public:
     // Destruction
     ~sudoSolver(){}
 
-    // Create app. menu bar
+    // createMenu() : Create app. menu bar
     //
     void createMenu();
 

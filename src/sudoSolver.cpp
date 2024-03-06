@@ -19,7 +19,7 @@ sudoSolver::sudoSolver(){
     _initStats();
 }
 
-// Create app. menu bar
+// createMenu() : Create app. menu bar
 //
 void sudoSolver::createMenu(){
 
