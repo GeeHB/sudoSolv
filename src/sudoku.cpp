@@ -36,8 +36,8 @@ sudoku::sudoku(){
         tSquares_[index].setIndex(index);
     }
 
-    soluce_ = NULL; // No soluce
-    empty();        // Start with an empty grid
+    soluce_ = NULL;     // No soluce
+    empty();            // Start with an empty grid
 
     // No hypothese
     for (index = 0; index < HYP_COUNT; index++){
@@ -174,7 +174,7 @@ void sudoku::pause(){
             0, IMG_PAUSE_COPY_Y,
             IMG_PAUSE_W, 1, DIMAGE_NOCLIP);
     }
-    
+
     // bottom
     y = CASIO_HEIGHT - IMG_PAUSE_H + IMG_PAUSE_COPY_Y - 1;
     dsubimage(0, y, &g_pause,
@@ -356,7 +356,7 @@ bool sudoku::edit(uint8_t mode){
     position prevPos(0, false);
 
     if (EDIT_MODE_CREATION == mode){
-        revert();   // Remove obious and found values (if any)
+        revert();   // Remove obvious and found values (if any)
         display();
     }
 
@@ -624,7 +624,7 @@ bool sudoku::edit(uint8_t mode){
                     cont = false;   // No more value to find
                 }
             }
-           
+
             dupdate();
             prevPos = currentPos;
             reDraw = false;
@@ -650,7 +650,7 @@ bool sudoku::edit(uint8_t mode){
         popup.update();
 
         getkey();   // Wait for any key to be pressed
-        
+
         popup.close();
         display();
     }
@@ -741,7 +741,7 @@ bool sudoku::resolve(int* mDuration, int8_t** soluce){
     }
 
 #ifdef DEST_CASIO_CALC
-    waitWindow.close(); // Close the window    
+    waitWindow.close(); // Close the window
 #endif // #ifdef DEST_CASIO_CALC
 
     return found;
@@ -1807,7 +1807,7 @@ bool sudoku::_ownMenuItemsDrawings(PMENUBAR const bar,
 //
 uint8_t sudoku::_onManualReject(){
     uint8_t count(0);
-    if (hypID_>=0){        
+    if (hypID_>=0){
         count = _hypReject(hypotheses_[hypID_].colour);
     }
 
@@ -1834,7 +1834,7 @@ uint8_t sudoku::_hypAccept(int colFrom, int colTo){
             }
         }
     }
-    
+
     return count;
 }
 
@@ -1911,7 +1911,7 @@ void sudoku::_hypUpdateMenu(menuBar& menu, int curCol, int prevCol){
     if (curCol == prevCol){
         return;
     }
-    
+
     // Update menus
     PMENUITEM item(menu.getItem(IDM_MANUAL_HYP_SUBMENU, SEARCH_BY_ID));
     if (item){

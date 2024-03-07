@@ -622,6 +622,22 @@ void menuBar::_freeMenuBar(PMENUBAR bar, bool freeAll){
     }
 }
 
+//  _unSelectItems() : Unselect item(s)
+//
+//  @bar : Pointer to the bar
+//
+void menuBar::_unSelectItems(PMENUBAR bar){
+    if (bar){
+        PMENUITEM item;
+        for (uint8_t index(0); index < MENU_MAX_ITEM_COUNT; index++){
+            if ((item = bar->items[index])){
+                removeBit(item->state, ITEM_STATE_SELECTED);
+            }
+        }
+    }
+}
+
+
 //
 // Menu items
 //
@@ -877,13 +893,16 @@ bool menuBar::_selectByIndex(int8_t index, bool selected, bool redraw){
         }
 
         if (selected){
-            setBit(item->state, ITEM_STATE_SELECTED);
-            visible_->selIndex = index;
-
             // unselect prev.
+            /*
             if (-1 != sel && (item = visible_->items[sel])){
                 removeBit(item->state, ITEM_STATE_SELECTED);
             }
+            */
+            _unSelectItems(visible_);
+
+             setBit(item->state, ITEM_STATE_SELECTED);
+            visible_->selIndex = index;
         }
         else{
             removeBit(item->state, ITEM_STATE_SELECTED);

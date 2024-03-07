@@ -61,7 +61,7 @@ void sudoSolver::createMenu(){
 void sudoSolver::showHomeScreen(){
     drect(0, 0, CASIO_WIDTH, CASIO_HEIGHT - menu_.getHeight(), C_WHITE);
     dimage(0, 0, &g_about);
-        
+
     char copyright[255];
     strcpy(copyright, APP_NAME);
     strcat(copyright, " by ");
@@ -251,7 +251,7 @@ void sudoSolver::_onNewSudoku(uint8_t complexity){
 
     game_.create(complexity);   // do the job ...
 
-    waitWindow.close(); // Close the window    
+    waitWindow.close(); // Close the window
     game_.display();
 
     _initStats();
@@ -451,7 +451,6 @@ void sudoSolver::_initStats(bool whole){
         FC_EMPTY(fileName_);
     }
 
-    game_.emptyFileName();
     obviousVals_ = -1;
     duration_ = -1;
 }
@@ -498,7 +497,7 @@ void sudoSolver::_newFileName(FONTCHARACTER fName){
 //
 void sudoSolver::_displayStats(){
     game_.displayFileName();
-    
+
     if (obviousVals_ != -1){
         if (obviousVals_){
             dprint(OBV_TEXT_X, OBV_TEXT_Y, C_BLACK,
