@@ -16,7 +16,7 @@
 extern "C" {
 #endif // #ifdef __cplusplus
 
-//   sudoku : Edition and/or resolution of a single sudoku grid
+//   sudokuShuffler : Shuffle an existing sudoku to create a new one
 //
 class sudokuShuffler{
 public:

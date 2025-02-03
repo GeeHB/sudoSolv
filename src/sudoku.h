@@ -161,8 +161,8 @@ public:
     //
     //  The algorithm will go forward to seek value and backward each
     //  time a value can't be found at a given pos.
-    //  We going backward, if position reaches sPos (if not NULL)
-    //  or exit the grid, the method end with no solution.
+    //  When going backward, if position reaches sPos (if not NULL)
+    //  or exits the grid, the method ends with no solution.
     //
     //  @mDuration : points to an int that will receive duration
     //              of solving process in ms. Can be NULL
@@ -486,7 +486,7 @@ private:
     //  @prevCol : previous col
     //
     void _hypUpdateMenu(menuBar& menu, int curCol, int prevCol);
-    
+
     // _onHypChanged() : Change coloured hyp.
     //
     //  @menu : Hyp. colours menu
@@ -553,7 +553,7 @@ private:
         int colour;     // Associated colour
         int8_t firstPos;    // Index of the first value
     }HYPOTHESE;
-    
+
     HYPOTHESE hypotheses_[HYP_COUNT];   // Hyps' stack
     int8_t hypID_;                      // Current hyp. index
 
